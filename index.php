@@ -14,16 +14,19 @@
 <!-- Open Graph / Facebook -->
 
 <!-- Open Graph -->
+<!-- Open Graph dengan Large Image -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://polar.web.id/">
-<meta property="og:title" content="Polar.id — Bot WhatsApp Multi Device Gratis | Dashboard Bot WA">
-<meta property="og:description" content="Platform bot WhatsApp multi device gratis. Kelola session bot WA tanpa login, tanpa registrasi. Cepat, mudah, dan support Phoenix MD & Ourin MD.">
-<meta property="og:image" content="https://polar.web.id/apple-touch-icon.png">
-<meta property="og:image:width" content="180">
-<meta property="og:image:height" content="180">
+<meta property="og:title" content="Polar.id — Bot WhatsApp Multi Device Gratis">
+<meta property="og:description" content="Platform bot WhatsApp multi device gratis. Kelola session bot WA tanpa login, tanpa registrasi.">
+<meta property="og:image" content="https://polar.web.id/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Polar.id Bot WhatsApp">
 
-<!-- Twitter / X -->
-<meta name="twitter:card" content="summary">
+<!-- Twitter Card Large -->
+    
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:url" content="https://polar.web.id/">
 <meta name="twitter:title" content="Polar.id — Bot WhatsApp Multi Device Gratis | Dashboard Bot WA">
 <meta name="twitter:description" content="Platform bot WhatsApp multi device gratis. Kelola session bot WA tanpa login, tanpa registrasi. Cepat, mudah, dan support Phoenix MD & Ourin MD.">
