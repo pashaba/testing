@@ -2,8 +2,8 @@ FROM php:8.0-apache
 
 RUN a2enmod rewrite
 
-COPY . /var/www/html/
+RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-RUN chown -R www-data:www-data /var/www/html
+COPY . /var/www/html/
 
 EXPOSE 80
