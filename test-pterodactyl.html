@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pterodactyl API Tester V2</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0e27;
+            color: #e2e8f0;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: #f6821f; margin-bottom: 10px; }
+        .sub { color: #64748b; margin-bottom: 20px; }
+        button {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+        button:hover { background: #f6821f; border-color: #f6821f; color: white; }
+        .result {
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+        pre {
+            font-family: monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .info { color: #f59e0b; }
+        .endpoint-list {
+            margin-top: 20px;
+            padding: 15px;
+            background: #1e293b;
+            border-radius: 8px;
+        }
+        .endpoint-item {
+            padding: 8px;
+            border-bottom: 1px solid #334155;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .endpoint-url { color: #94a3b8; }
+        .status-200 { color: #10b981; }
+        .status-404 { color: #f59e0b; }
+        .status-401 { color: #ef4444; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🦕 Pterodactyl API Tester V2</h1>
+    <p class="sub">Mencoba berbagai endpoint untuk menemukan API yang benar</p>
+    
+    <button onclick="runTest()">🚀 Jalankan Test</button>
+    
+    <div class="result">
+        <pre id="jsonResult">Klik tombol untuk memulai test...</pre>
+    </div>
+</div>
+
+<script>
+async function runTest() {
+    const preEl = document.getElementById('jsonResult');
+    preEl.textContent = 'Loading... Mencoba berbagai endpoint...';
+    
+    try {
+        const response = await fetch('api/test-pterodactyl.php');
+        const data = await response.json();
+        preEl.textContent = JSON.stringify(data, null, 2);
+        
+        // Tampilkan ringkasan di console
+        console.log('Test Result:', data);
+        
+        if (data.success_endpoint) {
+            console.log('%c✅ Endpoint berhasil: ' + data.success_endpoint, 'color: #10b981');
+        } else {
+            console.log('%c❌ Tidak ada endpoint yang berhasil', 'color: #ef4444');
+            if (data.panel_check?.http_code === 200) {
+                console.log('%cℹ️ Panel bisa diakses, tapi API endpoint mungkin berbeda', 'color: #f59e0b');
+            }
+        }
+    } catch (error) {
+        preEl.textContent = `Error: ${error.message}`;
+    }
+}
+</script>
+</body>
+</html>

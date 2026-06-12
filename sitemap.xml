@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <url>
+    <loc>https://polar.web.id</loc>
+  </url>
+
+  <url>
+    <loc>https://polar.web.id/dashboard.php</loc>
+  </url>
+  <url>
+    <loc>https://polar.web.id/ads.txt</loc>
+  </url>
+
+  <url>
+    <loc>https://polar.web.id/premium.php</loc>
+  </url>
+
+  <url>
+    <loc>https://polar.web.id/favicon.png</loc>
+  </url>
+    
+  <url>
+    <loc>https://polar.web.id/event.php</loc>
+  </url>
+
+  <url>
+    <loc>https://polar.web.id/index.php</loc>
+  </url>
+
+  <url>
+    <loc>https://polar.web.id/token.php</loc>
+  </url>
+
+</urlset>

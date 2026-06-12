@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Status Monitor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 40px 20px;
+        }
+        .container { max-width: 700px; margin: 0 auto; }
+        h1 { color: #f6821f; margin-bottom: 10px; }
+        .sub { color: #64748b; margin-bottom: 30px; }
+        .status-card {
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #334155;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .badge-online { background: #10b98120; color: #10b981; border: 1px solid #10b981; }
+        .badge-offline { background: #ef444420; color: #ef4444; border: 1px solid #ef4444; }
+        .badge-suspended { background: #f59e0b20; color: #f59e0b; border: 1px solid #f59e0b; }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #334155;
+        }
+        .info-label { color: #94a3b8; }
+        .info-value { font-family: monospace; font-weight: 500; }
+        .progress-bar {
+            background: #334155;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        .progress-fill {
+            background: #f6821f;
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+        .progress-fill.warning { background: #f59e0b; }
+        .progress-fill.danger { background: #ef4444; }
+        button {
+            background: #f6821f;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            width: 100%;
+        }
+        button:hover { background: #e07010; }
+        pre {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+            font-size: 11px;
+            margin-top: 20px;
+            border: 1px solid #334155;
+        }
+        .refresh-time {
+            text-align: right;
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🖥️ Server Status Monitor</h1>
+    <p class="sub">Memantau status server Pterodactyl</p>
+    
+    <div class="status-card">
+        <div id="statusBadge"></div>
+        <div class="info-row"><span class="info-label">Server Name</span><span class="info-value" id="serverName">-</span></div>
+        <div class="info-row"><span class="info-label">Node</span><span class="info-value" id="serverNode">-</span></div>
+        <div class="info-row"><span class="info-label">Raw Status API</span><span class="info-value" id="rawStatus">-</span></div>
+    </div>
+    
+    <div class="status-card">
+        <h3 style="margin-bottom: 15px;">📊 Resource Usage</h3>
+        <div class="info-row"><span class="info-label">CPU</span><span class="info-value" id="cpuValue">-</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="cpuBar" style="width: 0%"></div></div>
+        <div class="info-row" style="margin-top: 15px;"><span class="info-label">RAM</span><span class="info-value" id="ramValue">-</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="ramBar" style="width: 0%"></div></div>
+        <div class="info-row" style="margin-top: 15px;"><span class="info-label">Disk</span><span class="info-value" id="diskValue">-</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="diskBar" style="width: 0%"></div></div>
+    </div>
+    
+    <button onclick="checkStatus()">🔄 Refresh Status</button>
+    <div class="refresh-time" id="refreshTime"></div>
+    
+    <pre id="rawJson">Klik refresh untuk melihat data...</pre>
+</div>
+
+<script>
+async function checkStatus() {
+    const preEl = document.getElementById('rawJson');
+    const refreshTimeEl = document.getElementById('refreshTime');
+    
+    preEl.textContent = 'Loading...';
+    
+    try {
+        const response = await fetch('api/pterodactyl-status-fixed.php');
+        const data = await response.json();
+        
+        preEl.textContent = JSON.stringify(data, null, 2);
+        refreshTimeEl.textContent = `Last checked: ${new Date().toLocaleTimeString()}`;
+        
+        // Update UI berdasarkan status
+        const isOnline = data.server?.is_online || false;
+        const statusText = data.server?.status_text || 'Unknown';
+        const statusBadge = document.getElementById('statusBadge');
+        
+        if (isOnline) {
+            statusBadge.className = 'status-badge badge-online';
+            statusBadge.innerHTML = '🟢 ' + statusText;
+        } else {
+            statusBadge.className = 'status-badge badge-offline';
+            statusBadge.innerHTML = '🔴 ' + statusText;
+        }
+        
+        document.getElementById('serverName').textContent = data.server?.name || '-';
+        document.getElementById('serverNode').textContent = data.server?.node || '-';
+        document.getElementById('rawStatus').textContent = data.server?.raw_status ?? 'null';
+        
+        // Resources
+        const cpu = data.resources?.cpu || {};
+        const ram = data.resources?.memory || {};
+        const disk = data.resources?.disk || {};
+        
+        document.getElementById('cpuValue').textContent = `${cpu.current || 0}% / ${cpu.limit || 0}%`;
+        document.getElementById('ramValue').textContent = `${ram.current_mb || 0} MB / ${ram.limit_mb || 0} MB (${ram.percent || 0}%)`;
+        document.getElementById('diskValue').textContent = `${disk.current_mb || 0} MB / ${disk.limit_mb || 0} MB (${disk.percent || 0}%)`;
+        
+        const cpuPercent = Math.min(100, cpu.percent || 0);
+        const ramPercent = Math.min(100, ram.percent || 0);
+        const diskPercent = Math.min(100, disk.percent || 0);
+        
+        document.getElementById('cpuBar').style.width = cpuPercent + '%';
+        document.getElementById('ramBar').style.width = ramPercent + '%';
+        document.getElementById('diskBar').style.width = diskPercent + '%';
+        
+        // Warna progress bar berdasarkan persentase
+        const cpuBar = document.getElementById('cpuBar');
+        const ramBar = document.getElementById('ramBar');
+        const diskBar = document.getElementById('diskBar');
+        
+        [cpuBar, ramBar, diskBar].forEach(bar => {
+            bar.classList.remove('warning', 'danger');
+        });
+        
+        if (cpuPercent > 80) cpuBar.classList.add('danger');
+        else if (cpuPercent > 60) cpuBar.classList.add('warning');
+        if (ramPercent > 80) ramBar.classList.add('danger');
+        else if (ramPercent > 60) ramBar.classList.add('warning');
+        if (diskPercent > 80) diskBar.classList.add('danger');
+        else if (diskPercent > 60) diskBar.classList.add('warning');
+        
+    } catch (error) {
+        preEl.textContent = `Error: ${error.message}`;
+    }
+}
+
+// Auto refresh setiap 30 detik
+checkStatus();
+setInterval(checkStatus, 30000);
+</script>
+</body>
+</html>

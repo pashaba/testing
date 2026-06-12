@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Server Check</title>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .status-card {
+            background: #1e293b;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px solid;
+        }
+        .status-online {
+            border-color: #10b981;
+            background: #10b98110;
+        }
+        .status-offline {
+            border-color: #ef4444;
+            background: #ef444410;
+        }
+        .status-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        .status-text {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .status-sub {
+            color: #94a3b8;
+            font-size: 14px;
+        }
+        .ram-info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #0f172a;
+            border-radius: 12px;
+        }
+        button {
+            background: #f6821f;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        pre {
+            text-align: left;
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 11px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🖥️ Server Status Checker</h1>
+    <p>Deteksi online/offline berdasarkan <strong>RAM usage</strong></p>
+    
+    <div id="statusCard" class="status-card">
+        <div class="status-icon" id="statusIcon">⏳</div>
+        <div class="status-text" id="statusText">Memeriksa...</div>
+        <div class="status-sub" id="statusSub">Loading...</div>
+        <div class="ram-info" id="ramInfo"></div>
+    </div>
+    
+    <button onclick="check()">🔄 Refresh</button>
+    
+    <pre id="rawJson">Klik refresh...</pre>
+</div>
+
+<script>
+async function check() {
+    const card = document.getElementById('statusCard');
+    const icon = document.getElementById('statusIcon');
+    const text = document.getElementById('statusText');
+    const sub = document.getElementById('statusSub');
+    const ramInfo = document.getElementById('ramInfo');
+    const pre = document.getElementById('rawJson');
+    
+    pre.textContent = 'Loading...';
+    
+    try {
+        const response = await fetch('api/pterodactyl-status.php');
+        const data = await response.json();
+        
+        pre.textContent = JSON.stringify(data, null, 2);
+        
+        if (data.is_online) {
+            card.className = 'status-card status-online';
+            icon.innerHTML = '🟢';
+            text.innerHTML = 'SERVER ONLINE';
+            sub.innerHTML = data.message || 'Bot berjalan normal';
+            ramInfo.innerHTML = `🧠 RAM Usage: <strong>${data.resources.ram_mb} MB</strong> | CPU: ${data.resources.cpu_percent}%`;
+        } else {
+            card.className = 'status-card status-offline';
+            icon.innerHTML = '🔴';
+            text.innerHTML = 'SERVER OFFLINE';
+            sub.innerHTML = data.message || 'Server sedang mati, maintenance mode aktif';
+            ramInfo.innerHTML = `🧠 RAM Usage: <strong>0 MB</strong> (server mati)`;
+        }
+        
+    } catch (error) {
+        pre.textContent = `Error: ${error.message}`;
+        card.className = 'status-card status-offline';
+        icon.innerHTML = '⚠️';
+        text.innerHTML = 'ERROR';
+        sub.innerHTML = 'Gagal koneksi ke API';
+    }
+}
+
+check();
+setInterval(check, 30000);
+</script>
+</body>
+</html>

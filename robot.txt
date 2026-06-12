@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://polar.web.id/sitemap.xml

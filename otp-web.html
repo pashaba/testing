@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RumaOTP — Order SMS OTP</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --or:#f97316;--ord:#ea580c;--orl:#fed7aa;--orp:#fff7ed;
+  --w:#fff;--g50:#f9fafb;--g100:#f3f4f6;--g200:#e5e7eb;
+  --g300:#d1d5db;--g400:#9ca3af;--g500:#6b7280;--g600:#4b5563;
+  --g700:#374151;--g800:#1f2937;--g900:#111827;
+  --red:#ef4444;--green:#22c55e;--r:12px;
+  --sh:0 4px 24px rgba(0,0,0,.08);--shl:0 8px 40px rgba(0,0,0,.12)
+}
+body{font-family:'Inter',sans-serif;background:var(--w);color:var(--g800);min-height:100vh}
+.app{min-height:100vh;display:flex;flex-direction:column}
+.top-bar{background:var(--or);height:4px}
+
+/* NAVBAR */
+.navbar{background:var(--w);border-bottom:2px solid var(--orl);padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.brand{display:flex;align-items:center;gap:8px;font-size:20px;font-weight:800;color:var(--or);text-decoration:none}
+.brand span{color:var(--g800)}
+.nav-r{display:flex;align-items:center;gap:10px}
+.nav-user{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:500;color:var(--g700)}
+.avatar{width:34px;height:34px;background:var(--or);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 20px;border-radius:var(--r);font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all .15s;text-decoration:none;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-p{background:var(--or);color:#fff}
+.btn-p:hover:not(:disabled){background:var(--ord);transform:translateY(-1px)}
+.btn-o{background:transparent;color:var(--or);border:2px solid var(--or)}
+.btn-o:hover:not(:disabled){background:var(--orp)}
+.btn-g{background:transparent;color:var(--g600);border:2px solid var(--g200)}
+.btn-g:hover:not(:disabled){background:var(--g100)}
+.btn-gr{background:var(--green);color:#fff}
+.btn-gr:hover:not(:disabled){background:#16a34a;transform:translateY(-1px)}
+.btn-rd{background:var(--red);color:#fff}
+.btn-rd:hover:not(:disabled){background:#dc2626}
+.btn-wa{background:#25d366;color:#fff}
+.btn-wa:hover{background:#128c7e;transform:translateY(-1px)}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn-lg{padding:14px 28px;font-size:15px;width:100%}
+
+/* PAGES */
+.page{display:none}.page.active{display:block}
+
+/* AUTH */
+.auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--orp) 0%,var(--w) 60%);padding:24px}
+.auth-card{background:var(--w);border-radius:20px;box-shadow:var(--shl);padding:40px;width:100%;max-width:420px;border:1px solid var(--orl)}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo h1{font-size:28px;font-weight:800;color:var(--or)}
+.auth-logo h1 span{color:var(--g800)}
+.auth-logo p{font-size:13px;color:var(--g500);margin-top:4px}
+.auth-tabs{display:flex;background:var(--g100);border-radius:10px;padding:4px;margin-bottom:28px}
+.auth-tab{flex:1;padding:9px;text-align:center;font-size:14px;font-weight:600;cursor:pointer;border-radius:8px;transition:all .15s;color:var(--g500);border:none;background:transparent}
+.auth-tab.active{background:var(--w);color:var(--or);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.af{display:none}.af.active{display:block}
+
+/* FORM */
+.fg{margin-bottom:18px}
+.fl{display:block;font-size:13px;font-weight:600;color:var(--g700);margin-bottom:6px}
+.fi{width:100%;padding:11px 14px;border:2px solid var(--g200);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;transition:border-color .15s;outline:none;color:var(--g800);background:#fff}
+.fi:focus{border-color:var(--or)}
+.fi::placeholder{color:var(--g400)}
+.fh{font-size:12px;color:var(--g400);margin-top:4px}
+select.fi{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;margin-bottom:16px;display:none}
+.alert.show{display:block}
+.ae{background:#fef2f2;color:var(--red);border:1px solid #fecaca}
+.as{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+.ai{background:var(--orp);color:var(--ord);border:1px solid var(--orl)}
+
+/* DASHBOARD */
+.dash{padding:28px 24px;max-width:960px;margin:0 auto}
+.dash-hdr{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.dash-hdr h2{font-size:22px;font-weight:800;color:var(--g900)}
+.dash-hdr p{font-size:14px;color:var(--g500);margin-top:2px}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.sc{background:var(--w);border:2px solid var(--g100);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:border-color .15s}
+.sc:hover{border-color:var(--orl)}
+.sc::before{content:'';position:absolute;top:0;right:0;width:80px;height:80px;background:var(--orp);border-radius:0 16px 0 80px}
+.sico{width:40px;height:40px;background:var(--or);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;position:relative;z-index:1}
+.slbl{font-size:12px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+.sval{font-size:22px;font-weight:800;color:var(--g900)}
+.sval.or{color:var(--or)}
+.ssub{font-size:12px;color:var(--g400);margin-top:2px}
+
+/* ACTION ROW */
+.arow{display:flex;gap:10px;margin-bottom:24px;flex-wrap:wrap}
+
+/* TABS */
+.tbar{display:flex;border-bottom:2px solid var(--g100)}
+.tbtn{padding:12px 20px;font-size:14px;font-weight:600;color:var(--g500);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s}
+.tbtn.active{color:var(--or);border-bottom-color:var(--or)}
+.tpane{display:none}.tpane.active{display:block}
+
+/* CARD */
+.card{background:var(--w);border:2px solid var(--g100);border-radius:16px;overflow:hidden;margin-bottom:20px}
+.card-hdr{padding:16px 20px;border-bottom:2px solid var(--g100);display:flex;align-items:center;justify-content:space-between}
+.card-ttl{font-size:15px;font-weight:700;color:var(--g800)}
+
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 14px;background:var(--g50);color:var(--g500);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+td{padding:11px 14px;border-top:1px solid var(--g100);color:var(--g700);vertical-align:middle}
+tr:hover td{background:var(--orp)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.b-ok{background:#dcfce7;color:#15803d}
+.b-pend{background:#fef9c3;color:#854d0e}
+.b-can{background:#fee2e2;color:#b91c1c}
+.b-recv{background:#dbeafe;color:#1d4ed8}
+.b-exp{background:#ffedd5;color:#c2410c}
+.empty{text-align:center;padding:40px 20px;color:var(--g400)}
+.empty .ei{font-size:36px;margin-bottom:10px}
+.empty p{font-size:14px}
+
+/* MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:200;padding:16px;backdrop-filter:blur(2px)}
+.mo.open{display:flex}
+.modal{background:var(--w);border-radius:20px;padding:28px;width:100%;max-width:460px;box-shadow:var(--shl);position:relative;animation:mIn .2s ease;max-height:92vh;overflow-y:auto}
+@keyframes mIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.mclose{position:absolute;top:16px;right:16px;background:var(--g100);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--g500);transition:background .15s}
+.mclose:hover{background:var(--g200)}
+.mttl{font-size:18px;font-weight:800;color:var(--g900);margin-bottom:4px}
+.msub{font-size:13px;color:var(--g500);margin-bottom:20px}
+
+/* DEPOSIT STEPS */
+.ds{display:none}.ds.active{display:block}
+.ngrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.nb{padding:11px 6px;text-align:center;border:2px solid var(--g200);border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--g700);background:var(--w);transition:all .15s}
+.nb:hover,.nb.sel{border-color:var(--or);background:var(--orp);color:var(--ord)}
+.qrbox{text-align:center;padding:16px 0}
+.qrbox img{width:190px;height:190px;border-radius:12px;border:3px solid var(--orl);margin-bottom:12px}
+.qramt{font-size:22px;font-weight:800;color:var(--or);margin-bottom:4px}
+.qrnote{font-size:12px;color:var(--g400)}
+.cd{background:var(--orp);border-radius:10px;padding:10px;text-align:center;font-size:13px;color:var(--ord);font-weight:600;margin:12px 0}
+.stchk{display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:var(--g500);margin-top:8px}
+.spin{width:16px;height:16px;border:2px solid var(--orl);border-top-color:var(--or);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ORDER OTP STEPS */
+.os{display:none}.os.active{display:block}
+.svgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:16px;max-height:260px;overflow-y:auto;padding-right:4px}
+.svc{display:flex;align-items:center;gap:10px;padding:10px 12px;border:2px solid var(--g200);border-radius:10px;cursor:pointer;transition:all .15s;background:var(--w)}
+.svc:hover,.svc.sel{border-color:var(--or);background:var(--orp)}
+.svc img{width:28px;height:28px;border-radius:6px;object-fit:cover}
+.svc .sn{font-size:13px;font-weight:600;color:var(--g800)}
+.cnt-card{display:flex;align-items:center;gap:10px;padding:10px 14px;border:2px solid var(--g200);border-radius:10px;cursor:pointer;transition:all .15s;background:var(--w);margin-bottom:8px}
+.cnt-card:hover,.cnt-card.sel{border-color:var(--or);background:var(--orp)}
+.cnt-card img{width:28px;height:20px;border-radius:3px;object-fit:cover}
+.cnt-name{font-size:14px;font-weight:600;color:var(--g800);flex:1}
+.cnt-pr{font-size:13px;font-weight:700;color:var(--or)}
+.cnt-stk{font-size:11px;color:var(--g400)}
+.opgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.opc{display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;border:2px solid var(--g200);border-radius:10px;cursor:pointer;transition:all .15s;background:var(--w)}
+.opc:hover,.opc.sel{border-color:var(--or);background:var(--orp)}
+.opc img{width:40px;height:40px;border-radius:8px;object-fit:cover}
+.opc span{font-size:12px;font-weight:600;color:var(--g700);text-align:center}
+.phone-box{background:var(--g50);border:2px solid var(--g200);border-radius:12px;padding:16px;text-align:center;margin-bottom:16px}
+.phone-num{font-size:22px;font-weight:800;color:var(--g900);letter-spacing:1px;margin-bottom:4px}
+.phone-meta{font-size:12px;color:var(--g400)}
+.otp-result{background:linear-gradient(135deg,var(--orp),#fff);border:2px solid var(--orl);border-radius:14px;padding:20px;text-align:center;margin-bottom:16px}
+.otp-code{font-size:36px;font-weight:800;color:var(--or);letter-spacing:6px;cursor:pointer;margin-bottom:8px}
+.otp-msg{font-size:12px;color:var(--g500);background:var(--w);border-radius:8px;padding:10px;margin-top:10px;text-align:left;white-space:pre-wrap;word-break:break-word}
+.otp-wait{text-align:center;padding:16px 0}
+.big-spin{width:48px;height:48px;border:4px solid var(--orl);border-top-color:var(--or);border-radius:50%;animation:sp .8s linear infinite;margin:0 auto 14px}
+.sumbox{background:var(--g50);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.sumrow{display:flex;justify-content:space-between;align-items:center;padding:5px 0;font-size:13px;color:var(--g600)}
+.sumrow:not(:last-child){border-bottom:1px solid var(--g200)}
+.sumrow strong{color:var(--g900);font-weight:700}
+.sumrow.total{font-size:14px}
+.sumrow.total strong{color:var(--or);font-size:16px}
+.saldo-warn{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 14px;font-size:13px;color:var(--red);margin-bottom:14px;display:none}
+.saldo-warn.show{display:block}
+
+/* SEARCH */
+.srch-wrap{position:relative;margin-bottom:12px}
+.srch{width:100%;padding:9px 14px 9px 36px;border:2px solid var(--g200);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;outline:none;color:var(--g800)}
+.srch:focus{border-color:var(--or)}
+.srch-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+
+/* OTP CODE IN TABLE */
+.otc{font-size:17px;font-weight:800;color:var(--or);letter-spacing:3px}
+.cpybtn{background:var(--g100);border:none;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--g600);font-weight:600;margin-left:4px}
+.cpybtn:hover{background:var(--orp);color:var(--ord)}
+
+/* CS FLOAT */
+.cs-float{position:fixed;bottom:24px;right:24px;z-index:150;text-decoration:none}
+.cs-btn{display:flex;align-items:center;gap:10px;background:#25d366;color:#fff;border:none;border-radius:50px;padding:12px 22px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 20px rgba(37,211,102,.4);transition:all .2s}
+.cs-float:hover .cs-btn{background:#128c7e;transform:translateY(-2px);box-shadow:0 6px 28px rgba(37,211,102,.5)}
+.pulse{display:inline-block;width:10px;height:10px;background:#fff;border-radius:50%;animation:pu 1.5s ease infinite}
+@keyframes pu{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.8)}}
+
+/* LOADER */
+.ploader{min-height:140px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--g400);font-size:14px}
+.lbig{width:36px;height:36px;border:3px solid var(--orl);border-top-color:var(--or);border-radius:50%;animation:sp .8s linear infinite}
+
+/* MISC */
+.divider{display:flex;align-items:center;gap:12px;margin:14px 0;color:var(--g400);font-size:12px}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--g200)}
+.id-chip{font-family:'Courier New',monospace;background:var(--g100);padding:4px 10px;border-radius:6px;font-size:12px;color:var(--g600);cursor:pointer;border:none}
+.id-chip:hover{background:var(--orp);color:var(--ord)}
+
+@media(max-width:600px){
+  .auth-card{padding:28px 20px}
+  .stats{grid-template-columns:1fr 1fr}
+  .dash{padding:16px 14px}
+  .modal{padding:22px 18px}
+  .ngrid{grid-template-columns:repeat(2,1fr)}
+  .svgrid{grid-template-columns:1fr 1fr}
+  .navbar{padding:0 14px}
+  .brand{font-size:17px}
+  .nav-user span{display:none}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top-bar"></div>
+
+<!-- AUTH -->
+<div id="page-auth" class="page active">
+<div class="auth-page"><div class="auth-card">
+  <div class="auth-logo"><h1>Ruma<span>OTP</span></h1><p>Platform order OTP terpercaya & murah</p></div>
+  <div class="auth-tabs">
+    <button class="auth-tab active" onclick="swTab('login')">Masuk</button>
+    <button class="auth-tab" onclick="swTab('register')">Daftar</button>
+  </div>
+  <!-- LOGIN -->
+  <div id="f-login" class="af active">
+    <div id="al-login" class="alert"></div>
+    <div class="fg"><label class="fl">Username</label><input id="lu" class="fi" type="text" placeholder="Username kamu" /></div>
+    <div class="fg"><label class="fl">Password</label><input id="lp" class="fi" type="password" placeholder="Password" /></div>
+    <button id="btn-login" class="btn btn-p btn-lg" onclick="doLogin()">Masuk</button>
+  </div>
+  <!-- REGISTER -->
+  <div id="f-reg" class="af">
+    <div id="al-reg" class="alert"></div>
+    <div class="fg"><label class="fl">Username</label><input id="ru" class="fi" type="text" placeholder="Pilih username unik" /><div class="fh">Min. 3 karakter, huruf & angka saja</div></div>
+    <div class="fg"><label class="fl">Email</label><input id="re" class="fi" type="email" placeholder="email@kamu.com" /></div>
+    <div class="fg"><label class="fl">Password</label><input id="rp" class="fi" type="password" placeholder="Min. 8 karakter" /></div>
+    <button id="btn-reg" class="btn btn-p btn-lg" onclick="doReg()">Buat Akun</button>
+  </div>
+</div></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page">
+  <nav class="navbar">
+    <a class="brand" href="#">Ruma<span>OTP</span></a>
+    <div class="nav-r">
+      <div class="nav-user"><div class="avatar" id="nav-av">?</div><span id="nav-uname">—</span></div>
+      <a href="https://wa.me/6285715294026" target="_blank" class="btn btn-wa btn-sm">💬 CS</a>
+      <button class="btn btn-g btn-sm" onclick="doLogout()">Keluar</button>
+    </div>
+  </nav>
+  <div class="dash">
+    <div class="dash-hdr">
+      <div><h2 id="dash-greet">Dashboard</h2><p>Selamat datang kembali 👋</p></div>
+    </div>
+    <div class="stats">
+      <div class="sc"><div class="sico">💰</div><div class="slbl">Saldo Aktif</div><div class="sval or" id="st-saldo">Rp 0</div><div class="ssub">Siap digunakan</div></div>
+      <div class="sc"><div class="sico">🛒</div><div class="slbl">Total Order</div><div class="sval" id="st-orders">0</div><div class="ssub">Order OTP</div></div>
+      <div class="sc"><div class="sico">📋</div><div class="slbl">Total Deposit</div><div class="sval" id="st-dep">0</div><div class="ssub">Transaksi masuk</div></div>
+      <div class="sc"><div class="sico">🆔</div><div class="slbl">ID Akun</div><div class="sval" style="font-size:14px;margin-top:6px"><button class="id-chip" id="st-uid" onclick="copyUID()">—</button></div><div class="ssub">Klik untuk copy</div></div>
+    </div>
+    <div class="arow">
+      <button class="btn btn-p" onclick="openDep()">➕ Deposit Saldo</button>
+      <button class="btn btn-gr" onclick="openOTP()">📱 Order OTP</button>
+      <button class="btn btn-o btn-sm" onclick="loadDash()">🔄 Refresh</button>
+    </div>
+    <div class="card">
+      <div class="card-hdr" style="padding:0 20px;border-bottom:2px solid var(--g100)">
+        <div class="tbar" style="border:none;margin:0;flex:1">
+          <button class="tbtn active" onclick="swHistTab('tab-ord')">📱 Order OTP</button>
+          <button class="tbtn" onclick="swHistTab('tab-dep')">💰 Deposit</button>
+        </div>
+        <span style="font-size:12px;color:var(--g400)" id="hist-cnt"></span>
+      </div>
+      <div id="tab-ord" class="tpane active"><div id="orders-el"><div class="ploader"><div class="lbig"></div><span>Memuat…</span></div></div></div>
+      <div id="tab-dep" class="tpane"><div id="dep-el"><div class="ploader"><div class="lbig"></div><span>Memuat…</span></div></div></div>
+    </div>
+  </div>
+</div>
+</div><!-- end .app -->
+
+<!-- DEPOSIT MODAL -->
+<div id="mo-dep" class="mo">
+<div class="modal">
+  <button class="mclose" onclick="closeDep()">✕</button>
+  <!-- Step 1 -->
+  <div id="ds1" class="ds active">
+    <div class="mttl">Deposit Saldo</div><div class="msub">Pilih nominal atau masukkan manual</div>
+    <div id="dep-al" class="alert"></div>
+    <div class="ngrid">
+      <div class="nb" onclick="selNom(this,2000)">Rp 2.000</div>
+      <div class="nb" onclick="selNom(this,5000)">Rp 5.000</div>
+      <div class="nb" onclick="selNom(this,10000)">Rp 10.000</div>
+      <div class="nb" onclick="selNom(this,25000)">Rp 25.000</div>
+      <div class="nb" onclick="selNom(this,50000)">Rp 50.000</div>
+      <div class="nb" onclick="selNom(this,100000)">Rp 100.000</div>
+    </div>
+    <div class="divider">atau masukkan manual</div>
+    <div class="fg"><label class="fl">Nominal (Rp)</label><input id="dep-inp" class="fi" type="number" placeholder="Contoh: 10000" min="2000" oninput="onNomInp(this)" /><div class="fh">Minimum deposit Rp 2.000</div></div>
+    <button id="btn-dep" class="btn btn-p btn-lg" onclick="createDep()">Lanjutkan — Bayar via QRIS</button>
+  </div>
+  <!-- Step 2 -->
+  <div id="ds2" class="ds">
+    <div class="mttl">Scan QRIS</div><div class="msub">Bayar dengan e-wallet atau m-banking</div>
+    <div class="qrbox"><img id="qr-img" src="" alt="QR" /><div class="qramt" id="qr-amt">—</div><div class="qrnote" id="qr-note"></div></div>
+    <div class="cd" id="dep-cd">⏱ Menghitung…</div>
+    <div class="stchk" id="dep-stchk"><div class="spin"></div><span>Menunggu pembayaran…</span></div>
+    <div style="margin-top:14px"><button class="btn btn-g btn-lg" onclick="cancelDep()">Batalkan</button></div>
+  </div>
+  <!-- Step 3 -->
+  <div id="ds3" class="ds">
+    <div style="text-align:center;padding:10px 0 16px">
+      <div style="font-size:52px;margin-bottom:12px">🎉</div>
+      <div class="mttl" style="text-align:center">Deposit Berhasil!</div>
+      <div class="msub" style="text-align:center">Saldo kamu telah diperbarui</div>
+      <div style="font-size:28px;font-weight:800;color:var(--or);margin:16px 0" id="dep-ok-amt">—</div>
+      <button class="btn btn-p btn-lg" onclick="closeDep()">Kembali ke Dashboard</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ORDER OTP MODAL -->
+<div id="mo-otp" class="mo">
+<div class="modal">
+  <button class="mclose" onclick="closeOTP()">✕</button>
+  <!-- Step 1: Service -->
+  <div id="os1" class="os active">
+    <div class="mttl">Order OTP</div><div class="msub">Pilih layanan / aplikasi</div>
+    <div id="otp-al1" class="alert"></div>
+    <div class="srch-wrap"><span class="srch-ico">🔍</span><input class="srch" placeholder="Cari layanan…" oninput="filterSvc(this.value)" /></div>
+    <div id="svc-grid" class="svgrid"><div class="ploader" style="grid-column:1/-1"><div class="lbig"></div><span>Memuat…</span></div></div>
+    <button id="btn-os1" class="btn btn-p btn-lg" onclick="goOs(2)" disabled>Pilih Negara →</button>
+  </div>
+  <!-- Step 2: Country -->
+  <div id="os2" class="os">
+    <div class="mttl">Pilih Negara</div><div class="msub" id="os2-sub">Negara tersedia</div>
+    <div id="otp-al2" class="alert"></div>
+    <div id="cnt-list" style="max-height:300px;overflow-y:auto;padding-right:4px"><div class="ploader"><div class="lbig"></div><span>Memuat…</span></div></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-g" style="flex:1" onclick="goOs(1)">← Kembali</button>
+      <button id="btn-os2" class="btn btn-p" style="flex:2" onclick="goOs(3)" disabled>Pilih Operator →</button>
+    </div>
+  </div>
+  <!-- Step 3: Operator -->
+  <div id="os3" class="os">
+    <div class="mttl">Pilih Operator</div><div class="msub">Pilih operator nomor</div>
+    <div id="otp-al3" class="alert"></div>
+    <div id="op-grid" class="opgrid"><div class="ploader" style="grid-column:1/-1"><div class="lbig"></div><span>Memuat…</span></div></div>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="btn btn-g" style="flex:1" onclick="goOs(2)">← Kembali</button>
+      <button id="btn-os3" class="btn btn-p" style="flex:2" onclick="confirmOrd()" disabled>Konfirmasi →</button>
+    </div>
+  </div>
+  <!-- Step 4: Konfirmasi -->
+  <div id="os4" class="os">
+    <div class="mttl">Konfirmasi Order</div><div class="msub">Cek detail sebelum bayar</div>
+    <div id="otp-al4" class="alert"></div>
+    <div class="sumbox" id="ord-sum"></div>
+    <div class="saldo-warn" id="sal-warn">⚠️ Saldo tidak cukup! Deposit dulu ya.</div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-g" style="flex:1" onclick="goOs(3)">← Kembali</button>
+      <button id="btn-buy" class="btn btn-gr" style="flex:2" onclick="placeOrd()">Bayar & Order ✓</button>
+    </div>
+  </div>
+  <!-- Step 5: Waiting OTP -->
+  <div id="os5" class="os">
+    <div class="mttl">Menunggu OTP</div><div class="msub">Gunakan nomor ini untuk daftar</div>
+    <div class="phone-box"><div class="phone-num" id="otp-phone">—</div><div class="phone-meta" id="otp-pm">—</div></div>
+    <div id="otp-wait-area" class="otp-wait">
+      <div class="big-spin"></div>
+      <div style="font-size:16px;font-weight:700;color:var(--g800);margin-bottom:6px" id="otp-hint">Menunggu kode OTP…</div>
+      <p style="font-size:13px;color:var(--g500)">Masukkan nomor di aplikasi target,<br>OTP muncul otomatis di sini.</p>
+    </div>
+    <div id="otp-code-area" style="display:none">
+      <div class="otp-result">
+        <div style="font-size:13px;color:var(--g500);margin-bottom:6px">Kode OTP</div>
+        <div class="otp-code" id="otp-code-disp" onclick="cpyOTP()" title="Klik untuk copy">——</div>
+        <div style="font-size:11px;color:var(--g400)">Klik kode untuk copy</div>
+        <div class="otp-msg" id="otp-msg-disp"></div>
+      </div>
+    </div>
+    <div class="cd" id="otp-cd">⏱ Menghitung…</div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn btn-rd btn-sm" style="flex:1" onclick="cancelOrd()">❌ Batalkan</button>
+      <button class="btn btn-g btn-sm" style="flex:1" onclick="closeOTP()">Tutup</button>
+    </div>
+  </div>
+  <!-- Step 6: Done -->
+  <div id="os6" class="os">
+    <div style="text-align:center;padding:10px 0 16px">
+      <div style="font-size:52px;margin-bottom:12px">✅</div>
+      <div class="mttl" style="text-align:center">OTP Diterima!</div>
+      <div class="msub" style="text-align:center">Gunakan kode berikut</div>
+      <div class="otp-result" style="margin:16px 0">
+        <div class="otp-code" id="otp-final" onclick="cpyFinal()" title="Klik untuk copy">——</div>
+        <div style="font-size:11px;color:var(--g400)">Klik untuk copy</div>
+      </div>
+      <button class="btn btn-p btn-lg" onclick="closeOTP()">Selesai</button>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- CS FLOAT -->
+<a href="https://wa.me/6285715294026" target="_blank" class="cs-float" title="Hubungi CS">
+  <div class="cs-btn"><span class="pulse"></span>💬 Hubungi CS</div>
+</a>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);z-index:999;background:var(--g900);color:#fff;padding:11px 22px;border-radius:12px;font-size:13px;font-weight:500;box-shadow:var(--shl);transition:all .2s;opacity:0;pointer-events:none;white-space:nowrap"></div>
+
+<script>
+const SURL="https://xcxciixqhmghitmyigbj.supabase.co";
+const SKEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjeGNpaXhxaG1naGl0bXlpZ2JqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODU2MzQ2MCwiZXhwIjoyMDk0MTM5NDYwfQ.Tzg34ww9r2X2WrZ9wcYoajoQUjUfRkOxnsdARskfvJE";
+const ROKEY="rk-dev-wvlGeWinXvIESSBYDLyHGjm8NzDIJzY6";
+const RO="https://www.rumahotp.io/api";
+
+async function sb(path,opts={}){
+  const r=await fetch(`${SURL}/rest/v1/${path}`,{headers:{'apikey':SKEY,'Authorization':`Bearer ${SKEY}`,'Content-Type':'application/json','Prefer':opts.prefer||'return=representation',...opts.headers},method:opts.method||'GET',body:opts.body?JSON.stringify(opts.body):undefined});
+  if(!r.ok){const e=await r.json().catch(()=>({}));throw new Error(e.message||e.hint||`HTTP ${r.status}`)}
+  const ct=r.headers.get('content-type')||'';
+  if(ct.includes('json')&&r.status!==204)return r.json();return null;
+}
+async function roAPI(url){const r=await fetch(url,{headers:{'x-apikey':ROKEY,'Accept':'application/json'}});return r.json();}
+async function hashPw(pw){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode("rumaOTP_salt_v1_"+pw));return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+
+let CU=null;
+function loadU(){try{const s=localStorage.getItem('ru');if(s)CU=JSON.parse(s);}catch{}}
+function saveU(u){CU=u;localStorage.setItem('ru',JSON.stringify(u));}
+function clearU(){CU=null;localStorage.removeItem('ru');}
+
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('page-'+id).classList.add('active');}
+function showAl(id,msg,t='error'){const el=document.getElementById(id);el.textContent=msg;el.className=`alert a${t[0]} show`;}
+function hideAl(id){document.getElementById(id).className='alert';}
+function setBt(id,l,txt){const b=document.getElementById(id);b.disabled=l;b.textContent=l?'⏳ Mohon tunggu…':txt;}
+function toast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},dur);}
+function fRp(n){return'Rp '+Number(n).toLocaleString('id-ID');}
+function swTab(tab){document.querySelectorAll('.auth-tab').forEach((e,i)=>e.classList.toggle('active',(i===0)===(tab==='login')));document.getElementById('f-login').classList.toggle('active',tab==='login');document.getElementById('f-reg').classList.toggle('active',tab==='register');hideAl('al-login');hideAl('al-reg');}
+function swHistTab(id){document.querySelectorAll('.tbtn').forEach((b,i)=>b.classList.toggle('active',['tab-ord','tab-dep'][i]===id));document.querySelectorAll('.tpane').forEach(p=>p.classList.toggle('active',p.id===id));}
+
+// LOGIN
+async function doLogin(){
+  const u=document.getElementById('lu').value.trim(),p=document.getElementById('lp').value;
+  if(!u||!p)return showAl('al-login','Isi semua kolom dulu!');
+  hideAl('al-login');setBt('btn-login',true,'Masuk');
+  try{const h=await hashPw(p);const rows=await sb(`otp_users?username=eq.${encodeURIComponent(u)}&password_hash=eq.${h}&select=*`);
+    if(!rows||!rows.length)return showAl('al-login','Username atau password salah.');
+    saveU(rows[0]);loadDash();showPage('dashboard');
+  }catch(e){showAl('al-login','Error: '+e.message);}finally{setBt('btn-login',false,'Masuk');}
+}
+
+// REGISTER
+async function doReg(){
+  const u=document.getElementById('ru').value.trim(),e=document.getElementById('re').value.trim(),p=document.getElementById('rp').value;
+  if(!u||!e||!p)return showAl('al-reg','Isi semua kolom dulu!');
+  if(u.length<3)return showAl('al-reg','Username minimal 3 karakter.');
+  if(!/^[a-zA-Z0-9_]+$/.test(u))return showAl('al-reg','Username hanya huruf, angka, underscore.');
+  if(p.length<8)return showAl('al-reg','Password minimal 8 karakter.');
+  hideAl('al-reg');setBt('btn-reg',true,'Buat Akun');
+  try{const ex=await sb(`otp_users?username=eq.${encodeURIComponent(u)}&select=id`);
+    if(ex&&ex.length)return showAl('al-reg','Username sudah dipakai.');
+    const h=await hashPw(p);const id=crypto.randomUUID();
+    const rows=await sb('otp_users',{method:'POST',body:{id,username:u,email:e,password_hash:h,saldo:0,total_deposit:0,total_orders:0,created_at:new Date().toISOString()}});
+    saveU(Array.isArray(rows)?rows[0]:rows);loadDash();showPage('dashboard');toast('Akun berhasil dibuat! 🎉');
+  }catch(e){showAl('al-reg','Error: '+e.message);}finally{setBt('btn-reg',false,'Buat Akun');}
+}
+
+function doLogout(){clearU();showPage('auth');document.getElementById('lu').value='';document.getElementById('lp').value='';}
+function copyUID(){if(!CU)return;navigator.clipboard.writeText(CU.id).then(()=>toast('ID disalin! 📋'));}
+
+// LOAD DASHBOARD
+async function loadDash(){
+  if(!CU)return;
+  document.getElementById('nav-uname').textContent=CU.username;
+  document.getElementById('nav-av').textContent=CU.username[0].toUpperCase();
+  document.getElementById('dash-greet').textContent=`Hai, ${CU.username}!`;
+  try{const rows=await sb(`otp_users?id=eq.${CU.id}&select=*`);if(rows?.[0])saveU(rows[0]);}catch{}
+  document.getElementById('st-saldo').textContent=fRp(CU.saldo||0);
+  document.getElementById('st-dep').textContent=CU.total_deposit||0;
+  document.getElementById('st-orders').textContent=CU.total_orders||0;
+  document.getElementById('st-uid').textContent=(CU.id||'—').substring(0,8)+'…';
+  loadOrdHist();loadDepHist();
+}
+
+// ORDER HISTORY
+async function loadOrdHist(){
+  if(!CU)return;const el=document.getElementById('orders-el');
+  el.innerHTML=`<div class="ploader"><div class="lbig"></div><span>Memuat…</span></div>`;
+  try{const rows=await sb(`otp_orders?user_id=eq.${CU.id}&order=created_at.desc&limit=30&select=*`);
+    if(!rows||!rows.length){el.innerHTML=`<div class="empty"><div class="ei">📱</div><p>Belum ada order. Yuk order OTP pertamamu!</p></div>`;return;}
+    const bm={completed:'b-ok',received:'b-recv',canceled:'b-can',expiring:'b-exp'};
+    const bl={completed:'✅ Selesai',received:'📨 Diterima',canceled:'❌ Batal',expiring:'⚠️ Expiring'};
+    let h=`<div class="tw"><table><thead><tr><th>Layanan</th><th>Nomor</th><th>OTP</th><th>Harga</th><th>Status</th></tr></thead><tbody>`;
+    for(const r of rows){
+      const b=bm[r.status]||'b-pend',lb=bl[r.status]||r.status;
+      const otp=r.otp_code?`<span class="otc">${r.otp_code}</span><button class="cpybtn" onclick="navigator.clipboard.writeText('${r.otp_code}').then(()=>toast('OTP disalin!'))">copy</button>`:'<span style="color:var(--g400)">—</span>';
+      h+=`<tr><td><strong>${r.service||'—'}</strong><br><span style="font-size:11px;color:var(--g400)">${r.country||''}</span></td><td style="font-family:monospace;font-size:12px">${r.phone_number||'—'}</td><td>${otp}</td><td>${fRp(r.price||0)}</td><td><span class="badge ${b}">${lb}</span></td></tr>`;
+    }
+    h+=`</tbody></table></div>`;el.innerHTML=h;
+  }catch(e){el.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>Gagal: ${e.message}</p></div>`;}
+}
+
+// DEPOSIT HISTORY
+async function loadDepHist(){
+  if(!CU)return;const el=document.getElementById('dep-el');
+  el.innerHTML=`<div class="ploader"><div class="lbig"></div><span>Memuat…</span></div>`;
+  try{const rows=await sb(`otp_deposits?user_id=eq.${CU.id}&order=created_at.desc&limit=20&select=*`);
+    if(!rows||!rows.length){el.innerHTML=`<div class="empty"><div class="ei">📭</div><p>Belum ada deposit. Yuk top up!</p></div>`;return;}
+    const bm={success:'b-ok',pending:'b-pend',cancel:'b-can'};
+    const bl={success:'✅ Sukses',pending:'⏳ Pending',cancel:'❌ Batal'};
+    let h=`<div class="tw"><table><thead><tr><th>ID Deposit</th><th>Nominal</th><th>Diterima</th><th>Status</th><th>Waktu</th></tr></thead><tbody>`;
+    for(const r of rows){
+      const b=bm[r.status]||'b-pend',lb=bl[r.status]||r.status;
+      const time=new Date(r.created_at).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+      h+=`<tr><td><code style="font-size:11px;color:var(--g500)">${(r.deposit_id||'—').substring(0,16)}…</code></td><td>${fRp(r.amount)}</td><td>${fRp(r.diterima||0)}</td><td><span class="badge ${b}">${lb}</span></td><td>${time}</td></tr>`;
+    }
+    h+=`</tbody></table></div>`;el.innerHTML=h;
+  }catch(e){el.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>Gagal: ${e.message}</p></div>`;}
+}
+
+// ===== DEPOSIT FLOW =====
+let dNom=0,dData=null,dPoll=null,dCd=null;
+function openDep(){dNom=0;dData=null;document.querySelectorAll('.nb').forEach(b=>b.classList.remove('sel'));document.getElementById('dep-inp').value='';hideAl('dep-al');goDs(1);document.getElementById('mo-dep').classList.add('open');}
+function closeDep(){clearInterval(dPoll);clearInterval(dCd);document.getElementById('mo-dep').classList.remove('open');loadDash();}
+function goDs(n){document.querySelectorAll('.ds').forEach((s,i)=>s.classList.toggle('active',i+1===n));}
+function selNom(el,v){document.querySelectorAll('.nb').forEach(b=>b.classList.remove('sel'));el.classList.add('sel');dNom=v;document.getElementById('dep-inp').value=v;}
+function onNomInp(el){document.querySelectorAll('.nb').forEach(b=>b.classList.remove('sel'));dNom=parseInt(el.value)||0;}
+
+async function createDep(){
+  dNom=parseInt(document.getElementById('dep-inp').value)||0;
+  if(dNom<2000)return showAl('dep-al','Minimal deposit Rp 2.000.','error');
+  hideAl('dep-al');const btn=document.getElementById('btn-dep');btn.disabled=true;btn.textContent='⏳ Membuat QRIS…';
+  const MARKUP=300;
+  const chargeAmt=dNom+MARKUP;
+  try{
+    const res=await roAPI(`${RO}/v1/deposit/create?amount=${chargeAmt}&payment_id=qris`);
+    if(!res.success)throw new Error(res.message||'Gagal buat deposit');
+    dData=res.data;
+    const diterimaUser=Math.max(0,(dData.currency?.diterima||chargeAmt)-MARKUP);
+    await sb('otp_deposits',{method:'POST',prefer:'return=minimal',body:{deposit_id:dData.id,user_id:CU.id,amount:dData.amount,diterima:diterimaUser,status:'pending',created_at:new Date().toISOString(),expired_at:new Date(dData.expired).toISOString()}});
+    document.getElementById('qr-img').src=dData.qr_image;
+    document.getElementById('qr-amt').textContent=fRp(dData.amount);
+    document.getElementById('qr-note').textContent=`Saldo masuk: ${fRp(diterimaUser)} • Biaya layanan termasuk`;
+    goDs(2);startDCd(dData.expired);startDPoll(dData.id);
+  }catch(e){showAl('dep-al','Error: '+e.message,'error');}
+  finally{btn.disabled=false;btn.textContent='Lanjutkan — Bayar via QRIS';}
+}
+function startDCd(exp){clearInterval(dCd);const el=document.getElementById('dep-cd');function tick(){const l=Math.max(0,Math.floor((exp-Date.now())/1000));const m=String(Math.floor(l/60)).padStart(2,'0');const s=String(l%60).padStart(2,'0');el.textContent=l>0?`⏱ Expired dalam ${m}:${s}`:'⏱ QR sudah expired';if(l<=0)clearInterval(dCd);}tick();dCd=setInterval(tick,1000);}
+function startDPoll(id){clearInterval(dPoll);dPoll=setInterval(()=>pollDep(id),5000);}
+async function pollDep(id){
+  try{const res=await roAPI(`${RO}/v2/deposit/get_status?deposit_id=${id}`);if(!res.success)return;
+    if(res.data?.status==='success'){
+      clearInterval(dPoll);clearInterval(dCd);
+      const diterima=res.data?.diterima||dData?.currency?.diterima||dNom;
+      await sb(`otp_deposits?deposit_id=eq.${id}`,{method:'PATCH',prefer:'return=minimal',body:{status:'success',paid_at:new Date().toISOString()}});
+      const rows=await sb(`otp_users?id=eq.${CU.id}&select=saldo,total_deposit`);
+      const curr=rows?.[0]||{};
+      await sb(`otp_users?id=eq.${CU.id}`,{method:'PATCH',prefer:'return=minimal',body:{saldo:(curr.saldo||0)+diterima,total_deposit:(curr.total_deposit||0)+1}});
+      CU.saldo=(curr.saldo||0)+diterima;CU.total_deposit=(curr.total_deposit||0)+1;saveU(CU);
+      document.getElementById('dep-ok-amt').textContent=`+${fRp(diterima)}`;goDs(3);
+    }else if(res.data?.status==='cancel'){
+      clearInterval(dPoll);clearInterval(dCd);
+      await sb(`otp_deposits?deposit_id=eq.${id}`,{method:'PATCH',prefer:'return=minimal',body:{status:'cancel'}});
+      document.getElementById('dep-stchk').innerHTML=`<span style="color:var(--red)">❌ Pembayaran dibatalkan.</span>`;
+    }
+  }catch{}
+}
+async function cancelDep(){
+  clearInterval(dPoll);clearInterval(dCd);
+  if(dData?.id)await sb(`otp_deposits?deposit_id=eq.${dData.id}`,{method:'PATCH',prefer:'return=minimal',body:{status:'cancel'}}).catch(()=>{});
+  closeDep();
+}
+
+// ===== ORDER OTP FLOW =====
+let OS={svcs:[],fsvcs:[],svc:null,cnt:null,op:null,provId:null,ord:null,poll:null,cd:null};
+
+function openOTP(){
+  OS={svcs:[],fsvcs:[],svc:null,cnt:null,op:null,provId:null,ord:null,poll:null,cd:null};
+  document.querySelectorAll('.os').forEach((s,i)=>s.classList.toggle('active',i===0));
+  document.getElementById('mo-otp').classList.add('open');
+  loadSvcs();
+}
+function closeOTP(){clearInterval(OS.poll);clearInterval(OS.cd);document.getElementById('mo-otp').classList.remove('open');loadDash();}
+function goOs(n){document.querySelectorAll('.os').forEach((s,i)=>s.classList.toggle('active',i+1===n));if(n===2)loadCnts();if(n===3)loadOps();}
+
+// Intercept goOs untuk trigger loads
+const _goOs=goOs;
+window.goOs=function(n){_goOs(n);};
+
+// STEP 1: Services
+async function loadSvcs(){
+  const g=document.getElementById('svc-grid');
+  g.innerHTML=`<div class="ploader" style="grid-column:1/-1"><div class="lbig"></div><span>Memuat layanan…</span></div>`;
+  try{
+    const res=await roAPI(`${RO}/v2/services`);
+    if(!res.success)throw new Error(res.message||'Gagal');
+    OS.svcs=res.data||[];OS.fsvcs=OS.svcs;renderSvcs(OS.svcs);
+  }catch{
+    const fb=[
+      {service_code:13,service_name:'WhatsApp',service_img:'https://assets.cindigital.id/apps/wa.png'},
+      {service_code:4,service_name:'Telegram',service_img:'https://assets.cindigital.id/apps/tg.png'},
+      {service_code:7,service_name:'Facebook',service_img:'https://assets.cindigital.id/apps/fb.png'},
+      {service_code:32,service_name:'Instagram',service_img:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Instagram_icon.png/48px-Instagram_icon.png'},
+      {service_code:1,service_name:'TikTok',service_img:''},
+      {service_code:5,service_name:'Google',service_img:''},
+      {service_code:10,service_name:'Shopee',service_img:''},
+      {service_code:11,service_name:'Tokopedia',service_img:''},
+    ];
+    OS.svcs=fb;OS.fsvcs=fb;renderSvcs(fb);
+  }
+}
+function renderSvcs(list){
+  const g=document.getElementById('svc-grid');
+  if(!list.length){g.innerHTML=`<div class="ploader" style="grid-column:1/-1"><p>Tidak ada layanan ditemukan.</p></div>`;return;}
+  g.innerHTML=list.map(s=>`<div class="svc" onclick="selSvc(this,'${s.service_code||s.id}','${(s.service_name||s.name||'').replace(/'/g,"\\'")}','${(s.service_img||s.icon||'').replace(/'/g,"\\'")}')"><img src="${s.service_img||s.icon||''}" alt="${s.service_name||s.name}" onerror="this.style.display='none'" /><div class="sn">${s.service_name||s.name}</div></div>`).join('');
+}
+function filterSvc(q){const f=OS.svcs.filter(s=>(s.service_name||s.name||'').toLowerCase().includes(q.toLowerCase()));renderSvcs(f);}
+function selSvc(el,id,name,icon){document.querySelectorAll('.svc').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');OS.svc={id,name,icon};document.getElementById('btn-os1').disabled=false;}
+
+// STEP 2: Countries
+async function loadCnts(){
+  const list=document.getElementById('cnt-list');
+  list.innerHTML=`<div class="ploader"><div class="lbig"></div><span>Memuat negara…</span></div>`;
+  document.getElementById('os2-sub').textContent=`Negara tersedia untuk ${OS.svc?.service_name||OS.svc?.name}`;
+  try{
+    const res=await roAPI(`${RO}/v2/countries?service_id=${OS.svc?.id||OS.svc?.service_code}`);
+    if(!res.success)throw new Error(res.message||'Gagal');
+    const cnts=res.data||[];
+    if(!cnts.length)throw new Error('Tidak ada negara tersedia.');
+    list.innerHTML=cnts.map(c=>`<div class="cnt-card" onclick='selCnt(this,${JSON.stringify(c)})'><img src="${c.img||''}" alt="${c.name}" onerror="this.style.display='none'" /><span class="cnt-name">${c.name} <span style="font-size:11px;color:var(--g400)">(${c.prefix})</span></span><div style="text-align:right"><div class="cnt-pr">${c.pricelist?.[0]?.price_format||'—'}</div><div class="cnt-stk">Stok: ${c.stock_total||0}</div></div></div>`).join('');
+  }catch(e){list.innerHTML=`<div class="empty"><div class="ei">⚠️</div><p>${e.message}</p></div>`;showAl('otp-al2',e.message,'error');}
+}
+function selCnt(el,data){document.querySelectorAll('.cnt-card').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');OS.cnt=data;OS.provId=data.pricelist?.[0]?.provider_id||null;document.getElementById('btn-os2').disabled=false;}
+
+// STEP 3: Operators
+async function loadOps(){
+  const g=document.getElementById('op-grid');
+  g.innerHTML=`<div class="ploader" style="grid-column:1/-1"><div class="lbig"></div><span>Memuat operator…</span></div>`;
+  try{
+    const res=await roAPI(`${RO}/v2/operators?country=${encodeURIComponent(OS.cnt?.name||'')}&provider_id=${OS.provId||''}`);
+    if(!res.success)throw new Error(res.message||'Gagal');
+    const ops=res.data||[];
+    if(!ops.length)throw new Error('Tidak ada operator tersedia.');
+    g.innerHTML=ops.map(o=>`<div class="opc" onclick="selOp(this,${o.id},'${o.name}','${o.image||''}')"><img src="${o.image||''}" alt="${o.name}" onerror="this.style.display='none'" /><span>${o.name}</span></div>`).join('');
+  }catch(e){g.innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="ei">⚠️</div><p>${e.message}</p></div>`;showAl('otp-al3',e.message,'error');}
+}
+function selOp(el,id,name,img){document.querySelectorAll('.opc').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');OS.op={id,name,img};document.getElementById('btn-os3').disabled=false;}
+
+// STEP 4: Confirm
+function confirmOrd(){
+  const price=OS.cnt?.pricelist?.[0]?.price||0;
+  document.getElementById('ord-sum').innerHTML=`
+    <div class="sumrow"><span>Layanan</span><strong>${OS.svc?.name||'—'}</strong></div>
+    <div class="sumrow"><span>Negara</span><strong>${OS.cnt?.name||'—'}</strong></div>
+    <div class="sumrow"><span>Operator</span><strong>${OS.op?.name||'—'}</strong></div>
+    <div class="sumrow total"><span>Harga</span><strong>${fRp(price)}</strong></div>
+  `;
+  const sw=document.getElementById('sal-warn'),bb=document.getElementById('btn-buy');
+  if((CU.saldo||0)<price){sw.style.display='block';bb.disabled=true;}else{sw.style.display='none';bb.disabled=false;}
+  goOs(4);
+}
+
+// STEP 5: Place Order
+async function placeOrd(){
+  const price=OS.cnt?.pricelist?.[0]?.price||0;
+  hideAl('otp-al4');const btn=document.getElementById('btn-buy');btn.disabled=true;btn.textContent='⏳ Memproses…';
+  try{
+    const res=await roAPI(`${RO}/v2/orders?number_id=${OS.cnt?.number_id}&provider_id=${OS.provId}&operator_id=${OS.op?.id}`);
+    if(!res.success)throw new Error(res.message||'Gagal buat order');
+    OS.ord=res.data;
+    // Kurangi saldo
+    const rows=await sb(`otp_users?id=eq.${CU.id}&select=saldo,total_orders`);
+    const curr=rows?.[0]||{};
+    const nSaldo=Math.max(0,(curr.saldo||0)-price);
+    const nOrd=(curr.total_orders||0)+1;
+    await sb(`otp_users?id=eq.${CU.id}`,{method:'PATCH',prefer:'return=minimal',body:{saldo:nSaldo,total_orders:nOrd}});
+    CU.saldo=nSaldo;CU.total_orders=nOrd;saveU(CU);
+    // Save to DB
+    await sb('otp_orders',{method:'POST',prefer:'return=minimal',body:{
+      order_id:res.data.order_id,user_id:CU.id,service:OS.svc?.service_name||OS.svc?.name,country:OS.cnt?.name,
+      operator:OS.op?.name,phone_number:res.data.phone_number,price,
+      status:'pending',created_at:new Date().toISOString(),
+      expired_at:new Date(res.data.expired_at).toISOString()
+    }});
+    document.getElementById('otp-phone').textContent=res.data.phone_number;
+    document.getElementById('otp-pm').textContent=`${OS.svc?.service_name||OS.svc?.name} · ${OS.cnt?.name} · ${OS.op?.name}`;
+    document.getElementById('otp-hint').textContent=`Daftarkan ke ${OS.svc?.service_name||OS.svc?.name}`;
+    document.getElementById('otp-wait-area').style.display='block';
+    document.getElementById('otp-code-area').style.display='none';
+    goOs(5);startOtpCd(res.data.expired_at);startOtpPoll(res.data.order_id);
+  }catch(e){showAl('otp-al4','Error: '+e.message,'error');btn.disabled=false;btn.textContent='Bayar & Order ✓';}
+}
+
+function startOtpCd(exp){
+  clearInterval(OS.cd);const el=document.getElementById('otp-cd');
+  const ts=typeof exp==='number'?exp:new Date(exp).getTime();
+  function tick(){const l=Math.max(0,Math.floor((ts-Date.now())/1000));const m=String(Math.floor(l/60)).padStart(2,'0');const s=String(l%60).padStart(2,'0');el.textContent=l>0?`⏱ Expired dalam ${m}:${s}`:'⏱ Order expired';if(l<=0){clearInterval(OS.cd);clearInterval(OS.poll);}}
+  tick();OS.cd=setInterval(tick,1000);
+}
+function startOtpPoll(id){clearInterval(OS.poll);OS.poll=setInterval(()=>pollOtp(id),5000);}
+
+async function pollOtp(id){
+  try{
+    const res=await roAPI(`${RO}/v1/orders/get_status?order_id=${id}`);
+    if(!res.success)return;const d=res.data;
+    if(d.status==='completed'||d.status==='received'){
+      await sb(`otp_orders?order_id=eq.${id}`,{method:'PATCH',prefer:'return=minimal',body:{status:d.status,otp_code:d.otp_code,otp_msg:d.otp_msg}});
+      document.getElementById('otp-wait-area').style.display='none';
+      document.getElementById('otp-code-area').style.display='block';
+      document.getElementById('otp-code-disp').textContent=d.otp_code||'—';
+      document.getElementById('otp-msg-disp').textContent=d.otp_msg||'';
+      document.getElementById('otp-final').textContent=d.otp_code||'—';
+      if(d.status==='completed'){clearInterval(OS.poll);clearInterval(OS.cd);}
+      toast(`🎉 OTP diterima: ${d.otp_code}`);
+    }else if(d.status==='canceled'||d.status==='expiring'){
+      clearInterval(OS.poll);clearInterval(OS.cd);
+      const ordRow=await sb(`otp_orders?order_id=eq.${id}&select=status,refunded,price`).catch(()=>null);
+      const alreadyRefunded=ordRow?.[0]?.refunded===true;
+      if(!alreadyRefunded){
+        const refPrice=ordRow?.[0]?.price||OS.ord?.price||0;
+        const urows=await sb(`otp_users?id=eq.${CU.id}&select=saldo`).catch(()=>null);
+        const curSaldo=urows?.[0]?.saldo||CU.saldo||0;
+        await sb(`otp_users?id=eq.${CU.id}`,{method:'PATCH',prefer:'return=minimal',body:{saldo:curSaldo+refPrice}});
+        CU.saldo=curSaldo+refPrice;saveU(CU);
+        await sb(`otp_orders?order_id=eq.${id}`,{method:'PATCH',prefer:'return=minimal',body:{status:d.status,refunded:true}});
+        const msg=d.status==='expiring'?`⏰ Order expired — saldo ${fRp(refPrice)} dikembalikan`:`❌ Order dibatalkan — saldo ${fRp(refPrice)} dikembalikan`;
+        document.getElementById('otp-cd').textContent=msg;
+        toast(`🔄 Refund +${fRp(refPrice)} ke saldo`);
+        document.getElementById('st-saldo').textContent=fRp(CU.saldo);
+      }else{
+        await sb(`otp_orders?order_id=eq.${id}`,{method:'PATCH',prefer:'return=minimal',body:{status:d.status}});
+        document.getElementById('otp-cd').textContent=d.status==='expiring'?'⏰ Order expired':'❌ Order dibatalkan';
+      }
+    }
+  }catch{}
+}
+
+function cpyOTP(){const c=document.getElementById('otp-code-disp').textContent;navigator.clipboard.writeText(c).then(()=>toast('OTP disalin! 📋'));}
+function cpyFinal(){const c=document.getElementById('otp-final').textContent;navigator.clipboard.writeText(c).then(()=>toast('OTP disalin! 📋'));}
+
+async function cancelOrd(){
+  clearInterval(OS.poll);clearInterval(OS.cd);
+  if(OS.ord?.order_id){
+    try{await roAPI(`${RO}/v1/orders/set_status?order_id=${OS.ord.order_id}&status=cancel`);
+      await sb(`otp_orders?order_id=eq.${OS.ord.order_id}`,{method:'PATCH',prefer:'return=minimal',body:{status:'canceled'}});
+    }catch{}
+  }
+  closeOTP();
+}
+
+// INIT
+loadU();
+if(CU){showPage('dashboard');loadDash();}
+document.getElementById('lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('lu').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+</script>
+</body>
+</html>
