@@ -5,8 +5,8 @@ session_start();
 define('GOOGLE_CLIENT_ID', '1054465623984-re5q3ehnrk4qrne8da214jjvltnut630.apps.googleusercontent.com');
 define('GOOGLE_CLIENT_SECRET', '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');
 
-// ⚠️ SESUAIKAN DENGAN YANG ADA DI GOOGLE CONSOLE
-define('GOOGLE_REDIRECT_URI', 'https://polar.web.id/auth/google/callback');
+// ✅ Redirect URI di ROOT (simple!)
+define('GOOGLE_REDIRECT_URI', 'https://polar.web.id/auth-google.php');
 
 $ALLOWED_EMAILS = [];
 
