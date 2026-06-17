@@ -2,9 +2,9 @@
 // auth/google/callback.php
 require_once '../../config-google.php';
 
-// Jika sudah login, redirect ke dashboard
+// Jika sudah login, redirect ke dashboard (pakai path absolut dari root)
 if (isset($_SESSION['user_email'])) {
-    header('Location: /dashboard.php');
+    header('Location: /dashboard.php');  // ← PAKAI SLASH DI DEPAN
     exit;
 }
 
@@ -55,6 +55,7 @@ if ($code) {
         $_SESSION['user_picture'] = $user_data['picture'] ?? '';
         $_SESSION['user_coins'] = 0;
         
+        // ← PAKAI PATH ABSOLUT DARI ROOT
         header('Location: /dashboard.php?login=success');
         exit;
     } else {
