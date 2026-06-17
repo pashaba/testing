@@ -1,5 +1,5 @@
 <?php
-// auth-google.php
+// auth-google.php (di ROOT folder)
 require_once 'config-google.php';
 
 // Jika sudah login, redirect ke dashboard
@@ -8,7 +8,6 @@ if (isset($_SESSION['user_email'])) {
     exit;
 }
 
-// Ambil kode dari Google
 $code = $_GET['code'] ?? '';
 $error = $_GET['error'] ?? '';
 
@@ -18,7 +17,6 @@ if ($error) {
 }
 
 if ($code) {
-    // Tukar code dengan access token
     $token_url = 'https://oauth2.googleapis.com/token';
     $post_data = [
         'code' => $code,
@@ -41,7 +39,6 @@ if ($code) {
     $token_data = json_decode($response, true);
     
     if (isset($token_data['access_token'])) {
-        // Ambil info user dari Google
         $userinfo_url = 'https://www.googleapis.com/oauth2/v2/userinfo';
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $userinfo_url);
@@ -53,20 +50,10 @@ if ($code) {
         
         $user_data = json_decode($user_response, true);
         
-        // Cek apakah email diizinkan
-        if (!empty($ALLOWED_EMAILS) && !in_array($user_data['email'], $ALLOWED_EMAILS)) {
-            header('Location: dashboard.php?error=email_not_allowed');
-            exit;
-        }
-        
-        // Simpan ke session
         $_SESSION['user_email'] = $user_data['email'];
         $_SESSION['user_name'] = $user_data['name'] ?? 'User';
         $_SESSION['user_picture'] = $user_data['picture'] ?? '';
-        $_SESSION['user_coins'] = 0; // Default 0 koin
-        
-        // Cek apakah user sudah ada di database (opsional)
-        // Jika ada, ambil jumlah koinnya
+        $_SESSION['user_coins'] = 0;
         
         header('Location: dashboard.php?login=success');
         exit;
