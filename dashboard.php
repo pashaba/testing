@@ -7,11 +7,20 @@ session_start();
 define('JADIBOT_EXPIRY_DAYS', 3);
 define('JADIBOT_WARNING_DAYS', 1);
 
-// Cek login
+// Cek login - dengan remember me
+$isLoggedIn = isset($_SESSION['user_email']);
+if (!$isLoggedIn && isset($_COOKIE['polar_user_email'])) {
+    $_SESSION['user_email'] = $_COOKIE['polar_user_email'];
+    $_SESSION['user_name'] = $_COOKIE['polar_user_name'] ?? 'User';
+    $_SESSION['user_picture'] = $_COOKIE['polar_user_picture'] ?? '';
+    $_SESSION['user_coins'] = intval($_COOKIE['polar_user_coins'] ?? 0);
+    $isLoggedIn = true;
+}
+
 $user = getUserInfo();
 $isLoggedIn = ($user !== null);
 
-// Jika belum login, tampilkan halaman login
+// Jika belum login, tampilkan halaman dengan popup login
 if (!$isLoggedIn) {
     $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
         'client_id' => GOOGLE_CLIENT_ID,
@@ -27,32 +36,132 @@ if (!$isLoggedIn) {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Login — Polar.id</title>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+        <title>Polar.id — Login</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body {
                 font-family: 'Inter', sans-serif;
-                background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+                background: #f8fafc;
                 min-height: 100vh;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 padding: 20px;
             }
-            .login-container { max-width: 440px; width: 100%; }
-            .login-card {
-                background: white;
-                border-radius: 24px;
-                padding: 48px 40px;
-                box-shadow: 0 20px 60px rgba(0,0,0,0.08);
-                border: 1px solid #e2e8f0;
-                text-align: center;
+            
+            /* ─── OVERLAY ─── */
+            .overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(15, 23, 42, 0.6);
+                backdrop-filter: blur(12px);
+                z-index: 999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                animation: fadeIn 0.3s ease;
             }
-            .logo { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #f6821f, #e07010); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
-            .subtitle { color: #64748b; font-size: 14px; margin-bottom: 32px; }
-            .google-btn {
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+            
+            /* ─── POPUP CARD ─── */
+            .popup {
+                background: white;
+                border-radius: 32px;
+                padding: 48px 40px;
+                max-width: 420px;
+                width: 100%;
+                text-align: center;
+                box-shadow: 0 24px 80px rgba(0,0,0,0.15);
+                animation: slideUp 0.4s ease;
+                position: relative;
+                overflow: hidden;
+            }
+            .popup::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #f6821f, #fbbf24);
+            }
+            @keyframes slideUp {
+                from { transform: translateY(30px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            
+            /* ─── LOGO ─── */
+            .logo-icon {
+                width: 64px;
+                height: 64px;
+                background: linear-gradient(135deg, #f6821f, #e07010);
+                border-radius: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+                margin: 0 auto 16px;
+                box-shadow: 0 8px 24px rgba(246,130,31,0.25);
+            }
+            .logo-icon i { color: white; }
+            
+            .popup-title {
+                font-size: 24px;
+                font-weight: 800;
+                color: #0f172a;
+                margin-bottom: 6px;
+            }
+            .popup-title span { color: #f6821f; }
+            
+            .popup-sub {
+                font-size: 13px;
+                color: #94a3b8;
+                margin-bottom: 24px;
+                line-height: 1.6;
+            }
+            
+            /* ─── USER PREVIEW ─── */
+            .user-preview {
+                background: #f8fafc;
+                border-radius: 16px;
+                padding: 16px 20px;
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                margin-bottom: 24px;
+                border: 1px solid #e2e8f0;
+            }
+            .user-preview-avatar {
+                width: 44px;
+                height: 44px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #f6821f, #e07010);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-weight: 700;
+                font-size: 18px;
+                flex-shrink: 0;
+            }
+            .user-preview-info { text-align: left; flex: 1; }
+            .user-preview-name {
+                font-size: 14px;
+                font-weight: 600;
+                color: #0f172a;
+            }
+            .user-preview-email {
+                font-size: 12px;
+                color: #94a3b8;
+            }
+            
+            /* ─── BUTTON ─── */
+            .btn-google {
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -62,42 +171,67 @@ if (!$isLoggedIn) {
                 background: white;
                 border: 1px solid #e2e8f0;
                 border-radius: 12px;
-                font-size: 16px;
+                font-size: 15px;
                 font-weight: 600;
                 color: #1e293b;
                 cursor: pointer;
                 transition: all 0.2s;
                 text-decoration: none;
             }
-            .google-btn:hover { border-color: #f6821f; box-shadow: 0 4px 12px rgba(246,130,31,0.1); transform: translateY(-1px); }
-            .google-btn svg { width: 24px; height: 24px; }
-            .divider { display: flex; align-items: center; gap: 16px; margin: 24px 0; color: #94a3b8; font-size: 12px; }
-            .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e2e8f0; }
-            .features { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-top: 24px; }
-            .feature-item { background: #f8fafc; border-radius: 12px; padding: 12px; font-size: 11px; color: #64748b; }
-            .feature-item i { display: block; font-size: 20px; color: #f6821f; margin-bottom: 6px; }
-            .error-msg { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px; border-radius: 10px; margin-bottom: 20px; font-size: 13px; }
-            @media (max-width: 480px) { .login-card { padding: 32px 24px; } .features { grid-template-columns: 1fr; } }
+            .btn-google:hover {
+                border-color: #f6821f;
+                box-shadow: 0 4px 16px rgba(246,130,31,0.12);
+                transform: translateY(-1px);
+            }
+            .btn-google svg { width: 22px; height: 22px; flex-shrink: 0; }
+            
+            /* ─── FOOTER ─── */
+            .popup-footer {
+                margin-top: 20px;
+                font-size: 11px;
+                color: #cbd5e1;
+            }
+            .popup-footer a {
+                color: #f6821f;
+                text-decoration: none;
+                font-weight: 600;
+            }
+            
+            /* ─── RESPONSIVE ─── */
+            @media (max-width: 480px) {
+                .popup { padding: 32px 24px; }
+                .logo-icon { width: 48px; height: 48px; font-size: 20px; }
+                .popup-title { font-size: 20px; }
+            }
         </style>
     </head>
     <body>
-        <div class="login-container">
-            <div class="login-card">
-                <div class="logo">❄️ Polar.id</div>
-                <div class="subtitle">Masuk untuk mengelola bot WhatsApp kamu</div>
-                <?php if (isset($_GET['error'])): ?>
-                    <div class="error-msg">
-                        <?php if ($_GET['error'] === 'email_not_allowed'): ?>
-                            <i class="fas fa-exclamation-circle"></i> Email tidak diizinkan untuk mengakses dashboard.
-                        <?php elseif ($_GET['error'] === 'token_failed'): ?>
-                            <i class="fas fa-exclamation-circle"></i> Gagal login, silakan coba lagi.
-                        <?php else: ?>
-                            <i class="fas fa-exclamation-circle"></i> Terjadi kesalahan, silakan coba lagi.
-                        <?php endif; ?>
+        <div class="overlay">
+            <div class="popup">
+                <!-- Logo -->
+                <div class="logo-icon"><i class="fas fa-snowflake"></i></div>
+                
+                <!-- Title -->
+                <div class="popup-title">Halo! <span>Login</span></div>
+                <div class="popup-sub">Login dengan Google untuk mulai mengelola bot WhatsApp kamu</div>
+                
+                <!-- User Preview -->
+                <div class="user-preview">
+                    <div class="user-preview-avatar">
+                        <i class="fas fa-user"></i>
                     </div>
-                <?php endif; ?>
-                <a href="<?= $auth_url ?>" class="google-btn">
-                    <svg width="24" height="24" viewBox="0 0 24 24">
+                    <div class="user-preview-info">
+                        <div class="user-preview-name">Login sebagai Kimtha</div>
+                        <div class="user-preview-email">Login untuk bisa claim dan manage server kamu</div>
+                    </div>
+                    <div style="color: #f6821f; font-size: 20px;">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+                
+                <!-- Google Button -->
+                <a href="<?= $auth_url ?>" class="btn-google">
+                    <svg width="22" height="22" viewBox="0 0 24 24">
                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
@@ -105,11 +239,10 @@ if (!$isLoggedIn) {
                     </svg>
                     Login dengan Google
                 </a>
-                <div class="divider">atau</div>
-                <div class="features">
-                    <div class="feature-item"><i class="fas fa-robot"></i> Kelola Bot</div>
-                    <div class="feature-item"><i class="fas fa-coins"></i> Dapat Koin</div>
-                    <div class="feature-item"><i class="fas fa-server"></i> Hosting Gratis</div>
+                
+                <!-- Footer -->
+                <div class="popup-footer">
+                    <i class="fas fa-shield-alt"></i> Aman dengan Google OAuth 2.0
                 </div>
             </div>
         </div>
@@ -163,17 +296,18 @@ $totalSessions = $totalSessions[0]['count'] ?? 0;
         .header-left { display: flex; align-items: center; gap: 16px; }
         .logo { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #f6821f, #e07010); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .header-right { display: flex; align-items: center; gap: 16px; }
-        .user-info { display: flex; align-items: center; gap: 10px; }
-        .user-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid #f6821f; }
+        .user-info { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 4px 12px 4px 4px; border-radius: 30px; border: 1px solid #e2e8f0; transition: all 0.2s; }
+        .user-info:hover { border-color: #f6821f; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
         .user-name { font-size: 13px; font-weight: 600; color: #0f172a; }
-        .user-email { font-size: 11px; color: #94a3b8; }
+        .user-email { font-size: 11px; color: #94a3b8; display: none; }
         .btn-logout { padding: 6px 14px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #64748b; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s; }
         .btn-logout:hover { background: #fef2f2; border-color: #ef4444; color: #ef4444; }
 
         /* ─── CONTENT ─── */
         .content { max-width: 1100px; margin: 0 auto; padding: 32px 24px; }
 
-        /* ─── FREE BOT SERVER CARD ─── */
+        /* ─── HERO CARD ─── */
         .hero-card {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border-radius: 24px;
@@ -369,7 +503,10 @@ $totalSessions = $totalSessions[0]['count'] ?? 0;
             border-radius: 16px;
             padding: 20px;
             border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
         }
+        .stat-card:hover { border-color: #f6821f; transform: translateY(-2px); }
         .stat-number { font-size: 28px; font-weight: 800; color: #f6821f; }
         .stat-label { font-size: 12px; color: #64748b; margin-top: 4px; }
 
@@ -407,6 +544,28 @@ $totalSessions = $totalSessions[0]['count'] ?? 0;
         .empty-state { text-align: center; padding: 40px; color: #94a3b8; }
         .empty-state i { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
 
+        /* ─── TOAST ─── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: #0f172a;
+            color: white;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 999;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            animation: toastSlide 0.3s ease;
+            display: none;
+        }
+        .toast.success { border-left: 4px solid #10b981; }
+        .toast.error { border-left: 4px solid #ef4444; }
+        @keyframes toastSlide {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         @media (max-width: 768px) {
             .hero-card { padding: 24px; }
             .hero-title { font-size: 22px; }
@@ -438,7 +597,7 @@ $totalSessions = $totalSessions[0]['count'] ?? 0;
             <?php if ($userPicture): ?>
                 <img src="<?= $userPicture ?>" class="user-avatar" alt="Avatar">
             <?php else: ?>
-                <div class="user-avatar" style="display:flex;align-items:center;justify-content:center;background:#f6821f;color:white;font-weight:700;"><?= strtoupper(substr($userName, 0, 1)) ?></div>
+                <div class="user-avatar" style="display:flex;align-items:center;justify-content:center;background:#f6821f;color:white;font-weight:700;font-size:14px;"><?= strtoupper(substr($userName, 0, 1)) ?></div>
             <?php endif; ?>
             <div>
                 <div class="user-name"><?= htmlspecialchars($userName) ?></div>
@@ -452,7 +611,10 @@ $totalSessions = $totalSessions[0]['count'] ?? 0;
 <!-- ─── CONTENT ─── -->
 <div class="content">
 
-    <!-- HERO CARD - FREE BOT SERVER -->
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- HERO CARD -->
     <div class="hero-card">
         <div class="hero-left">
             <div class="hero-badge"><i class="fas fa-circle"></i> 2 SLOT TERSEDIA</div>
@@ -474,8 +636,8 @@ $totalSessions = $totalSessions[0]['count'] ?? 0;
             </div>
         </div>
         <div class="hero-right">
-            <a href="#claim" class="btn-hero-primary"><i class="fas fa-rocket"></i> CLAIM SEKARANG</a>
-            <a href="#specs" class="btn-hero-secondary"><i class="fas fa-chart-simple"></i> LIHAT SPECS →</a>
+            <button class="btn-hero-primary" onclick="showToast('Coming soon! Fitur claim akan segera hadir.', 'info')"><i class="fas fa-rocket"></i> CLAIM SEKARANG</button>
+            <button class="btn-hero-secondary" onclick="showToast('Specs: RAM 1GB, CPU 2 Core, Disk 5GB', 'info')"><i class="fas fa-chart-simple"></i> LIHAT SPECS →</button>
         </div>
     </div>
 
@@ -485,12 +647,11 @@ $totalSessions = $totalSessions[0]['count'] ?? 0;
             <div class="coins-icon"><i class="fas fa-coins"></i></div>
             <div>
                 <div class="coins-label">Total Koin Anda</div>
-                <div class="coins-amount">🪙 <?= number_format($userCoins) ?></div>
+                <div class="coins-amount" id="userCoins">🪙 <?= number_format($userCoins) ?></div>
             </div>
         </div>
         <div class="coins-right">
-            <button class="btn-coin" onclick="openCoinModal()"><i class="fas fa-plus-circle"></i> Tambah Koin</button>
-            <button class="btn-coin btn-coin-primary" onclick="generateCoinLink()"><i class="fas fa-link"></i> Buat Link Koin</button>
+            <button class="btn-coin btn-coin-primary" id="createCoinBtn"><i class="fas fa-link"></i> Buat Link Koin</button>
         </div>
     </div>
 
@@ -525,10 +686,22 @@ $totalSessions = $totalSessions[0]['count'] ?? 0;
 
     <!-- SESSION STATS -->
     <div class="stats-grid">
-        <div class="stat-card"><div class="stat-number"><?= number_format($totalSessions) ?></div><div class="stat-label">Total Session</div></div>
-        <div class="stat-card"><div class="stat-number" style="color:#10b981;"><?= number_format($activeSessions) ?></div><div class="stat-label">Online</div></div>
-        <div class="stat-card"><div class="stat-number"><?= JADIBOT_EXPIRY_DAYS ?></div><div class="stat-label">Hari Aktif</div></div>
-        <div class="stat-card"><div class="stat-number">🪙 <?= number_format($userCoins) ?></div><div class="stat-label">Koin Anda</div></div>
+        <div class="stat-card" onclick="showToast('Total session terdaftar: <?= number_format($totalSessions) ?>', 'info')">
+            <div class="stat-number"><?= number_format($totalSessions) ?></div>
+            <div class="stat-label">Total Session</div>
+        </div>
+        <div class="stat-card" onclick="showToast('Session online: <?= number_format($activeSessions) ?>', 'info')">
+            <div class="stat-number" style="color:#10b981;"><?= number_format($activeSessions) ?></div>
+            <div class="stat-label">Online</div>
+        </div>
+        <div class="stat-card" onclick="showToast('Masa aktif session: <?= JADIBOT_EXPIRY_DAYS ?> hari', 'info')">
+            <div class="stat-number"><?= JADIBOT_EXPIRY_DAYS ?></div>
+            <div class="stat-label">Hari Aktif</div>
+        </div>
+        <div class="stat-card" onclick="showToast('Koin Anda: <?= number_format($userCoins) ?>', 'info')">
+            <div class="stat-number">🪙 <?= number_format($userCoins) ?></div>
+            <div class="stat-label">Koin Anda</div>
+        </div>
     </div>
 
     <!-- SESSIONS LIST -->
@@ -543,24 +716,9 @@ $totalSessions = $totalSessions[0]['count'] ?? 0;
     </div>
 </div>
 
-<!-- ─── MODAL TAMBAH KOIN ─── -->
-<div class="modal" id="coinModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;">
-    <div class="modal-content" style="background:white;border-radius:20px;max-width:400px;width:100%;padding:32px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <h3 style="font-size:18px;font-weight:700;"><i class="fas fa-coins"></i> Tambah Koin</h3>
-            <button onclick="closeCoinModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8;">×</button>
-        </div>
-        <div style="margin-bottom:16px;">
-            <label style="font-size:13px;font-weight:600;display:block;margin-bottom:6px;">Jumlah Koin</label>
-            <input type="number" id="coinAmount" min="1" value="1" style="width:100%;padding:12px;border:1px solid #e2e8f0;border-radius:10px;font-size:14px;">
-        </div>
-        <button onclick="generateCoinLink()" class="btn-hero-primary" style="width:100%;justify-content:center;">Buat Link Koin</button>
-    </div>
-</div>
-
 <!-- ─── MODAL ADD SESSION ─── -->
 <div class="modal" id="addModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;">
-    <div class="modal-content" style="background:white;border-radius:20px;max-width:480px;width:100%;padding:32px;">
+    <div class="modal-content" style="background:white;border-radius:20px;max-width:480px;width:100%;padding:32px;animation:slideUp 0.3s ease;">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
             <h3 style="font-size:18px;font-weight:700;"><i class="fas fa-plus-circle"></i> Tambah Session</h3>
             <button onclick="closeAddModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#94a3b8;">×</button>
@@ -588,6 +746,50 @@ $totalSessions = $totalSessions[0]['count'] ?? 0;
 </div>
 
 <script>
+// ─── TOAST ───
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + type;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3000);
+}
+
+// ─── CREATE COIN LINK (1 KLIK → 1 KOIN) ───
+document.getElementById('createCoinBtn').addEventListener('click', async function() {
+    const btn = this;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
+    btn.disabled = true;
+    
+    try {
+        const response = await fetch('api/create-coin-link.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: 1 })
+        });
+        const data = await response.json();
+        
+        if (data.success) {
+            const link = data.short_url || data.original_url;
+            showToast('✅ Link koin berhasil dibuat! 1 koin siap diklaim.', 'success');
+            navigator.clipboard.writeText(link).then(() => {
+                showToast('📋 Link sudah disalin ke clipboard!', 'success');
+            }).catch(() => {
+                showToast('🔗 Link: ' + link, 'info');
+            });
+            // Update koin (nanti akan refresh otomatis setelah claim)
+        } else {
+            showToast('❌ ' + (data.message || 'Gagal membuat link'), 'error');
+        }
+    } catch(e) {
+        showToast('❌ Error: ' + e.message, 'error');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+
 // ─── SESSION DATA ───
 let sessions = [];
 const SB_URL = '<?= SUPABASE_URL ?>';
@@ -655,13 +857,13 @@ async function createSession() {
     const token = document.getElementById('tokenInput').value.trim().toUpperCase();
     const script = document.getElementById('scriptSelect').value;
     
-    if (!phone) { alert('Masukkan nomor WhatsApp'); return; }
-    if (!token) { alert('Masukkan token aktivasi'); return; }
+    if (!phone) { showToast('Masukkan nomor WhatsApp', 'error'); return; }
+    if (!token) { showToast('Masukkan token aktivasi', 'error'); return; }
     
     let cleanPhone = phone.replace(/[^0-9]/g, '');
     if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.substring(1);
     if (!cleanPhone.startsWith('62')) cleanPhone = '62' + cleanPhone;
-    if (cleanPhone.length < 10) { alert('Nomor terlalu pendek'); return; }
+    if (cleanPhone.length < 10) { showToast('Nomor terlalu pendek', 'error'); return; }
     
     const btn = event.target;
     btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
@@ -681,9 +883,9 @@ async function createSession() {
         
         closeAddModal();
         await loadSessions();
-        alert('✅ Session berhasil dibuat!');
+        showToast('✅ Session berhasil dibuat!', 'success');
     } catch(e) {
-        alert('❌ ' + e.message);
+        showToast('❌ ' + e.message, 'error');
     } finally {
         btn.disabled = false; btn.innerHTML = 'Buat Session';
     }
@@ -694,13 +896,22 @@ async function deleteSession(id, phone) {
     try {
         await supabaseRequest('DELETE', `polar_sessions?id=eq.${id}`);
         await loadSessions();
-        alert('✅ Session dihapus');
-    } catch(e) { alert('❌ ' + e.message); }
+        showToast('✅ Session dihapus', 'success');
+    } catch(e) { showToast('❌ ' + e.message, 'error'); }
 }
 
 function openPairModal(phone) {
-    // Buka modal pairing
-    window.open('dashboard.php?pair=' + phone, '_blank');
+    showToast('🔗 Pairing code akan muncul di modal', 'info');
+    // Implementasi pairing modal...
+}
+
+async function claimPackage(days, coin) {
+    if (<?= $userCoins ?> < coin) {
+        showToast('❌ Koin tidak cukup! Butuh ' + coin + ' koin.', 'error');
+        return;
+    }
+    if (!confirm(`Klaim paket ${days} hari dengan ${coin} koin?`)) return;
+    showToast('✅ Paket ' + days + ' hari berhasil diklaim!', 'success');
 }
 
 // ─── MODAL FUNCTIONS ───
@@ -709,50 +920,6 @@ function openAddModal() {
 }
 function closeAddModal() {
     document.getElementById('addModal').style.display = 'none';
-}
-function openCoinModal() {
-    document.getElementById('coinModal').style.display = 'flex';
-}
-function closeCoinModal() {
-    document.getElementById('coinModal').style.display = 'none';
-}
-
-async function generateCoinLink() {
-    const amount = document.getElementById('coinAmount')?.value || 1;
-    closeCoinModal();
-    
-    try {
-        const response = await fetch('api/create-coin-link.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ amount: parseInt(amount) })
-        });
-        const data = await response.json();
-        
-        if (data.success) {
-            const msg = `✅ Link koin berhasil dibuat!\n\n🪙 ${amount} Koin\n🔗 ${data.short_url || data.original_url}\n\nBagikan link ini ke user untuk claim koin.`;
-            alert(msg);
-            if (data.short_url) {
-                navigator.clipboard.writeText(data.short_url);
-                alert('📋 Link sudah disalin ke clipboard!');
-            }
-        } else {
-            alert('❌ ' + (data.message || 'Gagal membuat link'));
-        }
-    } catch(e) {
-        alert('❌ Error: ' + e.message);
-    }
-}
-
-async function claimPackage(days, coin) {
-    if (<?= $userCoins ?> < coin) {
-        alert('❌ Koin tidak cukup! Anda punya <?= $userCoins ?> koin, butuh ' + coin + ' koin.');
-        return;
-    }
-    if (!confirm(`Klaim paket ${days} hari dengan ${coin} koin?`)) return;
-    
-    // Proses klaim paket (kirim ke bot via API)
-    alert(`✅ Paket ${days} hari berhasil diklaim! +${days} hari masa aktif.`);
 }
 
 // ─── CLOSE MODAL ON OVERLAY ───
