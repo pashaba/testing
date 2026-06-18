@@ -49,13 +49,11 @@ curl_exec($ch);
 curl_close($ch);
 
 // Tambah koin ke user
-// Ambil user_id dari claim
 $user_id = $claim['user_id'];
-
-// Update session user coins
 if (session_status() === PHP_SESSION_NONE) session_start();
 $_SESSION['user_coins'] = ($_SESSION['user_coins'] ?? 0) + 1;
 
+// Update juga di database user jika ada
 ?>
 <!DOCTYPE html>
 <html lang="id">
