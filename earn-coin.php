@@ -38,7 +38,7 @@ if ($claimedToday >= $maxPerDay) {
     exit;
 }
 
-// ========== CEK APAKAH ADA LINK PREMADE YANG BELUM DIGUNAKAN ==========
+// ========== AMBIL 1 TOKEN YANG BELUM DIPAKAI ==========
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/premade_links?used_by=eq.null&limit=1&order=id.asc');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -62,13 +62,12 @@ if (empty($premade)) {
 
 $link = $premade[0];
 $linkId = $link['id'];
-$claim_url = $link['url'];
+$claim_url = $link['url']; // URL Safelink yang sudah dibuat
 
-// ========== TANDAI LINK SUDAH DIGUNAKAN ==========
+// ========== TANDAI LINK SEDANG DIPROSES (opsional) ==========
 $updateData = json_encode([
-    'used_by' => $user_id,
-    'used_at' => date('Y-m-d H:i:s'),
-    'status' => 'claimed'
+    'status' => 'processing',
+    'processing_at' => date('Y-m-d H:i:s')
 ]);
 
 $ch = curl_init();
@@ -84,12 +83,6 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, [
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_exec($ch);
 curl_close($ch);
-
-// ========== TAMBAH KOIN KE USER ==========
-$_SESSION['user_coins'] = ($_SESSION['user_coins'] ?? 0) + 1;
-
-// ========== UPDATE KOIN DI DATABASE (opsional) ==========
-// Jika ada tabel users, update di sini
 
 // ========== KIRIM RESPONSE ==========
 $remaining = $maxPerDay - ($claimedToday + 1);
