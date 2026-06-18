@@ -48,6 +48,7 @@ if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
         $_SESSION['user_email'] = $user_data['email'] ?? '';
         $_SESSION['user_avatar'] = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($user_data['name'] ?? 'User') . '&background=FF6B00&color=fff';
         $_SESSION['user_coins'] = 0;
+        $_SESSION['claimed_today'] = 0;
         
         header('Location: dashboard.php');
         exit;
@@ -60,6 +61,7 @@ $user_name = $_SESSION['user_name'] ?? "Guest";
 $user_email = $_SESSION['user_email'] ?? "guest@gmail.com";
 $user_avatar = $_SESSION['user_avatar'] ?? "https://ui-avatars.com/api/?name=Guest&background=FF6B00&color=fff";
 $user_coins = $_SESSION['user_coins'] ?? 0;
+$claimed_today = $_SESSION['claimed_today'] ?? 0;
 
 // ========== URL LOGIN GOOGLE ==========
 $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
@@ -70,6 +72,15 @@ $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
     'access_type' => 'online',
     'prompt' => 'select_account'
 ]);
+
+// ========== HARDCODE 5 LINK SAFELINK ==========
+$POLAR_LINKS = [
+    'https://sfl.gl/fdI2BtU',
+    'https://sfl.gl/jEyc1yAV',
+    'https://sfl.gl/UBJUPR',
+    'https://sfl.gl/uzKT',
+    'https://sfl.gl/fFTu'
+];
 
 // ========== CEK SERVER ==========
 function checkPhoenixServer() {
@@ -168,7 +179,7 @@ $maxSessions = 10;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Polar.id — Jadibot WhatsApp Gratis</title>
+    <title>Polar.id — Bot WhatsApp Gratis 🪙</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -180,58 +191,48 @@ $maxSessions = 10;
             --orange-hover: #e05e00;
             --orange-glow: rgba(255,107,0,0.3);
             --white: #ffffff;
-            --white-hover: #e0e0e0;
-            --yellow: #ffcc00;
             --gold: #fbbf24;
+            --gold-glow: rgba(251,191,36,0.2);
             --text-main: #ffffff;
             --text-muted: #8b8b9b;
             --border: #2a2a35;
             --green: #22c55e;
             --red: #ef4444;
+            --purple: #8b5cf6;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        
         body {
             background-color: var(--bg-main);
             color: var(--text-main);
             min-height: 100vh;
             overflow-x: hidden;
             background-image: 
-                radial-gradient(circle at 20% 50%, rgba(255, 107, 0, 0.03) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(255, 107, 0, 0.03) 0%, transparent 50%);
+                radial-gradient(circle at 20% 50%, rgba(255,107,0,0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255,107,0,0.03) 0%, transparent 50%);
         }
 
         /* Animations */
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(50px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes glow { 0%,100% { box-shadow: 0 0 20px var(--orange-glow); } 50% { box-shadow: 0 0 40px var(--orange-glow); } }
+        @keyframes coinSpin { 0% { transform: rotateY(0); } 100% { transform: rotateY(360deg); } }
+        
         .animate-in { animation: fadeInUp 0.5s ease forwards; }
         .animate-in-delay-1 { animation: fadeInUp 0.5s ease 0.1s forwards; opacity: 0; }
         .animate-in-delay-2 { animation: fadeInUp 0.5s ease 0.2s forwards; opacity: 0; }
         .animate-in-delay-3 { animation: fadeInUp 0.5s ease 0.3s forwards; opacity: 0; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-glow { animation: glow 2s ease-in-out infinite; }
+        .animate-coin { animation: coinSpin 1s ease forwards; }
 
-        /* Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-main); }
-        ::-webkit-scrollbar-thumb { background: var(--orange); border-radius: 10px; }
+        .scrollbar::-webkit-scrollbar { width: 6px; }
+        .scrollbar::-webkit-scrollbar-track { background: var(--bg-main); }
+        .scrollbar::-webkit-scrollbar-thumb { background: var(--orange); border-radius: 10px; }
 
         /* Buttons */
         .btn {
@@ -253,35 +254,15 @@ $maxSessions = 10;
             position: relative;
             overflow: hidden;
         }
-        .btn::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
-            opacity: 0;
-            transition: var(--transition);
-        }
+        .btn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent); opacity: 0; transition: var(--transition); }
         .btn:hover::after { opacity: 1; }
         .btn:active { transform: scale(0.97); }
-        
-        .btn-orange { 
-            background: linear-gradient(135deg, var(--orange), var(--orange-hover)); 
-            color: white; 
-            box-shadow: 0 4px 20px var(--orange-glow);
-        }
-        .btn-orange:hover { 
-            transform: translateY(-3px); 
-            box-shadow: 0 8px 30px var(--orange-glow);
-        }
-        .btn-white { 
-            background: var(--white); 
-            color: #000; 
-        }
-        .btn-white:hover { 
-            background: var(--white-hover); 
-            transform: translateY(-3px); 
-            box-shadow: 0 5px 20px rgba(255,255,255,0.15);
-        }
+        .btn-orange { background: linear-gradient(135deg, var(--orange), var(--orange-hover)); color: white; box-shadow: 0 4px 20px var(--orange-glow); }
+        .btn-orange:hover { transform: translateY(-3px); box-shadow: 0 8px 30px var(--orange-glow); }
+        .btn-white { background: var(--white); color: #000; }
+        .btn-white:hover { background: #e0e0e0; transform: translateY(-3px); box-shadow: 0 5px 20px rgba(255,255,255,0.15); }
+        .btn-gold { background: linear-gradient(135deg, var(--gold), #f59e0b); color: #000; box-shadow: 0 4px 20px var(--gold-glow); }
+        .btn-gold:hover { transform: translateY(-3px); box-shadow: 0 8px 30px var(--gold-glow); }
         .btn-sm { padding: 6px 14px; font-size: 10px; border-radius: 8px; }
         .btn-danger { background: var(--red); color: white; }
         .btn-danger:hover { background: #dc2626; transform: translateY(-2px); }
@@ -295,7 +276,7 @@ $maxSessions = 10;
             justify-content: space-between;
             align-items: center;
             padding: 12px 24px;
-            background: rgba(15, 15, 23, 0.9);
+            background: rgba(15,15,23,0.9);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid var(--border);
             position: sticky;
@@ -303,382 +284,119 @@ $maxSessions = 10;
             z-index: 100;
             animation: fadeInUp 0.4s ease;
         }
-        .nav-brand { 
-            display: flex; 
-            align-items: center; 
-            gap: 10px; 
-            font-weight: 900; 
-            font-size: 20px; 
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .brand-icon { 
-            background: linear-gradient(135deg, var(--orange), var(--orange-hover)); 
-            color: white; 
-            padding: 6px 12px; 
-            border-radius: 10px; 
-            transform: skew(-8deg);
-            font-size: 16px;
-        }
+        .nav-brand { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 20px; text-transform: uppercase; letter-spacing: 1px; }
+        .brand-icon { background: linear-gradient(135deg, var(--orange), var(--orange-hover)); color: white; padding: 6px 12px; border-radius: 10px; transform: skew(-8deg); font-size: 16px; }
         .nav-right { display: flex; align-items: center; gap: 12px; }
-        .coin-badge { 
-            background: rgba(251, 191, 36, 0.1); 
-            border: 1px solid var(--gold); 
-            color: var(--gold); 
-            padding: 6px 14px; 
-            border-radius: 30px; 
-            font-weight: 700; 
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: var(--transition);
-        }
-        .coin-badge:hover {
-            background: rgba(251, 191, 36, 0.15);
-            transform: scale(1.05);
-        }
-        .coin-badge i { font-size: 14px; }
-        .profile-btn { 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            background: rgba(255,255,255,0.05); 
-            padding: 4px 12px 4px 4px; 
-            border-radius: 30px; 
-            cursor: pointer; 
-            transition: var(--transition);
-            border: 1px solid transparent;
-        }
-        .profile-btn:hover { 
-            background: rgba(255,255,255,0.08); 
-            border-color: var(--orange);
-        }
-        .profile-btn img { 
-            width: 30px; 
-            height: 30px; 
-            border-radius: 50%; 
-            border: 2px solid var(--orange);
-            transition: var(--transition);
-        }
+        .coin-badge { background: rgba(251,191,36,0.1); border: 1px solid var(--gold); color: var(--gold); padding: 6px 14px; border-radius: 30px; font-weight: 700; font-size: 12px; display: flex; align-items: center; gap: 6px; transition: var(--transition); cursor: default; }
+        .coin-badge i { font-size: 14px; animation: coinSpin 3s linear infinite; }
+        .coin-badge:hover { background: rgba(251,191,36,0.15); transform: scale(1.05); }
+        .profile-btn { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); padding: 4px 12px 4px 4px; border-radius: 30px; cursor: pointer; transition: var(--transition); border: 1px solid transparent; }
+        .profile-btn:hover { background: rgba(255,255,255,0.08); border-color: var(--orange); }
+        .profile-btn img { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--orange); transition: var(--transition); }
         .profile-btn:hover img { border-color: var(--white); }
-        .menu-btn { 
-            background: var(--orange); 
-            color: white; 
-            border: none; 
-            width: 36px; 
-            height: 36px; 
-            border-radius: 10px; 
-            font-size: 16px; 
-            cursor: pointer; 
-            transition: var(--transition);
-        }
+        .menu-btn { background: var(--orange); color: white; border: none; width: 36px; height: 36px; border-radius: 10px; font-size: 16px; cursor: pointer; transition: var(--transition); }
         .menu-btn:hover { transform: scale(1.08); background: var(--orange-hover); }
 
         /* SIDEBAR */
-        .sidebar-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
-            z-index: 998; opacity: 0; visibility: hidden; transition: var(--transition);
-        }
+        .sidebar-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 998; opacity: 0; visibility: hidden; transition: var(--transition); }
         .sidebar-overlay.active { opacity: 1; visibility: visible; }
-        .sidebar {
-            position: fixed; top: 0; right: -320px; width: 290px; height: 100vh;
-            background: var(--bg-nav); border-left: 1px solid var(--border);
-            z-index: 999; padding: 24px; transition: var(--transition);
-            display: flex; flex-direction: column; gap: 8px;
-        }
+        .sidebar { position: fixed; top: 0; right: -320px; width: 290px; height: 100vh; background: var(--bg-nav); border-left: 1px solid var(--border); z-index: 999; padding: 24px; transition: var(--transition); display: flex; flex-direction: column; gap: 8px; }
         .sidebar.active { right: 0; }
-        .sidebar-header { 
-            display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 20px; border-bottom: 1px solid var(--border); 
-            padding-bottom: 15px; 
-        }
-        .sidebar-close { 
-            background: var(--white); color: #000; border: none; 
-            width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-weight: bold;
-            transition: var(--transition);
-        }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .sidebar-close { background: var(--white); color: #000; border: none; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: var(--transition); }
         .sidebar-close:hover { transform: rotate(90deg); background: var(--orange); color: white; }
-        .nav-link {
-            padding: 12px 16px; color: var(--text-muted); text-decoration: none; font-weight: 600;
-            border-radius: 10px; transition: var(--transition); 
-            display: flex; align-items: center; gap: 12px; background: var(--bg-card);
-        }
-        .nav-link:hover, .nav-link.active { 
-            background: var(--orange); 
-            color: white; 
-            transform: translateX(6px);
-            box-shadow: 0 4px 20px var(--orange-glow);
-        }
+        .nav-link { padding: 12px 16px; color: var(--text-muted); text-decoration: none; font-weight: 600; border-radius: 10px; transition: var(--transition); display: flex; align-items: center; gap: 12px; background: var(--bg-card); }
+        .nav-link:hover, .nav-link.active { background: var(--orange); color: white; transform: translateX(6px); box-shadow: 0 4px 20px var(--orange-glow); }
         .nav-link i { width: 20px; text-align: center; }
 
         /* LOGIN POPUP */
-        .login-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(12px);
-            z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;
-            animation: fadeInUp 0.4s ease;
-        }
-        .login-card {
-            background: var(--bg-nav); border: 2px solid var(--orange); border-radius: 20px;
-            padding: 48px 32px; width: 100%; max-width: 400px; text-align: center;
-            position: relative; animation: slideUp 0.5s ease;
-            box-shadow: 0 20px 60px rgba(255,107,0,0.1);
-        }
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: 20%;
-            right: 20%;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, var(--orange), transparent);
-            border-radius: 10px;
-        }
-        .login-badge { 
-            position: absolute; 
-            top: -12px; 
-            left: 50%; 
-            transform: translateX(-50%) skew(-5deg);
-            background: var(--gold); 
-            color: #000; 
-            padding: 4px 20px; 
-            font-weight: 900; 
-            font-size: 11px; 
-            border-radius: 8px;
-            letter-spacing: 1px;
-        }
-        .login-avatar { 
-            width: 80px; height: 80px; 
-            background: linear-gradient(135deg, var(--gold), var(--orange)); 
-            border-radius: 50%; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 40px; 
-            color: #000; 
-            margin-bottom: 20px;
-            box-shadow: 0 8px 30px rgba(255,107,0,0.2);
-        }
+        .login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(12px); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeInUp 0.4s ease; }
+        .login-card { background: var(--bg-nav); border: 2px solid var(--orange); border-radius: 20px; padding: 48px 32px; width: 100%; max-width: 400px; text-align: center; position: relative; animation: slideUp 0.5s ease; box-shadow: 0 20px 60px rgba(255,107,0,0.1); }
+        .login-card::before { content: ''; position: absolute; top: -2px; left: 20%; right: 20%; height: 4px; background: linear-gradient(90deg, transparent, var(--orange), transparent); border-radius: 10px; }
+        .login-badge { position: absolute; top: -12px; left: 50%; transform: translateX(-50%) skew(-5deg); background: var(--gold); color: #000; padding: 4px 20px; font-weight: 900; font-size: 11px; border-radius: 8px; letter-spacing: 1px; }
+        .login-avatar { width: 80px; height: 80px; background: linear-gradient(135deg, var(--gold), var(--orange)); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 40px; color: #000; margin-bottom: 20px; box-shadow: 0 8px 30px rgba(255,107,0,0.2); }
         .login-card h2 { font-size: 32px; font-weight: 900; margin-bottom: 6px; }
         .login-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
-        .google-btn-login {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 50px;
-            padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
-            color: white; text-decoration: none; transition: var(--transition); text-align: left;
-        }
-        .google-btn-login:hover { 
-            border-color: var(--orange); 
-            background: rgba(255, 107, 0, 0.08); 
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(255,107,0,0.1);
-        }
-        .g-icon { 
-            background: white; 
-            border-radius: 50%; 
-            padding: 5px; 
-            width: 32px; 
-            height: 32px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-        }
+        .google-btn-login { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 50px; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; color: white; text-decoration: none; transition: var(--transition); text-align: left; }
+        .google-btn-login:hover { border-color: var(--orange); background: rgba(255,107,0,0.08); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,0,0.1); }
+        .g-icon { background: white; border-radius: 50%; padding: 5px; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; }
 
-        /* CONTENT */
+        /* MAIN CONTENT */
         .main-container { padding: 30px 20px; max-width: 700px; margin: 0 auto; }
-        .section { display: none; animation: fadeInUp 0.4s ease; }
+        .section { display: none; animation: fadeInUp 0.5s ease; }
         .section.active { display: block; }
 
         /* HERO */
         .hero { text-align: center; }
-        .slot-badge { 
-            display: inline-block; 
-            background: var(--white); 
-            color: #000; 
-            padding: 4px 18px; 
-            border-radius: 30px; 
-            font-weight: 800; 
-            font-size: 12px; 
-            margin-bottom: 16px;
-            letter-spacing: 0.5px;
-        }
-        .hero h1 { 
-            font-size: clamp(32px, 8vw, 44px); 
-            font-weight: 900; 
-            line-height: 1.15; 
-            margin-bottom: 16px;
-        }
-        .hero h1 span { 
-            background: linear-gradient(135deg, var(--yellow), var(--orange)); 
-            color: #000; 
-            padding: 0 12px; 
-            display: inline-block; 
-            transform: skew(-6deg);
-        }
+        .slot-badge { display: inline-block; background: var(--white); color: #000; padding: 4px 18px; border-radius: 30px; font-weight: 800; font-size: 12px; margin-bottom: 16px; letter-spacing: 0.5px; }
+        .hero h1 { font-size: clamp(32px, 8vw, 44px); font-weight: 900; line-height: 1.15; margin-bottom: 16px; }
+        .hero h1 span { background: linear-gradient(135deg, var(--gold), var(--orange)); color: #000; padding: 0 12px; display: inline-block; transform: skew(-6deg); }
         .hero p { color: var(--text-muted); font-size: 14px; margin-bottom: 30px; max-width: 420px; margin-left: auto; margin-right: auto; }
         .btn-group { display: flex; flex-direction: column; gap: 12px; align-items: center; }
         .btn-group .btn { width: 100%; }
 
         /* CARDS */
-        .card { 
-            background: var(--bg-card); 
-            border: 1px solid var(--border); 
-            border-radius: 16px; 
-            padding: 20px; 
-            margin-bottom: 20px; 
-            transition: var(--transition); 
-        }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; margin-bottom: 20px; transition: var(--transition); }
         .card:hover { border-color: var(--orange); box-shadow: 0 4px 30px rgba(255,107,0,0.05); }
-        .section-title { 
-            background: var(--gold); 
-            color: #000; 
-            display: inline-block; 
-            padding: 4px 14px; 
-            font-weight: 800; 
-            font-size: 11px; 
-            border-radius: 6px; 
-            margin-bottom: 16px;
-            letter-spacing: 0.5px;
-        }
+        .card-glass { background: rgba(20,20,30,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.05); }
+        .section-title { background: var(--gold); color: #000; display: inline-block; padding: 4px 14px; font-weight: 800; font-size: 11px; border-radius: 6px; margin-bottom: 16px; letter-spacing: 0.5px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .select-box {
-            background: var(--bg-main); border: 2px solid var(--border); border-radius: 12px; 
-            padding: 16px; text-align: center; cursor: pointer; transition: var(--transition); 
-            position: relative;
-        }
+
+        /* SELECT BOX */
+        .select-box { background: var(--bg-main); border: 2px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; cursor: pointer; transition: var(--transition); position: relative; }
         .select-box:hover { border-color: var(--white); transform: translateY(-3px); }
-        .select-box.active { 
-            border-color: var(--orange); 
-            background: rgba(255, 107, 0, 0.06);
-            box-shadow: 0 0 30px rgba(255,107,0,0.05);
-        }
+        .select-box.active { border-color: var(--orange); background: rgba(255,107,0,0.06); box-shadow: 0 0 30px rgba(255,107,0,0.05); }
         .select-box i { font-size: 24px; color: var(--text-muted); margin-bottom: 10px; transition: var(--transition); }
         .select-box.active i { color: var(--orange); }
         .select-box h4 { font-size: 14px; font-weight: 800; }
         .select-box p { font-size: 11px; color: var(--text-muted); margin-top: 5px; }
 
         /* STATUS */
-        .status-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 12px; 
-            margin-bottom: 20px; 
-            text-align: center; 
-        }
-        .stat-box { 
-            background: var(--bg-main); 
-            padding: 16px 10px; 
-            border-radius: 10px; 
-            border: 1px solid var(--border);
-            transition: var(--transition);
-        }
+        .status-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; text-align: center; }
+        .stat-box { background: var(--bg-main); padding: 16px 10px; border-radius: 10px; border: 1px solid var(--border); transition: var(--transition); }
         .stat-box:hover { border-color: var(--orange); transform: translateY(-2px); }
         .stat-box h3 { font-size: 22px; font-weight: 900; }
         .stat-box p { font-size: 10px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; }
         .text-orange { color: var(--orange); }
-        .text-white { color: var(--white); }
-        .badge-status { 
-            padding: 4px 12px; 
-            border-radius: 6px; 
-            font-size: 10px; 
-            font-weight: 800; 
-            text-transform: uppercase;
-            transition: var(--transition);
-        }
+        .text-gold { color: var(--gold); }
+        .badge-status { padding: 4px 12px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; transition: var(--transition); }
         .bg-online { background: rgba(34,197,94,0.12); color: var(--green); border: 1px solid var(--green); }
         .bg-offline { background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid var(--red); }
         .bg-pending { background: rgba(255,204,0,0.12); color: var(--gold); border: 1px solid var(--gold); }
-        .spec-row { 
-            display: flex; 
-            justify-content: space-between; 
-            padding: 10px 0; 
-            border-bottom: 1px dashed var(--border); 
-            font-size: 13px; 
-        }
+        .spec-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed var(--border); font-size: 13px; }
         .spec-row:last-child { border: none; }
 
         /* SESSIONS */
-        .session-item {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 12px 0; border-bottom: 1px solid var(--border);
-            flex-wrap: wrap; gap: 8px;
-        }
+        .session-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 8px; }
         .session-item:last-child { border-bottom: none; }
         .session-phone { font-weight: 600; font-family: monospace; font-size: 13px; }
         .session-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
         /* PAIRING MODAL */
-        .modal-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
-            z-index: 1100; display: none; align-items: center; justify-content: center; padding: 20px;
-        }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 1100; display: none; align-items: center; justify-content: center; padding: 20px; }
         .modal-overlay.active { display: flex; }
-        .modal-box {
-            background: var(--bg-nav); border: 1px solid var(--border); border-radius: 20px;
-            padding: 32px; max-width: 450px; width: 100%; max-height: 90vh; overflow-y: auto;
-            animation: slideUp 0.3s ease;
-        }
-        .modal-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 20px; 
-        }
-        .modal-close { 
-            background: rgba(255,255,255,0.05); 
-            border: 1px solid var(--border); 
-            border-radius: 50%;
-            color: var(--text-muted); 
-            font-size: 20px; 
-            width: 36px; 
-            height: 36px;
-            cursor: pointer; 
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+        .modal-box { background: var(--bg-nav); border: 1px solid var(--border); border-radius: 20px; padding: 32px; max-width: 450px; width: 100%; max-height: 90vh; overflow-y: auto; animation: slideUp 0.3s ease; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-close { background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 50%; color: var(--text-muted); font-size: 20px; width: 36px; height: 36px; cursor: pointer; transition: var(--transition); display: flex; align-items: center; justify-content: center; }
         .modal-close:hover { background: var(--red); color: white; border-color: var(--red); }
-        .pair-code {
-            background: var(--bg-main); border: 2px dashed var(--orange); border-radius: 12px;
-            padding: 20px; text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 4px;
-            font-family: monospace; color: var(--orange); margin: 15px 0;
-            transition: var(--transition);
-        }
-        .pair-code:hover { border-color: var(--white); }
+        .pair-code { background: var(--bg-main); border: 2px dashed var(--orange); border-radius: 12px; padding: 20px; text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 4px; font-family: monospace; color: var(--orange); margin: 15px 0; transition: var(--transition); }
 
         /* TOAST */
-        .toast {
-            position: fixed; bottom: 24px; right: 24px; background: var(--bg-card);
-            border: 1px solid var(--border); color: white; padding: 16px 24px;
-            border-radius: 14px; font-size: 14px; z-index: 1200;
-            box-shadow: 0 8px 40px rgba(0,0,0,0.5); display: none; max-width: 380px;
-            animation: slideUp 0.3s ease;
-        }
+        .toast { position: fixed; bottom: 24px; right: 24px; background: var(--bg-card); border: 1px solid var(--border); color: white; padding: 16px 24px; border-radius: 14px; font-size: 14px; z-index: 1200; box-shadow: 0 8px 40px rgba(0,0,0,0.5); display: none; max-width: 380px; animation: slideUp 0.3s ease; }
         .toast.success { border-left: 4px solid var(--green); }
         .toast.error { border-left: 4px solid var(--red); }
         .toast.info { border-left: 4px solid var(--orange); }
+        .toast.gold { border-left: 4px solid var(--gold); }
 
         /* EARN BUTTON */
-        .earn-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, var(--gold), var(--orange));
-            color: #000;
-            border: none;
-            border-radius: 10px;
-            font-weight: 800;
-            font-size: 13px;
-            cursor: pointer;
-            transition: var(--transition);
-            box-shadow: 0 4px 20px rgba(251,191,36,0.2);
-        }
-        .earn-btn:hover { 
-            transform: translateY(-3px); 
-            box-shadow: 0 8px 30px rgba(251,191,36,0.3);
-        }
+        .earn-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; background: linear-gradient(135deg, var(--gold), var(--orange)); color: #000; border: none; border-radius: 10px; font-weight: 800; font-size: 13px; cursor: pointer; transition: var(--transition); box-shadow: 0 4px 20px rgba(251,191,36,0.2); }
+        .earn-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(251,191,36,0.3); }
         .earn-btn:active { transform: scale(0.97); }
+        .earn-btn.loading { opacity: 0.7; cursor: wait; }
+
+        /* Coin Animation */
+        .coin-float { display: inline-block; animation: float 2s ease-in-out infinite; }
+        .coin-spin { display: inline-block; animation: coinSpin 3s linear infinite; }
 
         /* RESPONSIVE */
         @media (max-width: 480px) {
@@ -691,9 +409,7 @@ $maxSessions = 10;
             .profile-btn span { display: none; }
             .main-container { padding: 20px 12px; }
         }
-        @media (max-width: 360px) {
-            .status-grid { grid-template-columns: 1fr; }
-        }
+        @media (max-width: 360px) { .status-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
@@ -707,17 +423,15 @@ $maxSessions = 10;
             <p>Login dengan Google untuk mulai menggunakan Polar.id</p>
             <a href="<?= $auth_url ?>" class="google-btn-login">
                 <div style="display:flex; align-items:center; gap:12px;">
-                    <div class="g-icon">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18">
-                    </div>
+                    <div class="g-icon"><img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"></div>
                     <div>
-                        <div style="font-size: 14px; font-weight: 700;">Login dengan Google</div>
-                        <div style="font-size: 11px; color: var(--text-muted);">Aman & cepat</div>
+                        <div style="font-size:14px;font-weight:700;">Login dengan Google</div>
+                        <div style="font-size:11px;color:var(--text-muted);">Aman & cepat</div>
                     </div>
                 </div>
-                <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+                <i class="fas fa-chevron-right" style="color:var(--text-muted);"></i>
             </a>
-            <div style="margin-top: 20px; font-size: 11px; color: var(--text-muted);">
+            <div style="margin-top:20px;font-size:11px;color:var(--text-muted);">
                 <i class="fas fa-shield-alt"></i> Login untuk claim dan manage server kamu
             </div>
         </div>
@@ -727,17 +441,15 @@ $maxSessions = 10;
     <div class="toast" id="toast"></div>
 
     <!-- NAVBAR -->
-    <nav class="navbar">
-        <div class="nav-brand">
-            <span class="brand-icon">✦</span> POLAR.ID
-        </div>
+    <nav class="navbar animate-in">
+        <div class="nav-brand"><span class="brand-icon">✦</span> POLAR.ID</div>
         <div class="nav-right">
             <div class="coin-badge" id="coinBadge">
-                <i class="fas fa-coins"></i> 
+                <i class="fas fa-coins coin-spin"></i>
                 <span id="coinCount"><?= $user_coins ?></span> Polar Coin
             </div>
             <div class="profile-btn" onclick="navTo('profile')">
-                <span style="font-size: 12px; font-weight: 600;" class="hide-mobile"><?= explode(' ', $user_name)[0] ?></span>
+                <span style="font-size:12px;font-weight:600;" class="hide-mobile"><?= explode(' ', $user_name)[0] ?></span>
                 <img src="<?= $user_avatar ?>" alt="Avatar">
             </div>
             <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
@@ -756,10 +468,10 @@ $maxSessions = 10;
         <a href="#" class="nav-link" onclick="navTo('claim'); toggleMenu();"><i class="fas fa-download"></i> CLAIM</a>
         <a href="#" class="nav-link" onclick="navTo('sessions'); toggleMenu();"><i class="fas fa-robot"></i> SESSIONS</a>
         <a href="#" class="nav-link" onclick="navTo('profile'); toggleMenu();"><i class="fas fa-user"></i> PROFILE</a>
-        <a href="#" class="nav-link" onclick="earnCoin()" style="background: linear-gradient(135deg, rgba(255,107,0,0.1), rgba(251,191,36,0.05)); border: 1px solid var(--orange);">
-            <i class="fas fa-coins" style="color: var(--gold);"></i> EARN POLAR COIN
+        <a href="#" class="nav-link" onclick="earnCoin()" style="background:linear-gradient(135deg,rgba(255,107,0,0.1),rgba(251,191,36,0.05));border:1px solid var(--orange);">
+            <i class="fas fa-coins" style="color:var(--gold);"></i> EARN POLAR COIN
         </a>
-        <a href="logout.php" class="nav-link" style="color: var(--orange); margin-top: auto;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
+        <a href="logout.php" class="nav-link" style="color:var(--orange);margin-top:auto;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
     </div>
 
     <div class="main-container">
@@ -767,46 +479,39 @@ $maxSessions = 10;
         <!-- HOME -->
         <div id="sec-home" class="section active animate-in">
             <div class="hero">
-                <div class="slot-badge"><i class="fas fa-circle" style="font-size: 8px; color: var(--orange);"></i> <?= $maxSessions - $totalSessions ?> SLOT TERSEDIA</div>
+                <div class="slot-badge animate-glow"><i class="fas fa-circle" style="font-size:8px;color:var(--orange);"></i> <?= $maxSessions - $totalSessions ?> SLOT TERSEDIA</div>
                 <h1>Jadibot <br><span>WhatsApp Gratis</span></h1>
                 <p>Dapatkan server bot gratis dengan spesifikasi terbaik. Claim sekarang sebelum slot habis!</p>
                 <div class="btn-group">
-                    <button class="btn btn-orange" onclick="navTo('claim')">
-                        <i class="fas fa-download"></i> CLAIM SEKARANG
-                    </button>
-                    <button class="btn btn-white" onclick="navTo('status')">
-                        LIHAT STATUS <i class="fas fa-arrow-right"></i>
-                    </button>
+                    <button class="btn btn-orange animate-glow" onclick="navTo('claim')"><i class="fas fa-download"></i> CLAIM SEKARANG</button>
+                    <button class="btn btn-white" onclick="navTo('status')">LIHAT STATUS <i class="fas fa-arrow-right"></i></button>
                 </div>
-                <div style="display:flex; justify-content:center; gap:24px; margin-top:30px; font-size: 13px; font-weight: 600;">
-                    <span style="color: var(--white);"><i class="fas fa-check-circle" style="color: var(--orange);"></i> 100% Gratis</span>
-                    <span style="color: var(--white);"><i class="fas fa-bolt" style="color: var(--orange);"></i> Setup Instan</span>
-                    <span style="color: var(--white);"><i class="fas fa-coins" style="color: var(--gold);"></i> Earn Polar Coin</span>
+                <div style="display:flex;justify-content:center;gap:24px;margin-top:30px;font-size:13px;font-weight:600;">
+                    <span style="color:var(--white);"><i class="fas fa-check-circle" style="color:var(--orange);"></i> 100% Gratis</span>
+                    <span style="color:var(--white);"><i class="fas fa-bolt" style="color:var(--orange);"></i> Setup Instan</span>
+                    <span style="color:var(--white);"><i class="fas fa-coins coin-float" style="color:var(--gold);"></i> Earn Polar Coin</span>
                 </div>
             </div>
         </div>
 
         <!-- CLAIM -->
         <div id="sec-claim" class="section">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div class="slot-badge"><i class="fas fa-circle" style="font-size: 8px;"></i> <?= $maxSessions - $totalSessions ?> SLOT TERSEDIA</div>
-                <h1 style="font-weight: 900; font-size: clamp(28px, 6vw, 36px); text-transform: uppercase;">CLAIM <span style="background: var(--white); color: #000; padding: 0 12px; transform: skew(-5deg); display: inline-block;">SERVER</span></h1>
-                <p style="color: var(--text-muted); font-size: 13px;">Pilih paket dan claim server bot gratis</p>
+            <div style="text-align:center;margin-bottom:20px;">
+                <div class="slot-badge"><i class="fas fa-circle" style="font-size:8px;"></i> <?= $maxSessions - $totalSessions ?> SLOT TERSEDIA</div>
+                <h1 style="font-weight:900;font-size:clamp(28px,6vw,36px);text-transform:uppercase;">CLAIM <span style="background:var(--white);color:#000;padding:0 12px;transform:skew(-5deg);display:inline-block;">SERVER</span></h1>
+                <p style="color:var(--text-muted);font-size:13px;">Pilih paket dan claim server bot gratis</p>
             </div>
 
-            <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 14px;">
-                    <div style="background: linear-gradient(135deg, var(--gold), var(--orange)); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; color: #000;">
-                        <?= substr($user_name, 0, 1) ?>
+            <div class="card card-glass animate-in">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div style="display:flex;align-items:center;gap:14px;">
+                        <div style="background:linear-gradient(135deg,var(--gold),var(--orange));width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000;"><?= substr($user_name, 0, 1) ?></div>
+                        <div><div style="font-size:10px;color:var(--text-muted);font-weight:600;letter-spacing:0.5px;">LOGIN AS</div><div style="font-weight:700;"><?= $user_name ?></div></div>
                     </div>
-                    <div>
-                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px;">LOGIN AS</div>
-                        <div style="font-weight: 700;"><?= $user_name ?></div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <span style="color:var(--gold);font-weight:700;"><i class="fas fa-coins coin-spin"></i> <span id="claimCoinDisplay"><?= $user_coins ?></span></span>
+                        <button class="earn-btn" onclick="earnCoin()" style="font-size:10px;padding:4px 14px;"><i class="fas fa-plus"></i></button>
                     </div>
-                </div>
-                <div style="display:flex;align-items:center;gap:10px;">
-                    <span style="color:var(--gold);font-weight:700;"><i class="fas fa-coins"></i> <span id="claimCoinDisplay"><?= $user_coins ?></span></span>
-                    <button class="earn-btn" onclick="earnCoin()" style="font-size:10px;padding:4px 14px;"><i class="fas fa-plus"></i></button>
                 </div>
             </div>
 
@@ -820,16 +525,13 @@ $maxSessions = 10;
                     ['days' => 10, 'coin' => 10, 'label' => '10 Hari', 'icon' => 'fa-calendar-check']
                 ];
                 foreach ($packages as $pkg):
-                    $disabled = ($user_coins < $pkg['coin']) ? 'disabled' : '';
-                    $isActive = ($pkg['coin'] <= $user_coins);
+                    $isActive = ($user_coins >= $pkg['coin']);
                 ?>
                 <div class="select-box <?= $isActive ? 'active' : '' ?>" onclick="<?= $isActive ? "selectPackage(this, {$pkg['days']}, {$pkg['coin']})" : '' ?>" style="<?= !$isActive ? 'opacity:0.5;cursor:not-allowed;' : '' ?>">
                     <i class="fas <?= $pkg['icon'] ?>"></i>
                     <h4><?= $pkg['label'] ?></h4>
-                    <p style="color: var(--gold);">🪙 <?= $pkg['coin'] ?> Polar Coin</p>
-                    <?php if (!$isActive): ?>
-                        <p style="color: var(--red); font-size: 10px; margin-top: 4px;">Koin tidak cukup</p>
-                    <?php endif; ?>
+                    <p style="color:var(--gold);">🪙 <?= $pkg['coin'] ?> Polar Coin</p>
+                    <?php if (!$isActive): ?><p style="color:var(--red);font-size:10px;margin-top:4px;">Koin tidak cukup</p><?php endif; ?>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -849,73 +551,66 @@ $maxSessions = 10;
             </div>
 
             <div class="card">
-                <div style="margin-bottom: 12px;">
-                    <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 6px;">📱 Nomor WhatsApp</label>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--text-muted);display:block;margin-bottom:6px;">📱 Nomor WhatsApp</label>
                     <input type="text" id="phoneInput" placeholder="628xxxxxxxxxx" style="width:100%;padding:14px;background:var(--bg-main);border:1px solid var(--border);border-radius:10px;color:white;font-size:14px;transition:var(--transition);">
-                    <style>
-                        input:focus { outline: none; border-color: var(--orange); box-shadow: 0 0 0 3px rgba(255,107,0,0.1); }
-                    </style>
                 </div>
                 <input type="hidden" id="selectedDays" value="1">
                 <input type="hidden" id="selectedCoin" value="1">
             </div>
 
-            <button class="btn btn-orange" style="width: 100%; margin-top: 10px; padding: 16px; font-size: 15px;" id="claimBtn" onclick="createSessionWithCoin()">
+            <button class="btn btn-orange" style="width:100%;margin-top:10px;padding:16px;font-size:15px;border-radius:14px;" id="claimBtn" onclick="createSessionWithCoin()">
                 <i class="fas fa-rocket"></i> CLAIM SERVER SEKARANG
             </button>
         </div>
 
         <!-- STATUS -->
         <div id="sec-status" class="section">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div class="slot-badge" style="background: var(--white); color: #000;"><i class="fas fa-circle" style="font-size: 8px;"></i> REAL-TIME MONITORING</div>
-                <h1 style="font-weight: 900; font-size: clamp(28px, 6vw, 36px); text-transform: uppercase;">SERVER <span style="background: var(--orange); color: white; padding: 0 12px; transform: skew(-5deg); display: inline-block;">STATUS</span></h1>
+            <div style="text-align:center;margin-bottom:20px;">
+                <div class="slot-badge" style="background:var(--white);color:#000;"><i class="fas fa-circle" style="font-size:8px;"></i> REAL-TIME MONITORING</div>
+                <h1 style="font-weight:900;font-size:clamp(28px,6vw,36px);text-transform:uppercase;">SERVER <span style="background:var(--orange);color:white;padding:0 12px;transform:skew(-5deg);display:inline-block;">STATUS</span></h1>
             </div>
 
-            <div class="card">
+            <div class="card card-glass animate-in">
                 <div class="status-grid">
                     <div class="stat-box"><h3 class="text-orange"><?= $totalSessions ?></h3><p>TOTAL</p></div>
-                    <div class="stat-box"><h3 style="color: var(--gold);"><?= $maxSessions - $totalSessions ?></h3><p>SLOT</p></div>
+                    <div class="stat-box"><h3 class="text-gold"><?= $maxSessions - $totalSessions ?></h3><p>SLOT</p></div>
                     <div class="stat-box"><h3 class="text-white"><?= ($phoenix_status['online'] ? 1 : 0) + ($ourin_status['online'] ? 1 : 0) ?></h3><p>ONLINE</p></div>
                     <div class="stat-box"><h3 class="text-orange"><?= (!$phoenix_status['online'] ? 1 : 0) + (!$ourin_status['online'] ? 1 : 0) ?></h3><p>OFFLINE</p></div>
                 </div>
             </div>
 
-            <div class="card" style="border-color: <?= $phoenix_status['online'] ? 'var(--green)' : 'var(--red)' ?>;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="background: var(--orange); padding: 10px; border-radius: 10px;"><i class="fas fa-server" style="color:white;"></i></div>
-                        <div><h3 style="font-size: 16px; font-weight: 900;">PHOENIX MD</h3><div style="font-size: 11px; color: var(--text-muted);">Pterodactyl Node</div></div>
+            <div class="card" style="border-color:<?= $phoenix_status['online'] ? 'var(--green)' : 'var(--red)' ?>;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="background:var(--orange);padding:10px;border-radius:10px;"><i class="fas fa-server" style="color:white;"></i></div>
+                        <div><h3 style="font-size:16px;font-weight:900;">PHOENIX MD</h3><div style="font-size:11px;color:var(--text-muted);">Pterodactyl Node</div></div>
                     </div>
-                    <div class="badge-status <?= $phoenix_status['online'] ? 'bg-online' : 'bg-offline' ?>">
-                        <?= $phoenix_status['online'] ? 'ONLINE' : 'OFFLINE' ?>
-                    </div>
+                    <div class="badge-status <?= $phoenix_status['online'] ? 'bg-online' : 'bg-offline' ?>"><?= $phoenix_status['online'] ? 'ONLINE' : 'OFFLINE' ?></div>
                 </div>
-                <div class="spec-row"><span style="color: var(--text-muted);">RAM</span><span style="font-weight: bold; color: var(--white);"><?= $phoenix_status['ram'] ?></span></div>
-                <div class="spec-row"><span style="color: var(--text-muted);">PING</span><span style="font-weight: bold; color: var(--white);"><?= $phoenix_status['ping'] ?></span></div>
+                <div class="spec-row"><span style="color:var(--text-muted);">RAM</span><span style="font-weight:bold;color:var(--white);"><?= $phoenix_status['ram'] ?></span></div>
+                <div class="spec-row"><span style="color:var(--text-muted);">PING</span><span style="font-weight:bold;color:var(--white);"><?= $phoenix_status['ping'] ?></span></div>
             </div>
 
-            <div class="card" style="border-color: <?= $ourin_status['online'] ? 'var(--green)' : 'var(--red)' ?>;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="background: var(--white); padding: 10px; border-radius: 10px;"><i class="fas fa-microchip" style="color:#000;"></i></div>
-                        <div><h3 style="font-size: 16px; font-weight: 900;">OURIN CORE</h3><div style="font-size: 11px; color: var(--text-muted);">Native Script</div></div>
+            <div class="card" style="border-color:<?= $ourin_status['online'] ? 'var(--green)' : 'var(--red)' ?>;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div style="background:var(--white);padding:10px;border-radius:10px;"><i class="fas fa-microchip" style="color:#000;"></i></div>
+                        <div><h3 style="font-size:16px;font-weight:900;">OURIN CORE</h3><div style="font-size:11px;color:var(--text-muted);">Native Script</div></div>
                     </div>
-                    <div class="badge-status <?= $ourin_status['online'] ? 'bg-online' : 'bg-offline' ?>">
-                        <?= $ourin_status['online'] ? 'ONLINE' : 'OFFLINE' ?>
-                    </div>
+                    <div class="badge-status <?= $ourin_status['online'] ? 'bg-online' : 'bg-offline' ?>"><?= $ourin_status['online'] ? 'ONLINE' : 'OFFLINE' ?></div>
                 </div>
-                <div class="spec-row"><span style="color: var(--text-muted);">RAM</span><span style="font-weight: bold; color: var(--white);"><?= $ourin_status['ram'] ?></span></div>
-                <div class="spec-row"><span style="color: var(--text-muted);">PING</span><span style="font-weight: bold; color: var(--white);"><?= $ourin_status['ping'] ?></span></div>
+                <div class="spec-row"><span style="color:var(--text-muted);">RAM</span><span style="font-weight:bold;color:var(--white);"><?= $ourin_status['ram'] ?></span></div>
+                <div class="spec-row"><span style="color:var(--text-muted);">PING</span><span style="font-weight:bold;color:var(--white);"><?= $ourin_status['ping'] ?></span></div>
             </div>
-            <p style="text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 20px;">🔄 AUTO-REFRESH SETIAP 30 DETIK</p>
+            <p style="text-align:center;font-size:10px;color:var(--text-muted);margin-top:20px;">🔄 AUTO-REFRESH SETIAP 30 DETIK</p>
         </div>
 
         <!-- SESSIONS -->
         <div id="sec-sessions" class="section">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div class="slot-badge"><i class="fas fa-circle" style="font-size: 8px;"></i> <?= $totalSessions ?> / <?= $maxSessions ?> SESSION</div>
-                <h1 style="font-weight: 900; font-size: clamp(28px, 6vw, 36px); text-transform: uppercase;">MY <span style="background: var(--orange); color: white; padding: 0 12px; transform: skew(-5deg); display: inline-block;">BOTS</span></h1>
+            <div style="text-align:center;margin-bottom:20px;">
+                <div class="slot-badge"><i class="fas fa-circle" style="font-size:8px;"></i> <?= $totalSessions ?> / <?= $maxSessions ?> SESSION</div>
+                <h1 style="font-weight:900;font-size:clamp(28px,6vw,36px);text-transform:uppercase;">MY <span style="background:var(--orange);color:white;padding:0 12px;transform:skew(-5deg);display:inline-block;">BOTS</span></h1>
             </div>
 
             <?php if (empty($sessions)): ?>
@@ -943,7 +638,7 @@ $maxSessions = 10;
                         <button class="btn btn-sm btn-orange" onclick="openPairModal('<?= $s['phone'] ?>')"><i class="fas fa-link"></i> Pairing</button>
                         <?php endif; ?>
                         <?php if ($s['status'] === 'online'): ?>
-                        <button class="btn btn-sm btn-success" onclick="showToast('Bot sedang online!', 'success')"><i class="fas fa-circle"></i> Online</button>
+                        <button class="btn btn-sm btn-success" onclick="showToast('Bot sedang online! ✅', 'success')"><i class="fas fa-circle"></i> Online</button>
                         <?php endif; ?>
                         <button class="btn btn-sm btn-danger" onclick="deleteSession(<?= $s['id'] ?>, '<?= $s['phone'] ?>')"><i class="fas fa-trash"></i> Hapus</button>
                     </div>
@@ -954,30 +649,30 @@ $maxSessions = 10;
 
         <!-- PROFILE -->
         <div id="sec-profile" class="section">
-            <div style="text-align: center; margin-bottom: 30px; margin-top: 10px;">
-                <div style="position: relative; display: inline-block;">
-                    <img src="<?= $user_avatar ?>" style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid var(--orange); transition: var(--transition);">
-                    <div style="position: absolute; top: 0; right: -10px; background: var(--orange); color: white; padding: 2px 12px; font-size: 10px; font-weight: 800; border-radius: 10px; transform: rotate(12deg);">✦ YOU!</div>
+            <div style="text-align:center;margin-bottom:30px;margin-top:10px;">
+                <div style="position:relative;display:inline-block;">
+                    <img src="<?= $user_avatar ?>" style="width:100px;height:100px;border-radius:50%;border:4px solid var(--orange);transition:var(--transition);">
+                    <div style="position:absolute;top:0;right:-10px;background:var(--orange);color:white;padding:2px 12px;font-size:10px;font-weight:800;border-radius:10px;transform:rotate(12deg);">✦ YOU!</div>
                 </div>
-                <h1 style="font-weight: 900; font-size: 28px; margin-top: 16px;"><?= $user_name ?></h1>
-                <p style="color: var(--text-muted); font-size: 13px;"><?= $user_email ?></p>
-                <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 16px; padding: 8px 24px; border-radius: 50px; margin-top: 16px;">
-                    <div style="font-weight: 700; color: var(--gold);"><i class="fas fa-coins"></i> <span id="profileCoinDisplay"><?= $user_coins ?></span></div>
-                    <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--text-muted);">POLAR COIN</div>
+                <h1 style="font-weight:900;font-size:28px;margin-top:16px;"><?= $user_name ?></h1>
+                <p style="color:var(--text-muted);font-size:13px;"><?= $user_email ?></p>
+                <div style="background:rgba(255,255,255,0.05);border:1px solid var(--border);display:inline-flex;align-items:center;gap:16px;padding:8px 24px;border-radius:50px;margin-top:16px;">
+                    <div style="font-weight:700;color:var(--gold);"><i class="fas fa-coins coin-spin"></i> <span id="profileCoinDisplay"><?= $user_coins ?></span></div>
+                    <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:var(--text-muted);">POLAR COIN</div>
                     <button class="earn-btn" onclick="earnCoin()" style="font-size:10px;padding:4px 14px;"><i class="fas fa-plus"></i> EARN</button>
                 </div>
-                <div style="margin-top: 16px;">
-                    <a href="logout.php" style="color: var(--text-muted); font-size: 12px; font-weight: 600; text-decoration: none; transition: var(--transition);">LOGOUT <i class="fas fa-arrow-right"></i></a>
+                <div style="margin-top:16px;">
+                    <a href="logout.php" style="color:var(--text-muted);font-size:12px;font-weight:600;text-decoration:none;transition:var(--transition);">LOGOUT <i class="fas fa-arrow-right"></i></a>
                 </div>
             </div>
 
-            <div class="card" style="text-align: center; padding: 40px 20px;">
-                <div style="background: rgba(255,255,255,0.05); width: 60px; height: 60px; border-radius: 16px; display: inline-flex; justify-content: center; align-items: center; font-size: 28px; color: var(--text-muted); margin-bottom: 16px;">
+            <div class="card card-glass" style="text-align:center;padding:40px 20px;">
+                <div style="background:rgba(255,255,255,0.05);width:60px;height:60px;border-radius:16px;display:inline-flex;justify-content:center;align-items:center;font-size:28px;color:var(--text-muted);margin-bottom:16px;">
                     <i class="fas fa-chart-simple"></i>
                 </div>
-                <h2 style="font-weight: 900; font-size: 20px; margin-bottom: 4px;">STATISTIK</h2>
-                <p style="color: var(--text-muted); font-size: 13px;">Total Session: <strong style="color:white;"><?= $totalSessions ?></strong> / <?= $maxSessions ?></p>
-                <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Polar Coin: <strong style="color:var(--gold);"><?= $user_coins ?></strong></p>
+                <h2 style="font-weight:900;font-size:20px;margin-bottom:4px;">STATISTIK</h2>
+                <p style="color:var(--text-muted);font-size:13px;">Total Session: <strong style="color:white;"><?= $totalSessions ?></strong> / <?= $maxSessions ?></p>
+                <p style="color:var(--text-muted);font-size:13px;margin-top:4px;">Polar Coin: <strong style="color:var(--gold);"><?= $user_coins ?></strong></p>
                 <button class="btn btn-orange" style="margin-top:20px;" onclick="navTo('claim')">CLAIM SERVER <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
@@ -1005,6 +700,9 @@ $maxSessions = 10;
         let selectedDays = 1;
         let selectedCoin = 1;
         let isProcessing = false;
+
+        // ========== HARDCODE POLAR LINKS ==========
+        const POLAR_LINKS = <?= json_encode($POLAR_LINKS) ?>;
 
         // ========== TOAST ==========
         function showToast(message, type = 'info') {
@@ -1045,7 +743,7 @@ $maxSessions = 10;
             document.getElementById('selectedCoin').value = coin;
         }
 
-        // ========== EARN COIN ==========
+        // ========== EARN COIN (ALL-IN-ONE) ==========
         function earnCoin() {
             if (isProcessing) return;
             isProcessing = true;
@@ -1055,53 +753,113 @@ $maxSessions = 10;
             if (btn) {
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
+                btn.classList.add('loading');
             }
             
-            showToast('🔄 Mengambil Polar Coin...', 'info');
-            
-            fetch('earn-coin.php')
-                .then(response => response.json())
+            // Ambil data dari session via AJAX
+            fetch('?action=get_earn_status')
+                .then(res => res.json())
                 .then(data => {
-                    if (data.success) {
-                        if (data.url) {
-                            window.open(data.url, '_blank');
-                            showToast('✅ ' + (data.message || 'Polar Coin berhasil diambil! 🪙'), 'success');
+                    if (!data.success) {
+                        showToast('❌ ' + (data.message || 'Gagal mengambil Polar Coin'), 'error');
+                        throw new Error(data.message);
+                    }
+                    
+                    const claimedToday = data.claimed_today || 0;
+                    const maxPerDay = 5;
+                    
+                    if (claimedToday >= maxPerDay) {
+                        showToast('❌ Anda sudah mengambil ' + maxPerDay + ' Polar Coin hari ini. Coba lagi besok! 🪙', 'error');
+                        return;
+                    }
+                    
+                    // Ambil link berdasarkan index
+                    const index = claimedToday;
+                    const link = POLAR_LINKS[index];
+                    
+                    if (!link) {
+                        showToast('❌ Tidak ada link tersedia. Hubungi admin.', 'error');
+                        return;
+                    }
+                    
+                    // Kirim request claim
+                    fetch('?action=claim_coin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ index: index })
+                    })
+                    .then(res => res.json())
+                    .then(claimData => {
+                        if (claimData.success) {
+                            window.open(link, '_blank');
+                            const remaining = maxPerDay - (claimedToday + 1);
+                            showToast('🪙 Polar Coin berhasil diambil! Sisa ' + remaining + ' coin hari ini.', 'gold');
                             
                             // Update coin display
-                            const coinElements = document.querySelectorAll('#coinCount, #claimCoinDisplay, #profileCoinDisplay');
-                            const currentCoins = parseInt(document.getElementById('coinCount')?.textContent || '0');
-                            const newCoins = currentCoins + 1;
-                            
-                            coinElements.forEach(el => {
+                            const newCoins = parseInt(document.getElementById('coinCount')?.textContent || '0') + 1;
+                            document.querySelectorAll('#coinCount, #claimCoinDisplay, #profileCoinDisplay').forEach(el => {
                                 if (el) el.textContent = newCoins;
                             });
                             
-                            // Update badge
-                            const badge = document.querySelector('.coin-badge');
-                            if (badge) {
-                                badge.style.transform = 'scale(1.15)';
-                                setTimeout(() => { badge.style.transform = 'scale(1)'; }, 300);
-                            }
+                            // Animasi coin
+                            document.getElementById('coinBadge')?.classList.add('animate-coin');
+                            setTimeout(() => {
+                                document.getElementById('coinBadge')?.classList.remove('animate-coin');
+                            }, 1000);
                             
-                            setTimeout(() => location.reload(), 2000);
+                            setTimeout(() => location.reload(), 1500);
                         } else {
-                            showToast('✅ Polar Coin berhasil ditambahkan! 🪙', 'success');
-                            location.reload();
+                            showToast('❌ ' + (claimData.message || 'Gagal mengambil Polar Coin'), 'error');
                         }
-                    } else {
-                        showToast('❌ ' + (data.message || 'Gagal mengambil Polar Coin'), 'error');
-                    }
+                    })
+                    .catch(() => showToast('❌ Gagal memproses claim', 'error'));
                 })
-                .catch(() => {
-                    showToast('❌ Gagal terhubung ke server', 'error');
-                })
+                .catch(() => showToast('❌ Gagal terhubung ke server', 'error'))
                 .finally(() => {
                     isProcessing = false;
                     if (btn) {
                         btn.disabled = false;
                         btn.innerHTML = originalText;
+                        btn.classList.remove('loading');
                     }
                 });
+        }
+
+        // ========== GET EARN STATUS (via AJAX) ==========
+        if (window.location.search.includes('action=get_earn_status')) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'claimed_today' => $_SESSION['claimed_today'] ?? 0,
+                'max_per_day' => 5
+            ]);
+            exit;
+        }
+
+        // ========== CLAIM COIN (via AJAX) ==========
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'claim_coin') {
+            header('Content-Type: application/json');
+            $input = json_decode(file_get_contents('php://input'), true);
+            $index = $input['index'] ?? 0;
+            
+            if (!isset($_SESSION['user_google_id'])) {
+                echo json_encode(['success' => false, 'message' => 'Harap login terlebih dahulu']);
+                exit;
+            }
+            
+            $claimedToday = $_SESSION['claimed_today'] ?? 0;
+            $maxPerDay = 5;
+            
+            if ($claimedToday >= $maxPerDay) {
+                echo json_encode(['success' => false, 'message' => 'Sudah mencapai limit 5 coin hari ini']);
+                exit;
+            }
+            
+            $_SESSION['claimed_today'] = $claimedToday + 1;
+            $_SESSION['user_coins'] = ($_SESSION['user_coins'] ?? 0) + 1;
+            
+            echo json_encode(['success' => true]);
+            exit;
         }
 
         // ========== SUPABASE REQUEST ==========
