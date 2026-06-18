@@ -5,9 +5,9 @@ require_once 'config.php';
 // ========== KONFIGURASI GOOGLE ==========
 $client_id = '1054465623984-re5q3ehnrk4qrne8da214jjvltnut630.apps.googleusercontent.com';
 $client_secret = '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';
-$redirect_uri = 'https://polar.web.id/dashboard.php'; // LANGSUNG KE DASHBOARD
+$redirect_uri = 'https://polar.web.id/dashboard.php';
 
-// ========== PROSES CALLBACK DARI GOOGLE ==========
+// ========== PROSES CALLBACK GOOGLE ==========
 if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
     $code = $_GET['code'];
     
@@ -47,7 +47,7 @@ if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
         $_SESSION['user_name'] = $user_data['name'] ?? 'User';
         $_SESSION['user_email'] = $user_data['email'] ?? '';
         $_SESSION['user_avatar'] = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($user_data['name'] ?? 'User') . '&background=FF6B00&color=fff';
-        $_SESSION['user_coins'] = 50;
+        $_SESSION['user_coins'] = 0; // ← AWAL 0 KOIN
         
         header('Location: dashboard.php');
         exit;
@@ -59,7 +59,7 @@ $is_logged_in = isset($_SESSION['user_google_id']);
 $user_name = $_SESSION['user_name'] ?? "Guest";
 $user_email = $_SESSION['user_email'] ?? "guest@gmail.com";
 $user_avatar = $_SESSION['user_avatar'] ?? "https://ui-avatars.com/api/?name=Guest&background=FF6B00&color=fff";
-$user_coins = $_SESSION['user_coins'] ?? 50;
+$user_coins = $_SESSION['user_coins'] ?? 0;
 
 // ========== URL LOGIN GOOGLE ==========
 $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
@@ -104,11 +104,36 @@ function checkPhoenixServer() {
 }
 
 function checkOurinServer() {
-    return [
-        'online' => true,
-        'ram' => '128 MB',
-        'ping' => rand(10, 80) . 'ms'
-    ];
+    // Sama seperti Phoenix, realtime
+    $ptero_panel = 'https://private.pterokudesu.web.id';
+    $api_key = 'ptlc_qEYuw1Iv0NQXPUMKzCUJhENIJ7P7SL6KFHTQ0kv9ckh';
+    // UUID Ourin (gunakan yang berbeda jika ada, atau pakai yang sama)
+    $uuid = 'e076c725-f16d-4a7d-93d9-82c294e07f38';
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $ptero_panel . '/api/client/servers/' . $uuid . '/resources');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $api_key,
+        'Accept: application/json'
+    ]);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($httpCode >= 200 && $httpCode < 300) {
+        $data = json_decode($response, true);
+        $ramBytes = $data['attributes']['resources']['memory_bytes'] ?? 0;
+        $ramMB = round($ramBytes / 1024 / 1024, 2);
+        return [
+            'online' => ($ramMB > 0),
+            'ram' => $ramMB . ' MB',
+            'ping' => rand(20, 150) . 'ms'
+        ];
+    }
+    return ['online' => false, 'ram' => '0 MB', 'ping' => 'Timeout'];
 }
 
 $phoenix_status = checkPhoenixServer();
@@ -137,6 +162,8 @@ if (!$fingerprint) {
     $_SESSION['fingerprint'] = $fingerprint;
 }
 $sessions = getSessions($fingerprint);
+$totalSessions = count($sessions);
+$maxSessions = 10;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -198,6 +225,7 @@ $sessions = getSessions($fingerprint);
         .btn-danger:hover { background: #dc2626; }
         .btn-success { background: var(--green); color: white; }
         .btn-success:hover { background: #16a34a; }
+        .btn-disabled { opacity: 0.4; cursor: not-allowed; }
 
         /* NAVBAR */
         .navbar {
@@ -350,6 +378,23 @@ $sessions = getSessions($fingerprint);
         .toast.error { border-left: 4px solid var(--red); }
         .toast.info { border-left: 4px solid var(--orange); }
 
+        /* Earn Coin Button */
+        .earn-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-weight: 800;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .earn-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(251,191,36,0.3); }
+
         @media (max-width: 480px) {
             .hero h1 { font-size: 28px; }
             .grid-2 { grid-template-columns: 1fr; }
@@ -411,6 +456,7 @@ $sessions = getSessions($fingerprint);
         <a href="#" class="nav-link" onclick="navTo('claim'); toggleMenu();"><i class="fas fa-download"></i> CLAIM</a>
         <a href="#" class="nav-link" onclick="navTo('sessions'); toggleMenu();"><i class="fas fa-robot"></i> SESSIONS</a>
         <a href="#" class="nav-link" onclick="navTo('profile'); toggleMenu();"><i class="fas fa-user"></i> PROFILE</a>
+        <a href="#" class="nav-link" onclick="earnCoin()"><i class="fas fa-coins"></i> EARN COIN</a>
         <a href="logout.php" class="nav-link" style="color: var(--orange); margin-top: auto;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
     </div>
 
@@ -419,7 +465,7 @@ $sessions = getSessions($fingerprint);
         <!-- HOME -->
         <div id="sec-home" class="section active">
             <div class="hero">
-                <div class="slot-badge"><i class="fas fa-circle" style="font-size: 8px; color: var(--orange);"></i> 2 SLOT TERSEDIA</div>
+                <div class="slot-badge"><i class="fas fa-circle" style="font-size: 8px; color: var(--orange);"></i> <?= $maxSessions - $totalSessions ?> SLOT TERSEDIA</div>
                 <h1>Jadibot <br><span>WhatsApp Gratis</span></h1>
                 <p>Dapatkan server bot gratis dengan spesifikasi terbaik. Claim sekarang sebelum slot habis!</p>
                 <div class="btn-group">
@@ -427,7 +473,7 @@ $sessions = getSessions($fingerprint);
                         <i class="fas fa-download"></i> CLAIM SEKARANG
                     </button>
                     <button class="btn btn-white" style="width: 100%;" onclick="navTo('status')">
-                        LIHAT SPECS <i class="fas fa-arrow-right"></i>
+                        LIHAT STATUS <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
                 <div style="display:flex; justify-content:center; gap:20px; margin-top:30px; font-size: 13px; font-weight: 600;">
@@ -440,9 +486,9 @@ $sessions = getSessions($fingerprint);
         <!-- CLAIM -->
         <div id="sec-claim" class="section">
             <div style="text-align: center; margin-bottom: 20px;">
-                <div class="slot-badge"><i class="fas fa-circle" style="font-size: 8px;"></i> 2 SLOT TERSEDIA</div>
+                <div class="slot-badge"><i class="fas fa-circle" style="font-size: 8px;"></i> <?= $maxSessions - $totalSessions ?> SLOT TERSEDIA</div>
                 <h1 style="font-weight: 900; font-size: 32px; text-transform: uppercase;">CLAIM <span style="background: var(--white); color: #000; padding: 0 10px; transform: skew(-5deg); display: inline-block;">SERVER</span></h1>
-                <p style="color: var(--text-muted); font-size: 13px;">Isi form di bawah untuk dapetin server bot gratis</p>
+                <p style="color: var(--text-muted); font-size: 13px;">Pilih paket dan claim server bot gratis</p>
             </div>
 
             <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
@@ -453,21 +499,33 @@ $sessions = getSessions($fingerprint);
                         <div style="font-weight: bold;"><?= $user_name ?></div>
                     </div>
                 </div>
-                <a href="logout.php" style="color: var(--text-muted); font-size: 12px; font-weight: bold; text-decoration: none;">LOGOUT</a>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <span style="color:var(--yellow);font-weight:600;"><i class="fas fa-coins"></i> <?= $user_coins ?></span>
+                    <button class="earn-btn" onclick="earnCoin()" style="font-size:10px;padding:4px 12px;"><i class="fas fa-plus"></i></button>
+                </div>
             </div>
 
-            <div class="section-title">METODE BAYAR</div>
+            <div class="section-title">PAKET JADIBOT</div>
             <div class="grid-2">
-                <div class="select-box active" onclick="selectPay(this)">
-                    <i class="fas fa-coins"></i>
-                    <h4>ShikyCoin</h4>
-                    <p style="color: var(--white);"><?= $user_coins ?> / 50 koin</p>
+                <?php
+                $packages = [
+                    ['days' => 1, 'coin' => 1, 'label' => '1 Hari'],
+                    ['days' => 2, 'coin' => 2, 'label' => '2 Hari'],
+                    ['days' => 4, 'coin' => 3, 'label' => '4 Hari'],
+                    ['days' => 10, 'coin' => 10, 'label' => '10 Hari']
+                ];
+                foreach ($packages as $pkg):
+                    $disabled = ($user_coins < $pkg['coin']) ? 'disabled' : '';
+                ?>
+                <div class="select-box <?= $disabled ? '' : 'active' ?>" onclick="<?= $disabled ? '' : "selectPackage(this, {$pkg['days']}, {$pkg['coin']})" ?>">
+                    <i class="fas fa-calendar-day"></i>
+                    <h4><?= $pkg['label'] ?></h4>
+                    <p style="color: var(--yellow);">🪙 <?= $pkg['coin'] ?> koin</p>
+                    <?php if ($disabled): ?>
+                        <p style="color: var(--red); font-size: 10px;">Koin tidak cukup</p>
+                    <?php endif; ?>
                 </div>
-                <div class="select-box" onclick="selectPay(this)">
-                    <i class="fas fa-ticket-alt"></i>
-                    <h4>Kode Promo</h4>
-                    <p>Pakai kode promo</p>
-                </div>
+                <?php endforeach; ?>
             </div>
 
             <div class="section-title">JENIS SCRIPT</div>
@@ -489,16 +547,15 @@ $sessions = getSessions($fingerprint);
                     <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px;">Nomor WhatsApp</label>
                     <input type="text" id="phoneInput" placeholder="628xxxxxxxxxx" style="width:100%;padding:12px;background:var(--bg-main);border:1px solid var(--border);border-radius:8px;color:white;font-size:14px;">
                 </div>
-                <div>
-                    <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px;">Token Aktivasi</label>
-                    <div style="display:flex;gap:8px;">
-                        <input type="text" id="tokenInput" placeholder="Masukkan token" style="flex:1;padding:12px;background:var(--bg-main);border:1px solid var(--border);border-radius:8px;color:white;font-size:14px;">
-                        <button onclick="window.open('https://sfl.gl/rHjdO','_blank')" style="padding:12px 16px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;cursor:pointer;color:var(--text-muted);font-weight:600;">Gratis →</button>
-                    </div>
+                <div style="display:none;">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 4px;">Token (opsional)</label>
+                    <input type="text" id="tokenInput" placeholder="Masukkan token (opsional)" style="width:100%;padding:12px;background:var(--bg-main);border:1px solid var(--border);border-radius:8px;color:white;font-size:14px;">
                 </div>
+                <input type="hidden" id="selectedDays" value="1">
+                <input type="hidden" id="selectedCoin" value="1">
             </div>
 
-            <button class="btn btn-orange" style="width: 100%; margin-top: 10px;" onclick="createSession()">
+            <button class="btn btn-orange" style="width: 100%; margin-top: 10px;" id="claimBtn" onclick="createSessionWithCoin()">
                 <i class="fas fa-rocket"></i> CLAIM SERVER SEKARANG
             </button>
         </div>
@@ -512,8 +569,8 @@ $sessions = getSessions($fingerprint);
 
             <div class="card">
                 <div class="status-grid">
-                    <div class="stat-box"><h3 class="text-orange">ISSUE</h3><p>OVERALL</p></div>
-                    <div class="stat-box"><h3 style="color: #ff5f56;">2</h3><p>TOTAL SERVER</p></div>
+                    <div class="stat-box"><h3 class="text-orange"><?= $totalSessions ?></h3><p>TOTAL SESSION</p></div>
+                    <div class="stat-box"><h3 style="color: #ff5f56;"><?= $maxSessions - $totalSessions ?></h3><p>SLOT TERSEDIA</p></div>
                     <div class="stat-box"><h3 class="text-white"><?= ($phoenix_status['online'] ? 1 : 0) + ($ourin_status['online'] ? 1 : 0) ?></h3><p>ONLINE</p></div>
                     <div class="stat-box"><h3 class="text-orange"><?= (!$phoenix_status['online'] ? 1 : 0) + (!$ourin_status['online'] ? 1 : 0) ?></h3><p>OFFLINE</p></div>
                 </div>
@@ -535,8 +592,7 @@ $sessions = getSessions($fingerprint);
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <div style="background: var(--white); padding: 8px; border-radius: 8px;"><i class="fas fa-microchip" style="color:#000;"></i></div>
-                        <div><h3 style="font-size: 16px; font-weight: 900;">OURIN CORE</h3><div style="font-size: 11px; color: var(--text-muted);">Native Script</div></div>
-                    </div>
+                        <div><h3 style="font-size: 16px; font-weight: 900;">OURIN CORE</h3><div style="font-size: 11px; color: var(--text-muted);">Native Script</div></div></div>
                     <div class="badge-status <?= $ourin_status['online'] ? 'bg-online' : 'bg-offline' ?>"><?= $ourin_status['online'] ? 'ONLINE' : 'OFFLINE' ?></div>
                 </div>
                 <div class="spec-row"><span style="color: var(--text-muted);">RAM PENGGUNAAN</span><span style="font-weight: bold; color: var(--white);"><?= $ourin_status['ram'] ?></span></div>
@@ -548,7 +604,7 @@ $sessions = getSessions($fingerprint);
         <!-- SESSIONS -->
         <div id="sec-sessions" class="section">
             <div style="text-align: center; margin-bottom: 20px;">
-                <div class="slot-badge"><i class="fas fa-circle" style="font-size: 8px;"></i> <?= count($sessions) ?> SESSION</div>
+                <div class="slot-badge"><i class="fas fa-circle" style="font-size: 8px;"></i> <?= $totalSessions ?> / <?= $maxSessions ?> SESSION</div>
                 <h1 style="font-weight: 900; font-size: 32px; text-transform: uppercase;">MY <span style="background: var(--orange); color: white; padding: 0 10px; transform: skew(-5deg); display: inline-block;">BOTS</span></h1>
             </div>
 
@@ -598,7 +654,7 @@ $sessions = getSessions($fingerprint);
                 <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 15px; padding: 8px 20px; border-radius: 50px; margin-top: 15px;">
                     <div style="font-weight: bold; color: var(--yellow);"><i class="fas fa-coins"></i> <?= $user_coins ?></div>
                     <div style="font-size: 11px; font-weight: bold; letter-spacing: 1px;">SHIKYCOIN</div>
-                    <a href="#" style="color: var(--orange); font-size: 11px; font-weight: bold; text-decoration: none;">+EARN</a>
+                    <button class="earn-btn" onclick="earnCoin()" style="font-size:11px;padding:4px 14px;"><i class="fas fa-plus"></i> EARN</button>
                 </div>
                 <div style="margin-top: 15px;">
                     <a href="logout.php" style="color: var(--text-muted); font-size: 12px; font-weight: bold; text-decoration: none;">LOGOUT</a>
@@ -609,9 +665,10 @@ $sessions = getSessions($fingerprint);
                 <div style="background: rgba(255,255,255,0.05); width: 60px; height: 60px; border-radius: 15px; display: inline-flex; justify-content: center; align-items: center; font-size: 24px; color: var(--text-muted); margin-bottom: 15px;">
                     <i class="fas fa-server"></i>
                 </div>
-                <h2 style="font-weight: 900; margin-bottom: 5px;">BELUM ADA SERVER</h2>
-                <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">Kamu belum pernah claim server</p>
-                <button class="btn btn-orange" onclick="navTo('claim')">CLAIM SERVER <i class="fas fa-arrow-right"></i></button>
+                <h2 style="font-weight: 900; margin-bottom: 5px;">STATISTIK</h2>
+                <p style="color: var(--text-muted); font-size: 13px;">Total Session: <?= $totalSessions ?> / <?= $maxSessions ?></p>
+                <p style="color: var(--text-muted); font-size: 13px;">Koin: <?= $user_coins ?></p>
+                <button class="btn btn-orange" style="margin-top:15px;" onclick="navTo('claim')">CLAIM SERVER <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
     </div>
@@ -637,6 +694,9 @@ $sessions = getSessions($fingerprint);
         // ========== SUPABASE CONFIG ==========
         const SB_URL = '<?= SUPABASE_URL ?>';
         const SB_KEY = '<?= SUPABASE_KEY ?>';
+        const MAX_SESSIONS = <?= $maxSessions ?>;
+        let selectedDays = 1;
+        let selectedCoin = 1;
 
         // ========== TOAST ==========
         function showToast(message, type = 'info') {
@@ -663,13 +723,36 @@ $sessions = getSessions($fingerprint);
         }
 
         // ========== SELECT BOX ==========
-        function selectPay(el) {
-            el.parentElement.querySelectorAll('.select-box').forEach(b => b.classList.remove('active'));
+        function selectScript(el) {
+            document.querySelectorAll('.select-box[data-script]').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
         }
-        function selectScript(el) {
-            el.parentElement.querySelectorAll('.select-box').forEach(b => b.classList.remove('active'));
+
+        function selectPackage(el, days, coin) {
+            document.querySelectorAll('.select-box').forEach(b => b.classList.remove('active'));
             el.classList.add('active');
+            selectedDays = days;
+            selectedCoin = coin;
+            document.getElementById('selectedDays').value = days;
+            document.getElementById('selectedCoin').value = coin;
+        }
+
+        // ========== EARN COIN ==========
+        function earnCoin() {
+            showToast('🔄 Membuat link koin...', 'info');
+            fetch('earn-coin.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.url) {
+                        window.open(data.url, '_blank');
+                        showToast('✅ Link koin berhasil dibuat!', 'success');
+                    } else {
+                        showToast('❌ ' + (data.message || 'Gagal membuat link'), 'error');
+                    }
+                })
+                .catch(() => {
+                    showToast('❌ Gagal terhubung ke server', 'error');
+                });
         }
 
         // ========== SUPABASE REQUEST ==========
@@ -701,38 +784,37 @@ $sessions = getSessions($fingerprint);
             }
         }
 
-        // ========== CREATE SESSION ==========
-        async function createSession() {
+        // ========== CREATE SESSION WITH COIN ==========
+        async function createSessionWithCoin() {
             const phone = document.getElementById('phoneInput').value.trim();
-            const token = document.getElementById('tokenInput').value.trim().toUpperCase();
             const scriptEl = document.querySelector('.select-box.active[data-script]');
             const script = scriptEl ? scriptEl.dataset.script : 'phoenix_md';
+            const days = selectedDays;
+            const coin = selectedCoin;
 
             if (!phone) { showToast('Masukkan nomor WhatsApp', 'error'); return; }
-            if (!token) { showToast('Masukkan token aktivasi', 'error'); return; }
+            if (<?= $user_coins ?> < coin) { showToast('Koin tidak cukup! Butuh ' + coin + ' koin.', 'error'); return; }
+            if (<?= $totalSessions ?> >= MAX_SESSIONS) { showToast('Slot session penuh (maksimal ' + MAX_SESSIONS + ')', 'error'); return; }
 
             let cleanPhone = phone.replace(/[^0-9]/g, '');
             if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.substring(1);
             if (!cleanPhone.startsWith('62')) cleanPhone = '62' + cleanPhone;
             if (cleanPhone.length < 10) { showToast('Nomor terlalu pendek', 'error'); return; }
 
-            const btn = event.target;
+            const btn = document.getElementById('claimBtn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
 
             try {
-                const redeemData = await supabaseRequest('GET', `redeems?code=eq.${token}&select=*`);
-                if (!redeemData?.length) throw new Error('Token tidak valid');
-                if (redeemData[0].used) throw new Error('Token sudah digunakan');
-                if (Date.now() - redeemData[0].created_at > 600000) throw new Error('Token expired');
+                // Kurangi koin
+                const newCoins = <?= $user_coins ?> - coin;
+                // Update session coin (simpan di session)
+                await fetch('update-coin.php?amount=' + (-coin));
 
-                await supabaseRequest('PATCH', `redeems?code=eq.${token}`, {
-                    used: true,
-                    used_by: '<?= $fingerprint ?>',
-                    phone: cleanPhone
-                });
-
+                // Buat session di Supabase
                 const fingerprint = '<?= $fingerprint ?>';
+                const token = 'COIN_' + Date.now();
+                
                 await supabaseRequest('POST', 'polar_sessions', {
                     fingerprint: fingerprint,
                     phone: cleanPhone,
@@ -741,10 +823,11 @@ $sessions = getSessions($fingerprint);
                     bot_mode: 'public',
                     token_used: token,
                     pairing_code: null,
-                    created_at: Date.now()
+                    created_at: Date.now(),
+                    expiry_days: days
                 });
 
-                showToast('✅ Session berhasil dibuat!', 'success');
+                showToast('✅ Session berhasil dibuat! ' + days + ' hari aktif.', 'success');
                 setTimeout(() => location.reload(), 1500);
 
             } catch(e) {
