@@ -65,7 +65,7 @@ curl_close($ch);
 
 // ========== REDIRECT KE SAFELINK ==========
 // Ganti dengan link Safelink Anda
-$safelink_url = 'https://sfl.gl/xxx'; // ← GANTI DENGAN LINK SAFELINK ANDA
+$safelink_url = 'https://sfl.gl/ooVeddtK'; // ← GANTI DENGAN LINK SAFELINK ANDA
 
 echo json_encode([
     'success' => true,
