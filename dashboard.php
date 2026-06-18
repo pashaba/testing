@@ -48,50 +48,10 @@ if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
         $_SESSION['user_email'] = $user_data['email'] ?? '';
         $_SESSION['user_avatar'] = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($user_data['name'] ?? 'User') . '&background=FF6B00&color=fff';
         $_SESSION['user_coins'] = 0;
-        $_SESSION['claimed_today'] = 0;
         
         header('Location: dashboard.php');
         exit;
     }
-}
-
-// ========== PROSES AJAX ==========
-if (isset($_GET['action']) && $_GET['action'] === 'get_earn_status') {
-    header('Content-Type: application/json');
-    if (!isset($_SESSION['user_google_id'])) {
-        echo json_encode(['success' => false, 'message' => 'Harap login']);
-        exit;
-    }
-    echo json_encode([
-        'success' => true,
-        'claimed_today' => $_SESSION['claimed_today'] ?? 0,
-        'max_per_day' => 5
-    ]);
-    exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'claim_coin') {
-    header('Content-Type: application/json');
-    $input = json_decode(file_get_contents('php://input'), true);
-    $index = $input['index'] ?? 0;
-    
-    if (!isset($_SESSION['user_google_id'])) {
-        echo json_encode(['success' => false, 'message' => 'Harap login']);
-        exit;
-    }
-    
-    $claimedToday = $_SESSION['claimed_today'] ?? 0;
-    $maxPerDay = 5;
-    
-    if ($claimedToday >= $maxPerDay) {
-        echo json_encode(['success' => false, 'message' => 'Sudah mencapai limit 5 coin hari ini']);
-        exit;
-    }
-    
-    $_SESSION['claimed_today'] = $claimedToday + 1;
-    
-    echo json_encode(['success' => true]);
-    exit;
 }
 
 // ========== CEK LOGIN ==========
@@ -100,7 +60,6 @@ $user_name = $_SESSION['user_name'] ?? "Guest";
 $user_email = $_SESSION['user_email'] ?? "guest@gmail.com";
 $user_avatar = $_SESSION['user_avatar'] ?? "https://ui-avatars.com/api/?name=Guest&background=FF6B00&color=fff";
 $user_coins = $_SESSION['user_coins'] ?? 0;
-$is_first_login = !isset($_SESSION['has_seen_tutorial']);
 
 // ========== URL LOGIN GOOGLE ==========
 $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
@@ -111,15 +70,6 @@ $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
     'access_type' => 'online',
     'prompt' => 'select_account'
 ]);
-
-// ========== HARDCODE 5 LINK SAFELINK ==========
-$POLAR_LINKS = [
-    'https://sfl.gl/fdI2BtU',
-    'https://sfl.gl/jEyc1yAV',
-    'https://sfl.gl/UBJUPR',
-    'https://sfl.gl/uzKT',
-    'https://sfl.gl/fFTu'
-];
 
 // ========== CEK SERVER ==========
 function checkPhoenixServer() {
@@ -256,14 +206,10 @@ $maxSessions = 10;
         @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes glow { 0%,100% { box-shadow: 0 0 20px var(--orange-glow); } 50% { box-shadow: 0 0 40px var(--orange-glow); } }
         @keyframes coinSpin { 0% { transform: rotateY(0); } 100% { transform: rotateY(360deg); } }
-        @keyframes highlightPulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 0 4px rgba(255,107,0,0.2), 0 0 60px rgba(255,107,0,0.05); }
-            50% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(255,107,0,0.3), 0 0 80px rgba(255,107,0,0.1); }
-        }
-        @keyframes arrowBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
+        .animate-in { animation: fadeInUp 0.5s ease forwards; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-glow { animation: glow 2s ease-in-out infinite; }
+        .animate-coin { animation: coinSpin 1s ease forwards; }
 
         /* ===== LOGIN POPUP ===== */
         .login-overlay {
@@ -352,73 +298,6 @@ $maxSessions = 10;
         }
         .g-icon img { width: 20px; height: 20px; }
         .login-footer { margin-top: 20px; font-size: 11px; color: var(--text-muted); }
-
-        /* ===== TUTORIAL - HIGHLIGHT ===== */
-        .tutorial-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(8px);
-            z-index: 999;
-            display: none;
-        }
-        .tutorial-overlay.active { display: block; }
-
-        .tutorial-card {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 28px 24px;
-            max-width: 420px;
-            width: 90%;
-            z-index: 1001;
-            animation: slideUp 0.4s ease;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-        }
-        .tutorial-card .step { display: none; }
-        .tutorial-card .step.active { display: block; }
-
-        .tutorial-step-icon { font-size: 40px; text-align: center; margin-bottom: 8px; }
-        .tutorial-step-title { font-size: 18px; font-weight: 800; text-align: center; margin-bottom: 4px; }
-        .tutorial-step-desc { font-size: 13px; color: var(--text-muted); text-align: center; line-height: 1.6; margin-bottom: 14px; }
-
-        .tutorial-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 14px; }
-        .tutorial-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); transition: var(--transition); cursor: pointer; }
-        .tutorial-dot.active { background: var(--orange); width: 28px; border-radius: 6px; }
-
-        .tutorial-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
-        .tutorial-btns .btn { min-width: 100px; justify-content: center; font-size: 12px; padding: 10px 16px; }
-
-        /* Highlight Circle */
-        .tutorial-highlight {
-            position: relative;
-            z-index: 1000 !important;
-        }
-        .tutorial-highlight::before {
-            content: '';
-            position: fixed;
-            inset: -30px;
-            border-radius: 50%;
-            border: 3px solid var(--orange);
-            background: rgba(255,107,0,0.06);
-            box-shadow: 0 0 0 4px rgba(255,107,0,0.15), 0 0 60px rgba(255,107,0,0.05);
-            pointer-events: none;
-            z-index: 1000;
-            animation: highlightPulse 1.5s ease-in-out infinite;
-        }
-        .tutorial-highlight::after {
-            content: '👆';
-            position: fixed;
-            font-size: 32px;
-            z-index: 1002;
-            animation: arrowBounce 1s ease-in-out infinite;
-            pointer-events: none;
-            filter: drop-shadow(0 2px 12px rgba(255,107,0,0.3));
-        }
 
         /* ===== LOADING MODAL ===== */
         .loading-overlay {
@@ -608,22 +487,8 @@ $maxSessions = 10;
             .status-grid { grid-template-columns: 1fr 1fr; }
             .navbar { padding: 8px 12px; }
             .login-card { padding: 32px 20px; }
-            .tutorial-card { bottom: 16px; padding: 20px 16px; max-width: 95%; }
-            .tutorial-step-title { font-size: 16px; }
-            .tutorial-step-desc { font-size: 12px; }
-            .tutorial-highlight::before { inset: -20px; }
-            .tutorial-highlight::after { font-size: 24px; }
             .pairing-box { padding: 24px 16px; }
             .pairing-code { font-size: 22px; letter-spacing: 4px; }
-        }
-        @media (max-width: 380px) {
-            .status-grid { grid-template-columns: 1fr 1fr; }
-            .stat-box h3 { font-size: 16px; }
-            .tutorial-btns .btn { min-width: 80px; font-size: 11px; padding: 8px 12px; }
-        }
-        @media (min-width: 768px) {
-            .tutorial-highlight::after { font-size: 40px; }
-            .tutorial-highlight::before { inset: -40px; }
         }
     </style>
 </head>
@@ -687,40 +552,6 @@ $maxSessions = 10;
         </div>
     </div>
 
-    <!-- TUTORIAL (First Login) -->
-    <?php if ($is_first_login): ?>
-    <div class="tutorial-overlay active" id="tutorialOverlay"></div>
-    <div class="tutorial-card" id="tutorialCard">
-        <!-- Step 1 -->
-        <div class="step active" data-step="1">
-            <div class="tutorial-step-icon">🪙</div>
-            <div class="tutorial-step-title">Selamat Datang!</div>
-            <div class="tutorial-step-desc">Dapatkan <strong>5 Polar Coin</strong> gratis setiap hari!<br>Gunakan coin untuk claim server bot WhatsApp.</div>
-        </div>
-        <!-- Step 2 -->
-        <div class="step" data-step="2">
-            <div class="tutorial-step-icon">📋</div>
-            <div class="tutorial-step-title">Cara Dapat Coin</div>
-            <div class="tutorial-step-desc">Klik <strong>"EARN POLAR COIN"</strong> di menu.<br>Dapatkan link Safelink, klik untuk +1 Polar Coin!</div>
-        </div>
-        <!-- Step 3 -->
-        <div class="step" data-step="3">
-            <div class="tutorial-step-icon">🤖</div>
-            <div class="tutorial-step-title">Claim Server</div>
-            <div class="tutorial-step-desc">Ke menu <strong>"CLAIM"</strong>, pilih paket,<br>masukkan nomor WhatsApp, dan claim server bot!</div>
-        </div>
-        <div class="tutorial-dots" id="tutorialDots">
-            <div class="tutorial-dot active" data-step="1"></div>
-            <div class="tutorial-dot" data-step="2"></div>
-            <div class="tutorial-dot" data-step="3"></div>
-        </div>
-        <div class="tutorial-btns">
-            <button class="btn btn-close-modal" onclick="prevTutorialStep()"><i class="fas fa-chevron-left"></i> Back</button>
-            <button class="btn btn-orange" id="tutorialNextBtn" onclick="nextTutorialStep()">Next <i class="fas fa-chevron-right"></i></button>
-        </div>
-    </div>
-    <?php endif; ?>
-
     <!-- ===== NAVBAR ===== -->
     <nav class="navbar" id="navbar">
         <div class="nav-brand"><span class="brand-icon">✦</span> POLAR.ID</div>
@@ -745,11 +576,11 @@ $maxSessions = 10;
             <button class="sidebar-close" onclick="toggleMenu()"><i class="fas fa-times"></i></button>
         </div>
         <a href="#" class="nav-link active" onclick="navTo('home'); toggleMenu();"><i class="fas fa-home"></i> HOME</a>
-        <a href="#" class="nav-link" id="tutorialEarnBtn" onclick="navTo('status'); toggleMenu();"><i class="fas fa-server"></i> STATUS</a>
+        <a href="#" class="nav-link" onclick="navTo('status'); toggleMenu();"><i class="fas fa-server"></i> STATUS</a>
         <a href="#" class="nav-link" onclick="navTo('claim'); toggleMenu();"><i class="fas fa-download"></i> CLAIM</a>
         <a href="#" class="nav-link" onclick="navTo('sessions'); toggleMenu();"><i class="fas fa-robot"></i> SESSIONS</a>
         <a href="#" class="nav-link" onclick="navTo('profile'); toggleMenu();"><i class="fas fa-user"></i> PROFILE</a>
-        <a href="#" class="nav-link" id="tutorialEarnLink" onclick="earnCoin()" style="background:linear-gradient(135deg,rgba(255,107,0,0.1),rgba(251,191,36,0.05));border:1px solid var(--orange);">
+        <a href="#" class="nav-link" onclick="earnCoin()" style="background:linear-gradient(135deg,rgba(255,107,0,0.1),rgba(251,191,36,0.05));border:1px solid var(--orange);">
             <i class="fas fa-coins" style="color:var(--gold);"></i> EARN POLAR COIN
         </a>
         <a href="logout.php" class="nav-link" style="color:var(--orange);margin-top:auto;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
@@ -779,7 +610,7 @@ $maxSessions = 10;
                 <p style="color:var(--text-muted);font-size:12px;">Pilih paket dan claim server bot gratis</p>
             </div>
 
-            <div class="card" id="tutorialProfileCard">
+            <div class="card">
                 <div style="display:flex;justify-content:space-between;align-items:center;">
                     <div style="display:flex;align-items:center;gap:12px;">
                         <div style="background:linear-gradient(135deg,var(--gold),var(--orange));width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000;font-size:14px;"><?= substr($user_name, 0, 1) ?></div>
@@ -787,7 +618,7 @@ $maxSessions = 10;
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <span style="color:var(--gold);font-weight:700;font-size:13px;"><i class="fas fa-coins"></i> <span id="claimCoinDisplay"><?= $user_coins ?></span></span>
-                        <button class="earn-btn" id="tutorialEarnButton" onclick="earnCoin()" style="font-size:9px;padding:3px 10px;"><i class="fas fa-plus"></i></button>
+                        <button class="earn-btn" onclick="earnCoin()" style="font-size:9px;padding:3px 10px;"><i class="fas fa-plus"></i></button>
                     </div>
                 </div>
             </div>
@@ -959,14 +790,11 @@ $maxSessions = 10;
         const SB_URL = '<?= SUPABASE_URL ?>';
         const SB_KEY = '<?= SUPABASE_KEY ?>';
         const MAX_SESSIONS = <?= $maxSessions ?>;
-        const POLAR_LINKS = <?= json_encode($POLAR_LINKS) ?>;
         let selectedDays = 1;
         let selectedCoin = 1;
         let isProcessing = false;
         let currentPairPhone = null;
         let pairInterval = null;
-        let currentTutorialStep = 1;
-        const totalTutorialSteps = 3;
 
         // ========== TOAST ==========
         function showToast(message, type = 'info') {
@@ -1005,90 +833,6 @@ $maxSessions = 10;
             selectedCoin = coin;
             document.getElementById('selectedDays').value = days;
             document.getElementById('selectedCoin').value = coin;
-        }
-
-        // ========== TUTORIAL ==========
-        function updateTutorialUI() {
-            document.querySelectorAll('.tutorial-card .step').forEach(el => {
-                el.classList.toggle('active', parseInt(el.dataset.step) === currentTutorialStep);
-            });
-            document.querySelectorAll('.tutorial-dot').forEach(el => {
-                el.classList.toggle('active', parseInt(el.dataset.step) === currentTutorialStep);
-            });
-            const btn = document.getElementById('tutorialNextBtn');
-            if (currentTutorialStep === totalTutorialSteps) {
-                btn.innerHTML = 'Selesai <i class="fas fa-check"></i>';
-                btn.onclick = closeTutorial;
-            } else {
-                btn.innerHTML = 'Selanjutnya <i class="fas fa-chevron-right"></i>';
-                btn.onclick = nextTutorialStep;
-            }
-            updateTutorialHighlight();
-        }
-
-        function updateTutorialHighlight() {
-            // Hapus highlight lama
-            document.querySelectorAll('.tutorial-highlight').forEach(el => {
-                el.classList.remove('tutorial-highlight');
-            });
-            document.querySelectorAll('.tutorial-arrow').forEach(el => el.remove());
-
-            let targetElement = null;
-            let arrowPos = {};
-
-            switch(currentTutorialStep) {
-                case 1:
-                    targetElement = document.getElementById('coinBadge');
-                    arrowPos = { bottom: '70px', right: '120px' };
-                    break;
-                case 2:
-                    targetElement = document.getElementById('tutorialEarnButton');
-                    arrowPos = { bottom: '90px', right: '60px' };
-                    break;
-                case 3:
-                    targetElement = document.getElementById('claimBtn');
-                    arrowPos = { bottom: '30px', left: '50%' };
-                    break;
-                default:
-                    return;
-            }
-
-            if (targetElement) {
-                targetElement.classList.add('tutorial-highlight');
-                
-                // Tambah arrow
-                const arrow = document.createElement('div');
-                arrow.className = 'tutorial-arrow';
-                arrow.innerHTML = '👆';
-                Object.assign(arrow.style, arrowPos);
-                document.body.appendChild(arrow);
-            }
-        }
-
-        function nextTutorialStep() {
-            if (currentTutorialStep < totalTutorialSteps) {
-                currentTutorialStep++;
-                updateTutorialUI();
-            }
-        }
-
-        function prevTutorialStep() {
-            if (currentTutorialStep > 1) {
-                currentTutorialStep--;
-                updateTutorialUI();
-            }
-        }
-
-        function closeTutorial() {
-            document.getElementById('tutorialOverlay').classList.remove('active');
-            document.getElementById('tutorialCard').style.display = 'none';
-            document.querySelectorAll('.tutorial-highlight').forEach(el => {
-                el.classList.remove('tutorial-highlight');
-            });
-            document.querySelectorAll('.tutorial-arrow').forEach(el => el.remove());
-            <?php 
-                $_SESSION['has_seen_tutorial'] = true;
-            ?>
         }
 
         // ========== LOADING MODAL ==========
@@ -1141,7 +885,7 @@ $maxSessions = 10;
             }
         }
 
-        // ========== EARN COIN ==========
+        // ========== EARN COIN (Session Flag) ==========
         function earnCoin() {
             if (isProcessing) return;
             isProcessing = true;
@@ -1154,47 +898,20 @@ $maxSessions = 10;
                 btn.classList.add('loading');
             }
             
-            fetch('?action=get_earn_status')
+            fetch('earn-coin.php')
                 .then(res => res.json())
                 .then(data => {
-                    if (!data.success) {
+                    if (data.success && data.url) {
+                        showToast('🪙 Klik link di bawah untuk dapat Polar Coin!', 'gold');
+                        window.open(data.url, '_blank');
+                        setTimeout(() => location.reload(), 3000);
+                    } else {
                         showToast('❌ ' + (data.message || 'Gagal mengambil Polar Coin'), 'error');
-                        throw new Error(data.message);
                     }
-                    
-                    const claimedToday = data.claimed_today || 0;
-                    const maxPerDay = 5;
-                    
-                    if (claimedToday >= maxPerDay) {
-                        showToast('❌ Anda sudah mengambil ' + maxPerDay + ' Polar Coin hari ini. Coba lagi besok! 🪙', 'error');
-                        return;
-                    }
-                    
-                    const index = claimedToday;
-                    const link = POLAR_LINKS[index];
-                    
-                    if (!link) {
-                        showToast('❌ Tidak ada link tersedia. Hubungi admin.', 'error');
-                        return;
-                    }
-                    
-                    fetch('?action=claim_coin', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ index: index })
-                    })
-                    .then(res => res.json())
-                    .then(claimData => {
-                        if (claimData.success) {
-                            showToast('🪙 Buka link di bawah untuk dapat Polar Coin!', 'gold');
-                            window.open(link, '_blank');
-                        } else {
-                            showToast('❌ ' + (claimData.message || 'Gagal mengambil Polar Coin'), 'error');
-                        }
-                    })
-                    .catch(() => showToast('❌ Gagal memproses claim', 'error'));
                 })
-                .catch(() => showToast('❌ Gagal terhubung ke server', 'error'))
+                .catch(() => {
+                    showToast('❌ Gagal terhubung ke server', 'error');
+                })
                 .finally(() => {
                     isProcessing = false;
                     if (btn) {
@@ -1335,21 +1052,11 @@ $maxSessions = 10;
 
         // ========== INIT ==========
         document.addEventListener('DOMContentLoaded', function() {
-            <?php if ($is_first_login): ?>
-            document.getElementById('tutorialOverlay').classList.add('active');
-            updateTutorialUI();
-            <?php endif; ?>
-            
             setInterval(updateCoinDisplay, 30000);
         });
 
-        // ========== CLOSE MODALS ==========
         document.getElementById('pairingOverlay').addEventListener('click', function(e) {
             if (e.target === this) closePairingModal();
-        });
-
-        document.getElementById('tutorialOverlay').addEventListener('click', function(e) {
-            if (e.target === this) closeTutorial();
         });
     </script>
 <?php endif; ?>
