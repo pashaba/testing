@@ -670,7 +670,7 @@ $maxSessions = 10;
             <div class="nav-brand" style="font-size:14px;"><span class="brand-icon">✦</span> MENU</div>
             <button class="sidebar-close" onclick="toggleMenu()"><i class="fas fa-times"></i></button>
         </div>
-        <a href="#" class="nav-link active" data-tut="nav-home" onclick="navTo('home'); toggleMenu();"><i class="fas fa-home"></i> HOME</a>
+        <a href="#" class="nav-link" data-tut="nav-home" onclick="navTo('home'); toggleMenu();"><i class="fas fa-home"></i> HOME</a>
         <a href="#" class="nav-link" data-tut="nav-status" onclick="navTo('status'); toggleMenu();"><i class="fas fa-server"></i> STATUS</a>
         <a href="#" class="nav-link" data-tut="nav-claim" onclick="navTo('claim'); toggleMenu();"><i class="fas fa-download"></i> CLAIM</a>
         <a href="#" class="nav-link" data-tut="nav-sessions" onclick="navTo('sessions'); toggleMenu();"><i class="fas fa-robot"></i> SESSIONS</a>
@@ -1177,6 +1177,7 @@ $maxSessions = 10;
 
         function getTutorialSidebarSteps() {
             return [
+                { selector: '[data-tut="nav-home"]', title: 'Home', desc: 'Halaman utama buat claim server dengan cepat.', arrow: 'left' },
                 { selector: '[data-tut="nav-status"]', title: 'Status Server', desc: 'Pantau status server Phoenix MD & Ourin secara real-time.', arrow: 'left' },
                 { selector: '[data-tut="nav-claim"]', title: 'Claim Server', desc: 'Pilih paket, masukkan nomor WhatsApp, dan claim bot gratis di sini.', arrow: 'left' },
                 { selector: '[data-tut="nav-sessions"]', title: 'My Bots', desc: 'Lihat semua bot WhatsApp yang sudah kamu claim dan kelola statusnya.', arrow: 'left' },
@@ -1215,23 +1216,53 @@ $maxSessions = 10;
             arrow.className = 'tutorial-arrow fas fa-arrow-' + (step.arrow === 'left' ? 'right' : 'up');
             let cardTop, cardLeft, arrowTop, arrowLeft;
 
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const isMobile = vw < 540;
+            const cardW = Math.min(260, vw - 24);
+
             if (step.arrow === 'left') {
+                // Arrow menunjuk ke elemen dari kiri (elemen ada di sisi kanan / sidebar)
                 arrowTop = rect.top + rect.height / 2 - 13;
                 arrowLeft = rect.left - 38;
-                cardTop = rect.top + rect.height / 2 - 60;
-                cardLeft = rect.left - 280;
-                if (cardLeft < 10) { cardLeft = rect.right + 20; arrow.className = 'tutorial-arrow fas fa-arrow-left'; arrowLeft = rect.right + 8; }
+
+                if (!isMobile) {
+                    // Desktop: card di kiri elemen
+                    cardTop = rect.top + rect.height / 2 - 60;
+                    cardLeft = rect.left - cardW - 20;
+                    if (cardLeft < 10) {
+                        cardLeft = rect.right + 20;
+                        arrow.className = 'tutorial-arrow fas fa-arrow-left';
+                        arrowLeft = rect.right + 8;
+                    }
+                } else {
+                    // Mobile: card di tengah bawah viewport, arrow tetap nunjuk ke elemen
+                    cardLeft = (vw - cardW) / 2;
+                    cardTop = vh - 200;
+                    // Kalau elemen terlalu bawah, geser card lebih ke atas
+                    if (rect.top > vh * 0.6) cardTop = rect.top - 180;
+                    // Arrow dari bawah (nunjuk ke atas ke arah elemen)
+                    arrowTop = rect.bottom + 6;
+                    arrowLeft = rect.left + rect.width / 2 - 13;
+                    arrow.className = 'tutorial-arrow fas fa-arrow-up';
+                }
             } else {
                 arrowTop = rect.bottom + 8;
                 arrowLeft = rect.left + rect.width / 2 - 13;
                 cardTop = rect.bottom + 40;
-                cardLeft = Math.max(10, Math.min(window.innerWidth - 280, rect.left + rect.width / 2 - 130));
-                if (cardTop + 140 > window.innerHeight) {
-                    cardTop = rect.top - 150;
+                cardLeft = Math.max(10, Math.min(vw - cardW - 10, rect.left + rect.width / 2 - cardW / 2));
+                if (cardTop + 160 > vh) {
+                    cardTop = rect.top - 160;
                     arrowTop = rect.top - 34;
                     arrow.className = 'tutorial-arrow fas fa-arrow-down';
                 }
             }
+
+            // Clamp supaya tidak pernah keluar viewport
+            cardTop = Math.max(10, Math.min(cardTop, vh - 180));
+            cardLeft = Math.max(10, Math.min(cardLeft, vw - cardW - 10));
+
+            card.style.width = cardW + 'px';
 
             arrow.style.top = arrowTop + 'px';
             arrow.style.left = arrowLeft + 'px';
