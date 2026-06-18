@@ -1,22 +1,77 @@
 <?php
 session_start();
-
-// ========== KONFIGURASI ==========
 require_once 'config.php';
 
-// Konfigurasi Google
-define('GOOGLE_CLIENT_ID', '1054465623984-re5q3ehnrk4qrne8da214jjvltnut630.apps.googleusercontent.com');
-define('GOOGLE_CLIENT_SECRET', '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');
-define('GOOGLE_REDIRECT_URI', 'https://polar.web.id/auth-google.php');
+// ========== KONFIGURASI GOOGLE ==========
+$client_id = '1054465623984-re5q3ehnrk4qrne8da214jjvltnut630.apps.googleusercontent.com';
+$client_secret = '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';
+$redirect_uri = 'https://polar.web.id/dashboard.php'; // LANGSUNG KE DASHBOARD
 
-// Simulasi Data Login (ubah ke logika database asli)
-$is_logged_in = isset($_SESSION['user_google_id']) ? true : false; 
+// ========== PROSES CALLBACK DARI GOOGLE ==========
+if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
+    $code = $_GET['code'];
+    
+    $token_url = 'https://oauth2.googleapis.com/token';
+    $post_data = [
+        'code' => $code,
+        'client_id' => $client_id,
+        'client_secret' => $client_secret,
+        'redirect_uri' => $redirect_uri,
+        'grant_type' => 'authorization_code'
+    ];
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $token_url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    
+    $token_data = json_decode($response, true);
+    
+    if (isset($token_data['access_token'])) {
+        $userinfo_url = 'https://www.googleapis.com/oauth2/v2/userinfo';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $userinfo_url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token_data['access_token']]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $user_response = curl_exec($ch);
+        curl_close($ch);
+        
+        $user_data = json_decode($user_response, true);
+        
+        $_SESSION['user_google_id'] = $user_data['id'];
+        $_SESSION['user_name'] = $user_data['name'] ?? 'User';
+        $_SESSION['user_email'] = $user_data['email'] ?? '';
+        $_SESSION['user_avatar'] = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($user_data['name'] ?? 'User') . '&background=FF6B00&color=fff';
+        $_SESSION['user_coins'] = 50;
+        
+        header('Location: dashboard.php');
+        exit;
+    }
+}
+
+// ========== CEK LOGIN ==========
+$is_logged_in = isset($_SESSION['user_google_id']);
 $user_name = $_SESSION['user_name'] ?? "Guest";
 $user_email = $_SESSION['user_email'] ?? "guest@gmail.com";
 $user_avatar = $_SESSION['user_avatar'] ?? "https://ui-avatars.com/api/?name=Guest&background=FF6B00&color=fff";
 $user_coins = $_SESSION['user_coins'] ?? 50;
 
-// ========== CEK SERVER PHOENIX MD & OURIN ==========
+// ========== URL LOGIN GOOGLE ==========
+$auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
+    'client_id' => $client_id,
+    'redirect_uri' => $redirect_uri,
+    'response_type' => 'code',
+    'scope' => 'email profile',
+    'access_type' => 'online',
+    'prompt' => 'select_account'
+]);
+
+// ========== CEK SERVER ==========
 function checkPhoenixServer() {
     $ptero_panel = 'https://private.pterokudesu.web.id';
     $api_key = 'ptlc_qEYuw1Iv0NQXPUMKzCUJhENIJ7P7SL6KFHTQ0kv9ckh';
@@ -76,7 +131,6 @@ function getSessions($fingerprint) {
     return json_decode($response, true) ?: [];
 }
 
-// Ambil fingerprint dari cookie/session
 $fingerprint = $_SESSION['fingerprint'] ?? '';
 if (!$fingerprint) {
     $fingerprint = hash('sha256', $_SERVER['HTTP_USER_AGENT'] . $_SERVER['REMOTE_ADDR'] . session_id());
@@ -139,15 +193,13 @@ $sessions = getSessions($fingerprint);
         .btn-orange:hover { background: var(--orange-hover); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255, 107, 0, 0.3); }
         .btn-white { background: var(--white); color: #000; }
         .btn-white:hover { background: var(--white-hover); transform: translateY(-3px); box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2); }
-        .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--text-main); }
-        .btn-outline:hover { border-color: var(--orange); color: var(--orange); }
         .btn-sm { padding: 6px 12px; font-size: 10px; }
         .btn-danger { background: var(--red); color: white; }
         .btn-danger:hover { background: #dc2626; }
         .btn-success { background: var(--green); color: white; }
         .btn-success:hover { background: #16a34a; }
 
-        /* --- NAVBAR --- */
+        /* NAVBAR */
         .navbar {
             display: flex;
             justify-content: space-between;
@@ -169,7 +221,7 @@ $sessions = getSessions($fingerprint);
         .menu-btn { background: var(--orange); color: white; border: none; width: 35px; height: 35px; border-radius: 8px; font-size: 16px; cursor: pointer; transition: 0.3s; }
         .menu-btn:hover { transform: scale(1.1); }
 
-        /* --- SIDEBAR --- */
+        /* SIDEBAR */
         .sidebar-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px);
             z-index: 998; opacity: 0; visibility: hidden; transition: all 0.3s ease;
@@ -190,7 +242,7 @@ $sessions = getSessions($fingerprint);
         }
         .nav-link:hover, .nav-link.active { background: var(--orange); color: white; transform: translateX(5px); }
 
-        /* --- LOGIN POPUP --- */
+        /* LOGIN POPUP */
         .login-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px);
             z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -213,7 +265,7 @@ $sessions = getSessions($fingerprint);
         .google-btn-login:hover { border-color: var(--orange); background: rgba(255, 107, 0, 0.05); transform: translateY(-2px); }
         .g-icon { background: white; border-radius: 50%; padding: 5px; width: 30px; height: 30px; display: flex; justify-content: center; align-items: center; }
 
-        /* --- CONTENT --- */
+        /* CONTENT */
         .main-container { padding: 30px 20px; max-width: 700px; margin: 0 auto; }
         .section { display: none; animation: fadeIn 0.4s ease; }
         .section.active { display: block; }
@@ -268,7 +320,7 @@ $sessions = getSessions($fingerprint);
         .session-status { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; }
         .session-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 
-        /* Modal Pairing */
+        /* Pairing Modal */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(6px);
             z-index: 1100; display: none; align-items: center; justify-content: center; padding: 20px;
@@ -286,7 +338,6 @@ $sessions = getSessions($fingerprint);
             padding: 20px; text-align: center; font-size: 28px; font-weight: 900; letter-spacing: 4px;
             font-family: monospace; color: var(--orange); margin: 15px 0;
         }
-        .pair-steps { font-size: 12px; color: var(--text-muted); line-height: 1.8; padding-left: 20px; }
 
         /* Toast */
         .toast {
@@ -299,9 +350,6 @@ $sessions = getSessions($fingerprint);
         .toast.error { border-left: 4px solid var(--red); }
         .toast.info { border-left: 4px solid var(--orange); }
 
-        .text-green { color: var(--green); }
-        .text-red { color: var(--red); }
-
         @media (max-width: 480px) {
             .hero h1 { font-size: 28px; }
             .grid-2 { grid-template-columns: 1fr; }
@@ -310,20 +358,20 @@ $sessions = getSessions($fingerprint);
         }
     </style>
 </head>
-<body class="<?= !$is_logged_in ? 'lock-scroll' : '' ?>">
-
-    <?php if (!$is_logged_in): ?>
+<body>
+<?php if (!$is_logged_in): ?>
+    <!-- LOGIN POPUP -->
     <div class="login-overlay">
         <div class="login-card">
             <div class="login-badge">NEW PLAYER</div>
             <div class="login-avatar"><i class="fas fa-user"></i></div>
             <h2>HALO!</h2>
             <p>Login dengan Google untuk mulai</p>
-            <a href="auth-google.php" class="google-btn-login">
+            <a href="<?= $auth_url ?>" class="google-btn-login">
                 <div style="display:flex; align-items:center; gap:10px;">
                     <div class="g-icon"><img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"></div>
                     <div>
-                        <div style="font-size: 13px; font-weight: 600;">Login sebagai Guest</div>
+                        <div style="font-size: 13px; font-weight: 600;">Login dengan Google</div>
                         <div style="font-size: 11px; color: var(--text-muted);">Klik untuk melanjutkan</div>
                     </div>
                 </div>
@@ -334,16 +382,13 @@ $sessions = getSessions($fingerprint);
             </div>
         </div>
     </div>
-    <?php endif; ?>
-
+<?php else: ?>
     <!-- TOAST -->
     <div class="toast" id="toast"></div>
 
     <!-- NAVBAR -->
     <nav class="navbar">
-        <div class="nav-brand">
-            <span class="brand-icon">S</span> POLAR.ID
-        </div>
+        <div class="nav-brand"><span class="brand-icon">S</span> POLAR.ID</div>
         <div class="nav-right">
             <div class="coin-badge"><i class="fas fa-coins"></i> <?= $user_coins ?></div>
             <div class="profile-btn" onclick="navTo('profile')">
@@ -402,9 +447,7 @@ $sessions = getSessions($fingerprint);
 
             <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <div style="background: rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">
-                        <?= substr($user_name, 0, 1) ?>
-                    </div>
+                    <div style="background: rgba(255,255,255,0.1); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;"><?= substr($user_name, 0, 1) ?></div>
                     <div>
                         <div style="font-size: 10px; color: var(--text-muted); font-weight: bold;">LOGIN AS</div>
                         <div style="font-weight: bold;"><?= $user_name ?></div>
@@ -482,9 +525,7 @@ $sessions = getSessions($fingerprint);
                         <div style="background: var(--orange); padding: 8px; border-radius: 8px;"><i class="fas fa-server" style="color:white;"></i></div>
                         <div><h3 style="font-size: 16px; font-weight: 900;">PHOENIX MD</h3><div style="font-size: 11px; color: var(--text-muted);">Pterodactyl Node</div></div>
                     </div>
-                    <div class="badge-status <?= $phoenix_status['online'] ? 'bg-online' : 'bg-offline' ?>">
-                        <?= $phoenix_status['online'] ? 'ONLINE' : 'OFFLINE' ?>
-                    </div>
+                    <div class="badge-status <?= $phoenix_status['online'] ? 'bg-online' : 'bg-offline' ?>"><?= $phoenix_status['online'] ? 'ONLINE' : 'OFFLINE' ?></div>
                 </div>
                 <div class="spec-row"><span style="color: var(--text-muted);">RAM PENGGUNAAN</span><span style="font-weight: bold; color: var(--white);"><?= $phoenix_status['ram'] ?></span></div>
                 <div class="spec-row"><span style="color: var(--text-muted);">PING</span><span style="font-weight: bold; color: var(--white);"><?= $phoenix_status['ping'] ?></span></div>
@@ -496,9 +537,7 @@ $sessions = getSessions($fingerprint);
                         <div style="background: var(--white); padding: 8px; border-radius: 8px;"><i class="fas fa-microchip" style="color:#000;"></i></div>
                         <div><h3 style="font-size: 16px; font-weight: 900;">OURIN CORE</h3><div style="font-size: 11px; color: var(--text-muted);">Native Script</div></div>
                     </div>
-                    <div class="badge-status <?= $ourin_status['online'] ? 'bg-online' : 'bg-offline' ?>">
-                        <?= $ourin_status['online'] ? 'ONLINE' : 'OFFLINE' ?>
-                    </div>
+                    <div class="badge-status <?= $ourin_status['online'] ? 'bg-online' : 'bg-offline' ?>"><?= $ourin_status['online'] ? 'ONLINE' : 'OFFLINE' ?></div>
                 </div>
                 <div class="spec-row"><span style="color: var(--text-muted);">RAM PENGGUNAAN</span><span style="font-weight: bold; color: var(--white);"><?= $ourin_status['ram'] ?></span></div>
                 <div class="spec-row"><span style="color: var(--text-muted);">PING</span><span style="font-weight: bold; color: var(--white);"><?= $ourin_status['ping'] ?></span></div>
@@ -535,18 +574,12 @@ $sessions = getSessions($fingerprint);
                     </div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;">
                         <?php if ($s['status'] === 'waiting_pair' || $s['status'] === 'pending'): ?>
-                        <button class="btn btn-sm btn-orange" onclick="openPairModal('<?= $s['phone'] ?>')">
-                            <i class="fas fa-link"></i> Pairing
-                        </button>
+                        <button class="btn btn-sm btn-orange" onclick="openPairModal('<?= $s['phone'] ?>')"><i class="fas fa-link"></i> Pairing</button>
                         <?php endif; ?>
                         <?php if ($s['status'] === 'online'): ?>
-                        <button class="btn btn-sm btn-success" onclick="showToast('Bot sedang online!', 'success')">
-                            <i class="fas fa-circle"></i> Online
-                        </button>
+                        <button class="btn btn-sm btn-success" onclick="showToast('Bot sedang online!', 'success')"><i class="fas fa-circle"></i> Online</button>
                         <?php endif; ?>
-                        <button class="btn btn-sm btn-danger" onclick="deleteSession(<?= $s['id'] ?>, '<?= $s['phone'] ?>')">
-                            <i class="fas fa-trash"></i> Hapus
-                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteSession(<?= $s['id'] ?>, '<?= $s['phone'] ?>')"><i class="fas fa-trash"></i> Hapus</button>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -562,7 +595,6 @@ $sessions = getSessions($fingerprint);
                 </div>
                 <h1 style="font-weight: 900; font-size: 28px; margin-top: 15px;"><?= $user_name ?></h1>
                 <p style="color: var(--text-muted); font-size: 13px;"><?= $user_email ?></p>
-                
                 <div style="background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: inline-flex; align-items: center; gap: 15px; padding: 8px 20px; border-radius: 50px; margin-top: 15px;">
                     <div style="font-weight: bold; color: var(--yellow);"><i class="fas fa-coins"></i> <?= $user_coins ?></div>
                     <div style="font-size: 11px; font-weight: bold; letter-spacing: 1px;">SHIKYCOIN</div>
@@ -605,9 +637,6 @@ $sessions = getSessions($fingerprint);
         // ========== SUPABASE CONFIG ==========
         const SB_URL = '<?= SUPABASE_URL ?>';
         const SB_KEY = '<?= SUPABASE_KEY ?>';
-        const PREFIX = '<?= PREFIX ?>';
-        let activePairPhone = null;
-        let pairInterval = null;
 
         // ========== TOAST ==========
         function showToast(message, type = 'info') {
@@ -676,7 +705,6 @@ $sessions = getSessions($fingerprint);
         async function createSession() {
             const phone = document.getElementById('phoneInput').value.trim();
             const token = document.getElementById('tokenInput').value.trim().toUpperCase();
-            
             const scriptEl = document.querySelector('.select-box.active[data-script]');
             const script = scriptEl ? scriptEl.dataset.script : 'phoenix_md';
 
@@ -693,20 +721,17 @@ $sessions = getSessions($fingerprint);
             btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
 
             try {
-                // 1. Verifikasi token
                 const redeemData = await supabaseRequest('GET', `redeems?code=eq.${token}&select=*`);
                 if (!redeemData?.length) throw new Error('Token tidak valid');
                 if (redeemData[0].used) throw new Error('Token sudah digunakan');
                 if (Date.now() - redeemData[0].created_at > 600000) throw new Error('Token expired');
 
-                // 2. Update token
                 await supabaseRequest('PATCH', `redeems?code=eq.${token}`, {
                     used: true,
                     used_by: '<?= $fingerprint ?>',
                     phone: cleanPhone
                 });
 
-                // 3. Buat session
                 const fingerprint = '<?= $fingerprint ?>';
                 await supabaseRequest('POST', 'polar_sessions', {
                     fingerprint: fingerprint,
@@ -743,8 +768,8 @@ $sessions = getSessions($fingerprint);
         }
 
         // ========== PAIRING MODAL ==========
+        let pairInterval = null;
         async function openPairModal(phone) {
-            activePairPhone = phone;
             document.getElementById('pairModal').classList.add('active');
             document.getElementById('pairContent').innerHTML = `
                 <div class="spinner" style="width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 15px;"></div>
@@ -759,12 +784,9 @@ $sessions = getSessions($fingerprint);
                         if (data[0].pairing_code) {
                             const code = data[0].pairing_code.match(/.{1,4}/g)?.join('-') || data[0].pairing_code;
                             document.getElementById('pairContent').innerHTML = `
-                                <div style="background:var(--bg-main);border:2px dashed var(--orange);border-radius:12px;padding:20px;text-align:center;">
-                                    <div style="font-size:32px;font-weight:900;letter-spacing:4px;font-family:monospace;color:var(--orange);">${code}</div>
-                                </div>
-                                <div style="margin-top:15px;font-size:12px;color:var(--text-muted);">
-                                    Masukkan kode ini di WhatsApp:
-                                    <br><br>
+                                <div class="pair-code">${code}</div>
+                                <div style="font-size:12px;color:var(--text-muted);">
+                                    Masukkan kode ini di WhatsApp:<br><br>
                                     <ol style="text-align:left;padding-left:20px;line-height:2;">
                                         <li>Buka WhatsApp → Settings</li>
                                         <li>Perangkat Tertaut → Tautkan Perangkat</li>
@@ -782,7 +804,6 @@ $sessions = getSessions($fingerprint);
                             document.getElementById('pairContent').innerHTML = `
                                 <div style="font-size:48px;text-align:center;margin-bottom:15px;">✅</div>
                                 <h3 style="text-align:center;color:var(--green);">Bot Berhasil Online!</h3>
-                                <p style="text-align:center;color:var(--text-muted);">Session sudah terhubung</p>
                                 <button onclick="closePairModal()" class="btn btn-orange" style="width:100%;margin-top:15px;">Tutup</button>
                             `;
                             clearInterval(pairInterval);
@@ -795,13 +816,12 @@ $sessions = getSessions($fingerprint);
         function closePairModal() {
             if (pairInterval) clearInterval(pairInterval);
             document.getElementById('pairModal').classList.remove('active');
-            activePairPhone = null;
         }
 
-        // ========== CLOSE MODAL ON OVERLAY ==========
         document.getElementById('pairModal').addEventListener('click', function(e) {
             if (e.target === this) closePairModal();
         });
     </script>
+<?php endif; ?>
 </body>
 </html>
