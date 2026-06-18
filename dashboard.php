@@ -1316,7 +1316,8 @@ $maxSessions = 10;
                 document.getElementById('sidebar').classList.remove('active');
                 document.getElementById('sidebarOverlay').classList.remove('active');
             }
-            try { localStorage.setItem('polar_tutorial_done', '1'); } catch(e) {}
+            const uid = '<?= $_SESSION['user_google_id'] ?? '' ?>';
+            try { localStorage.setItem('polar_tutorial_done_' + uid, '1'); } catch(e) {}
         }
 
         window.addEventListener('resize', () => {
@@ -1337,8 +1338,11 @@ $maxSessions = 10;
             // Kalau login overlay tidak ada di DOM = user sudah login = jalankan tutorial
             const hasLoginOverlay = document.querySelector('.login-overlay') !== null;
             if (!hasLoginOverlay) {
-                try { localStorage.removeItem('polar_tutorial_done'); } catch(e) {}
-                setTimeout(startTutorial, 600);
+                const uid = '<?= $_SESSION['user_google_id'] ?? '' ?>';
+                const tutKey = 'polar_tutorial_done_' + uid;
+                let tutorialDone = false;
+                try { tutorialDone = localStorage.getItem(tutKey) === '1'; } catch(e) {}
+                if (!tutorialDone) setTimeout(startTutorial, 600);
             }
         });
 
