@@ -1,22 +1,15 @@
 <?php
 // claim-coin.php - FIX ERROR 500
-// Pastikan tidak ada output sebelum session_start()
-
-// Matikan error display di production, aktifkan di development
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
-// Session harus di awal, sebelum output apapun
 session_start();
-
-// Include config
 require_once 'config.php';
 
 // ========== FUNGSI CURL KE SUPABASE ==========
 function supabaseRequest($method, $endpoint, $body = null) {
     global $SUPABASE_URL, $SUPABASE_KEY;
     
-    // Gunakan konstanta dari config jika ada
     if (!isset($SUPABASE_URL)) {
         $SUPABASE_URL = 'https://xcxciixqhmghitmyigbj.supabase.co';
     }
@@ -55,192 +48,21 @@ function supabaseRequest($method, $endpoint, $body = null) {
 
 // ========== CEK FLAG ==========
 if (!isset($_SESSION['can_claim']) || $_SESSION['can_claim'] !== true) {
-    ?>
-    <!DOCTYPE html>
-    <html lang="id">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Akses Ditolak — Polar.id</title>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
-        <style>
-            body {
-                font-family: 'Poppins', sans-serif;
-                background: #0a0a0f;
-                color: white;
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            }
-            .card {
-                background: #14141e;
-                border: 1px solid #2a2a35;
-                border-radius: 20px;
-                padding: 48px 36px;
-                max-width: 420px;
-                width: 100%;
-                text-align: center;
-                animation: slideUp 0.5s ease;
-            }
-            @keyframes slideUp {
-                from { opacity: 0; transform: translateY(30px); }
-                to { opacity: 1; transform: translateY(0); }
-            }
-            .icon { font-size: 64px; margin-bottom: 16px; }
-            h1 { font-size: 24px; font-weight: 900; margin-bottom: 8px; color: #ef4444; }
-            p { color: #8b8b9b; font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
-            .btn {
-                display: inline-block;
-                padding: 14px 32px;
-                background: linear-gradient(135deg, #FF6B00, #e05e00);
-                color: white;
-                border: none;
-                border-radius: 12px;
-                font-weight: 800;
-                text-decoration: none;
-                transition: all 0.3s ease;
-                font-size: 14px;
-            }
-            .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,0,0.3); }
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <div class="icon">🚫</div>
-            <h1>Akses Ditolak</h1>
-            <p>Silakan klik <strong>"EARN POLAR COIN"</strong> terlebih dahulu di dashboard.</p>
-            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali</a>
-        </div>
-    </body>
-    </html>
-    <?php
+    // Redirect ke dashboard dengan pesan
+    header('Location: dashboard.php?error=akses_ditolak');
     exit;
 }
 
 // ========== CEK EXPIRED ==========
 if (isset($_SESSION['claim_time']) && (time() - $_SESSION['claim_time']) > 600) {
     $_SESSION['can_claim'] = false;
-    ?>
-    <!DOCTYPE html>
-    <html lang="id">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Sesi Kedaluwarsa — Polar.id</title>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
-        <style>
-            body {
-                font-family: 'Poppins', sans-serif;
-                background: #0a0a0f;
-                color: white;
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            }
-            .card {
-                background: #14141e;
-                border: 1px solid #2a2a35;
-                border-radius: 20px;
-                padding: 48px 36px;
-                max-width: 420px;
-                width: 100%;
-                text-align: center;
-                animation: slideUp 0.5s ease;
-            }
-            .icon { font-size: 64px; margin-bottom: 16px; }
-            h1 { font-size: 24px; font-weight: 900; margin-bottom: 8px; color: #f59e0b; }
-            p { color: #8b8b9b; font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
-            .btn {
-                display: inline-block;
-                padding: 14px 32px;
-                background: linear-gradient(135deg, #FF6B00, #e05e00);
-                color: white;
-                border: none;
-                border-radius: 12px;
-                font-weight: 800;
-                text-decoration: none;
-                transition: all 0.3s ease;
-                font-size: 14px;
-            }
-            .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,0,0.3); }
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <div class="icon">⏰</div>
-            <h1>Sesi Kedaluwarsa</h1>
-            <p>Waktu claim sudah habis (10 menit). Klik <strong>"EARN POLAR COIN"</strong> lagi.</p>
-            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali</a>
-        </div>
-    </body>
-    </html>
-    <?php
+    header('Location: dashboard.php?error=sesi_kadaluarsa');
     exit;
 }
 
 // ========== CEK LOGIN ==========
 if (!isset($_SESSION['user_google_id'])) {
-    ?>
-    <!DOCTYPE html>
-    <html lang="id">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Harap Login — Polar.id</title>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
-        <style>
-            body {
-                font-family: 'Poppins', sans-serif;
-                background: #0a0a0f;
-                color: white;
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            }
-            .card {
-                background: #14141e;
-                border: 1px solid #2a2a35;
-                border-radius: 20px;
-                padding: 48px 36px;
-                max-width: 420px;
-                width: 100%;
-                text-align: center;
-                animation: slideUp 0.5s ease;
-            }
-            .icon { font-size: 64px; margin-bottom: 16px; }
-            h1 { font-size: 24px; font-weight: 900; margin-bottom: 8px; color: #3b82f6; }
-            p { color: #8b8b9b; font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
-            .btn {
-                display: inline-block;
-                padding: 14px 32px;
-                background: linear-gradient(135deg, #FF6B00, #e05e00);
-                color: white;
-                border: none;
-                border-radius: 12px;
-                font-weight: 800;
-                text-decoration: none;
-                transition: all 0.3s ease;
-                font-size: 14px;
-            }
-            .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,0,0.3); }
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <div class="icon">🔐</div>
-            <h1>Harap Login</h1>
-            <p>Silakan login terlebih dahulu untuk mengklaim Polar Coin.</p>
-            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Login</a>
-        </div>
-    </body>
-    </html>
-    <?php
+    header('Location: dashboard.php?error=harap_login');
     exit;
 }
 
@@ -265,63 +87,67 @@ $claimedToday = $data[0]['count'] ?? 0;
 
 if ($claimedToday >= 5) {
     $_SESSION['can_claim'] = false;
-    ?>
-    <!DOCTYPE html>
-    <html lang="id">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Limit Tercapai — Polar.id</title>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
-        <style>
-            body {
-                font-family: 'Poppins', sans-serif;
-                background: #0a0a0f;
-                color: white;
-                min-height: 100vh;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 20px;
-            }
-            .card {
-                background: #14141e;
-                border: 1px solid #2a2a35;
-                border-radius: 20px;
-                padding: 48px 36px;
-                max-width: 420px;
-                width: 100%;
-                text-align: center;
-                animation: slideUp 0.5s ease;
-            }
-            .icon { font-size: 64px; margin-bottom: 16px; }
-            h1 { font-size: 24px; font-weight: 900; margin-bottom: 8px; color: #ef4444; }
-            p { color: #8b8b9b; font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
-            .btn {
-                display: inline-block;
-                padding: 14px 32px;
-                background: linear-gradient(135deg, #FF6B00, #e05e00);
-                color: white;
-                border: none;
-                border-radius: 12px;
-                font-weight: 800;
-                text-decoration: none;
-                transition: all 0.3s ease;
-                font-size: 14px;
-            }
-            .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,0,0.3); }
-        </style>
-    </head>
-    <body>
-        <div class="card">
-            <div class="icon">🛑</div>
-            <h1>Limit Tercapai!</h1>
-            <p>Anda sudah mengambil <strong>5 Polar Coin</strong> hari ini. Coba lagi besok! 🪙</p>
-            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali</a>
-        </div>
-    </body>
-    </html>
-    <?php
+    header('Location: dashboard.php?error=limit_tercapai');
+    exit;
+}
+
+// ========== CEK APAKAH ADA RECORD PENDING ==========
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/coin_claims?user_id=eq.' . urlencode($user_id) . '&date=eq.' . $today . '&status=eq.pending&limit=1');
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    'apikey: ' . SUPABASE_KEY,
+    'Authorization: Bearer ' . SUPABASE_KEY
+]);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+$response = curl_exec($ch);
+curl_close($ch);
+
+$pendingData = json_decode($response, true);
+
+// Jika tidak ada record pending, buat baru
+if (empty($pendingData)) {
+    // Insert record baru
+    $insertData = json_encode([
+        'user_id' => $user_id,
+        'date' => $today,
+        'status' => 'pending',
+        'created_at' => date('Y-m-d H:i:s')
+    ]);
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/coin_claims');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $insertData);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'apikey: ' . SUPABASE_KEY,
+        'Authorization: Bearer ' . SUPABASE_KEY
+    ]);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_exec($ch);
+    curl_close($ch);
+    
+    // Ambil record yang baru dibuat
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/coin_claims?user_id=eq.' . urlencode($user_id) . '&date=eq.' . $today . '&status=eq.pending&limit=1');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'apikey: ' . SUPABASE_KEY,
+        'Authorization: Bearer ' . SUPABASE_KEY
+    ]);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    $pendingData = json_decode($response, true);
+}
+
+$recordId = $pendingData[0]['id'] ?? null;
+
+if (!$recordId) {
+    $_SESSION['can_claim'] = false;
+    header('Location: dashboard.php?error=gagal_claim');
     exit;
 }
 
@@ -332,7 +158,7 @@ $updateData = json_encode([
 ]);
 
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/coin_claims?user_id=eq.' . urlencode($user_id) . '&date=eq.' . $today . '&status=eq.pending&limit=1');
+curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/coin_claims?id=eq.' . $recordId);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_PATCH, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $updateData);
@@ -352,7 +178,6 @@ $_SESSION['user_coins'] = ($_SESSION['user_coins'] ?? 0) + 1;
 $_SESSION['can_claim'] = false;
 
 $remaining = 5 - ($claimedToday + 1);
-
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -450,27 +275,30 @@ $remaining = 5 - ($claimedToday + 1);
             0% { opacity: 1; transform: translateY(0) rotate(0deg); }
             100% { opacity: 0; transform: translateY(300px) rotate(720deg); }
         }
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #ffcc00;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <div class="card" id="claimCard">
-        <!-- Loading State -->
+    <div class="card">
         <div id="loadingState">
-            <div style="margin-bottom:16px;">
-                <div class="spinner" style="width:32px;height:32px;border:3px solid rgba(255,255,255,0.1);border-top-color:#ffcc00;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;"></div>
-            </div>
+            <div style="margin-bottom:16px;"><div class="spinner"></div></div>
             <h2 style="font-size:20px;font-weight:700;">Memproses...</h2>
             <p style="color:#8b8b9b;">Mohon tunggu sebentar</p>
         </div>
-
-        <!-- Success State -->
         <div id="successState" style="display:none;">
             <div class="icon">🪙</div>
             <h1>+1 <span>Polar Coin</span></h1>
             <p>Polar Coin berhasil ditambahkan ke akun Anda!</p>
-            <div class="coin-display">
-                <?= $_SESSION['user_coins'] ?? 0 ?> 🪙
-            </div>
+            <div class="coin-display"><?= $_SESSION['user_coins'] ?? 0 ?> 🪙</div>
             <div class="remaining">
                 <?php if ($remaining > 0): ?>
                     Sisa claim hari ini: <strong style="color:#ffcc00;"><?= $remaining ?></strong> lagi
@@ -478,14 +306,13 @@ $remaining = 5 - ($claimedToday + 1);
                     🎉 Anda sudah mencapai limit 5 Polar Coin hari ini!
                 <?php endif; ?>
             </div>
-            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali ke Dashboard</a>
+            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali</a>
             <br>
             <a href="dashboard.php" class="btn-secondary">🔄 Refresh</a>
         </div>
     </div>
 
     <script>
-        // ===== CONFETTI EFFECT =====
         function launchConfetti() {
             const colors = ['#ffcc00', '#FF6B00', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6', '#ec4899'];
             const container = document.createElement('div');
@@ -509,12 +336,10 @@ $remaining = 5 - ($claimedToday + 1);
             setTimeout(() => container.remove(), 3000);
         }
 
-        // ===== ANIMASI LOADING → SUCCESS =====
         document.addEventListener('DOMContentLoaded', function() {
             const loading = document.getElementById('loadingState');
             const success = document.getElementById('successState');
             
-            // Tampilkan loading 1.5 detik
             setTimeout(() => {
                 loading.style.display = 'none';
                 success.style.display = 'block';
