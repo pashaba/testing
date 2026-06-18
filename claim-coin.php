@@ -1,9 +1,59 @@
 <?php
-// claim-coin.php
+// claim-coin.php - FIX ERROR 500
+// Pastikan tidak ada output sebelum session_start()
+
+// Matikan error display di production, aktifkan di development
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+
+// Session harus di awal, sebelum output apapun
 session_start();
+
+// Include config
 require_once 'config.php';
 
-// ========== CEK SESSION FLAG ==========
+// ========== FUNGSI CURL KE SUPABASE ==========
+function supabaseRequest($method, $endpoint, $body = null) {
+    global $SUPABASE_URL, $SUPABASE_KEY;
+    
+    // Gunakan konstanta dari config jika ada
+    if (!isset($SUPABASE_URL)) {
+        $SUPABASE_URL = 'https://xcxciixqhmghitmyigbj.supabase.co';
+    }
+    if (!isset($SUPABASE_KEY)) {
+        $SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjeGNpaXhxaG1naGl0bXlpZ2JqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODU2MzQ2MCwiZXhwIjoyMDk0MTM5NDYwfQ.Tzg34ww9r2X2WrZ9wcYoajoQUjUfRkOxnsdARskfvJE';
+    }
+    
+    $url = $SUPABASE_URL . '/rest/v1/' . $endpoint;
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'apikey: ' . $SUPABASE_KEY,
+        'Authorization: Bearer ' . $SUPABASE_KEY,
+        'Content-Type: application/json',
+        'Prefer: return=representation'
+    ]);
+    if ($body) {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
+    }
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
+    curl_close($ch);
+    
+    return [
+        'code' => $httpCode,
+        'data' => json_decode($response, true),
+        'error' => $error
+    ];
+}
+
+// ========== CEK FLAG ==========
 if (!isset($_SESSION['can_claim']) || $_SESSION['can_claim'] !== true) {
     ?>
     <!DOCTYPE html>
@@ -60,8 +110,8 @@ if (!isset($_SESSION['can_claim']) || $_SESSION['can_claim'] !== true) {
         <div class="card">
             <div class="icon">🚫</div>
             <h1>Akses Ditolak</h1>
-            <p>Silakan klik <strong>"EARN POLAR COIN"</strong> terlebih dahulu di dashboard untuk mendapatkan akses.</p>
-            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali ke Dashboard</a>
+            <p>Silakan klik <strong>"EARN POLAR COIN"</strong> terlebih dahulu di dashboard.</p>
+            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali</a>
         </div>
     </body>
     </html>
@@ -69,7 +119,7 @@ if (!isset($_SESSION['can_claim']) || $_SESSION['can_claim'] !== true) {
     exit;
 }
 
-// ========== CEK EXPIRED (10 menit) ==========
+// ========== CEK EXPIRED ==========
 if (isset($_SESSION['claim_time']) && (time() - $_SESSION['claim_time']) > 600) {
     $_SESSION['can_claim'] = false;
     ?>
@@ -123,8 +173,8 @@ if (isset($_SESSION['claim_time']) && (time() - $_SESSION['claim_time']) > 600) 
         <div class="card">
             <div class="icon">⏰</div>
             <h1>Sesi Kedaluwarsa</h1>
-            <p>Waktu claim sudah habis (10 menit). Silakan klik <strong>"EARN POLAR COIN"</strong> lagi di dashboard.</p>
-            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali ke Dashboard</a>
+            <p>Waktu claim sudah habis (10 menit). Klik <strong>"EARN POLAR COIN"</strong> lagi.</p>
+            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali</a>
         </div>
     </body>
     </html>
@@ -194,10 +244,11 @@ if (!isset($_SESSION['user_google_id'])) {
     exit;
 }
 
+// ========== PROSES KLAIM ==========
 $user_id = $_SESSION['user_google_id'];
 $today = date('Y-m-d');
 
-// ========== CEK LIMIT 5 PER HARI ==========
+// CEK LIMIT 5 PER HARI
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/coin_claims?user_id=eq.' . urlencode($user_id) . '&date=eq.' . $today . '&select=count');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -266,7 +317,7 @@ if ($claimedToday >= 5) {
             <div class="icon">🛑</div>
             <h1>Limit Tercapai!</h1>
             <p>Anda sudah mengambil <strong>5 Polar Coin</strong> hari ini. Coba lagi besok! 🪙</p>
-            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali ke Dashboard</a>
+            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali</a>
         </div>
     </body>
     </html>
@@ -336,29 +387,14 @@ $remaining = 5 - ($claimedToday + 1);
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .icon {
-            font-size: 72px;
-            margin-bottom: 16px;
-            animation: bounce 1s ease infinite;
-        }
+        .icon { font-size: 72px; margin-bottom: 16px; animation: bounce 1s ease infinite; }
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
-        h1 {
-            font-size: 28px;
-            font-weight: 900;
-            margin-bottom: 8px;
-        }
-        h1 span {
-            color: #ffcc00;
-        }
-        p {
-            color: #8b8b9b;
-            font-size: 14px;
-            margin-bottom: 8px;
-            line-height: 1.6;
-        }
+        h1 { font-size: 28px; font-weight: 900; margin-bottom: 8px; }
+        h1 span { color: #ffcc00; }
+        p { color: #8b8b9b; font-size: 14px; margin-bottom: 8px; line-height: 1.6; }
         .coin-display {
             font-size: 48px;
             font-weight: 900;
@@ -369,11 +405,7 @@ $remaining = 5 - ($claimedToday + 1);
             border-radius: 12px;
             border: 1px solid rgba(255,204,0,0.1);
         }
-        .remaining {
-            font-size: 13px;
-            color: #8b8b9b;
-            margin-bottom: 20px;
-        }
+        .remaining { font-size: 13px; color: #8b8b9b; margin-bottom: 20px; }
         .btn {
             display: inline-block;
             padding: 14px 32px;
@@ -386,10 +418,7 @@ $remaining = 5 - ($claimedToday + 1);
             transition: all 0.3s ease;
             font-size: 14px;
         }
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(255,107,0,0.3);
-        }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,0,0.3); }
         .btn-secondary {
             background: rgba(255,255,255,0.05);
             border: 1px solid #2a2a35;
@@ -402,37 +431,18 @@ $remaining = 5 - ($claimedToday + 1);
             font-size: 13px;
             transition: all 0.3s ease;
         }
-        .btn-secondary:hover {
-            background: rgba(255,255,255,0.08);
-            color: white;
-        }
-
-        /* Loading state */
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: #ffcc00;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Success animation */
-        .confetti {
+        .btn-secondary:hover { background: rgba(255,255,255,0.08); color: white; }
+        .confetti-container {
             position: fixed;
+            inset: 0;
             pointer-events: none;
             z-index: 999;
+            overflow: hidden;
         }
         .confetti-piece {
             position: absolute;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 2px;
             animation: confettiFall 2s ease forwards;
         }
@@ -445,16 +455,16 @@ $remaining = 5 - ($claimedToday + 1);
 <body>
     <div class="card" id="claimCard">
         <!-- Loading State -->
-        <div id="loadingState" style="display:none;">
+        <div id="loadingState">
             <div style="margin-bottom:16px;">
-                <div class="loading-spinner"></div>
+                <div class="spinner" style="width:32px;height:32px;border:3px solid rgba(255,255,255,0.1);border-top-color:#ffcc00;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;"></div>
             </div>
             <h2 style="font-size:20px;font-weight:700;">Memproses...</h2>
-            <p style="color:var(--text-muted);">Mohon tunggu sebentar</p>
+            <p style="color:#8b8b9b;">Mohon tunggu sebentar</p>
         </div>
 
         <!-- Success State -->
-        <div id="successState">
+        <div id="successState" style="display:none;">
             <div class="icon">🪙</div>
             <h1>+1 <span>Polar Coin</span></h1>
             <p>Polar Coin berhasil ditambahkan ke akun Anda!</p>
@@ -475,47 +485,39 @@ $remaining = 5 - ($claimedToday + 1);
     </div>
 
     <script>
-        // Confetti effect
+        // ===== CONFETTI EFFECT =====
         function launchConfetti() {
-            const colors = ['#ffcc00', '#FF6B00', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6'];
+            const colors = ['#ffcc00', '#FF6B00', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6', '#ec4899'];
             const container = document.createElement('div');
-            container.className = 'confetti';
-            container.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden;';
-            
-            for (let i = 0; i < 50; i++) {
+            container.className = 'confetti-container';
+            for (let i = 0; i < 60; i++) {
                 const piece = document.createElement('div');
                 piece.className = 'confetti-piece';
                 piece.style.cssText = `
-                    position:absolute;
-                    width:${6 + Math.random() * 8}px;
-                    height:${6 + Math.random() * 8}px;
-                    background:${colors[Math.floor(Math.random() * colors.length)]};
-                    top:${-10 + Math.random() * 10}%;
-                    left:${Math.random() * 100}%;
-                    border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
-                    animation-delay:${Math.random() * 0.5}s;
-                    animation-duration:${1.5 + Math.random() * 1}s;
+                    left: ${Math.random() * 100}%;
+                    top: ${-10 + Math.random() * 10}%;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    width: ${5 + Math.random() * 8}px;
+                    height: ${5 + Math.random() * 8}px;
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+                    animation-delay: ${Math.random() * 0.8}s;
+                    animation-duration: ${1.5 + Math.random() * 1.5}s;
                 `;
                 container.appendChild(piece);
             }
             document.body.appendChild(container);
-            
             setTimeout(() => container.remove(), 3000);
         }
 
-        // Tampilkan loading dulu, lalu success
+        // ===== ANIMASI LOADING → SUCCESS =====
         document.addEventListener('DOMContentLoaded', function() {
-            const loadingState = document.getElementById('loadingState');
-            const successState = document.getElementById('successState');
+            const loading = document.getElementById('loadingState');
+            const success = document.getElementById('successState');
             
-            // Tampilkan loading
-            loadingState.style.display = 'block';
-            successState.style.display = 'none';
-            
-            // Setelah 1.5 detik, tampilkan success + confetti
+            // Tampilkan loading 1.5 detik
             setTimeout(() => {
-                loadingState.style.display = 'none';
-                successState.style.display = 'block';
+                loading.style.display = 'none';
+                success.style.display = 'block';
                 launchConfetti();
             }, 1500);
         });
