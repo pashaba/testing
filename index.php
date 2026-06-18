@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     
     <title>Free Jadibot WhatsApp</title>
-    <meta name="title" content="Free Jadibot WhatsApp" />
+    <meta name="title" content="polar.web.id | jadi bot whatsapp gratis" />
     <meta name="description" content="Platform bot WhatsApp multi device gratis. Kelola session bot WA tanpa login, tanpa registrasi. Cepat, mudah, dan support Phoenix MD & Ourin MD." />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -484,7 +484,7 @@ $totalUsers = count($uniqueFingerprints);
 
 <div id="splash">
     <div class="splash-icon">❄️</div>
-    <div class="splash-name">Polar.id</div>
+    <div class="splash-name">Polar.web.id</div>
     <div class="splash-bar"><div class="splash-fill"></div></div>
 </div>
 
@@ -495,7 +495,7 @@ $totalUsers = count($uniqueFingerprints);
             Unli Slot Tersedia
         </div>
         
-        <h1>Free Bot <span class="highlight">Server</span> Hosting</h1>
+        <h1>Free Jadibot <span class="highlight">Whatsapp</span> Bot</h1>
         
         <p class="hero-subtitle">
             Dapatkan server bot gratis dengan spesifikasi terbaik. Claim sekarang sebelum slot habis!
