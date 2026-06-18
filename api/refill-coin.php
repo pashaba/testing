@@ -6,7 +6,7 @@
 require_once '../config.php';
 
 // Secret key untuk keamanan (ganti dengan kunci rahasia Anda)
-define('CRON_SECRET', 'your-secret-key-here-change-me');
+define('CRON_SECRET', 'pashapro');
 
 // Cek secret key
 $secret = $_GET['secret'] ?? '';
