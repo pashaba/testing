@@ -775,89 +775,89 @@ $maxSessions = 10;
             document.getElementById('selectedDays').value = days;
             document.getElementById('selectedCoin').value = coin;
         }
-
-        // ========== EARN COIN (ALL-IN-ONE) ==========
-        function earnCoin() {
-            if (isProcessing) return;
-            isProcessing = true;
-            
-            const btn = event?.target?.closest?.('.earn-btn') || document.querySelector('.earn-btn');
-            const originalText = btn ? btn.innerHTML : 'EARN';
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
-                btn.classList.add('loading');
+// ========== EARN COIN (ALL-IN-ONE) ==========
+function earnCoin() {
+    if (isProcessing) return;
+    isProcessing = true;
+    
+    const btn = event?.target?.closest?.('.earn-btn') || document.querySelector('.earn-btn');
+    const originalText = btn ? btn.innerHTML : 'EARN';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
+        btn.classList.add('loading');
+    }
+    
+    // Ambil data dari session via AJAX ke file yang sama
+    fetch('?action=get_earn_status')
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                showToast('❌ ' + (data.message || 'Gagal mengambil Polar Coin'), 'error');
+                throw new Error(data.message);
             }
             
-            // Ambil data dari session via AJAX ke file yang sama
-            fetch('?action=get_earn_status')
-                .then(res => res.json())
-                .then(data => {
-                    if (!data.success) {
-                        showToast('❌ ' + (data.message || 'Gagal mengambil Polar Coin'), 'error');
-                        throw new Error(data.message);
-                    }
+            const claimedToday = data.claimed_today || 0;
+            const maxPerDay = 5;
+            
+            if (claimedToday >= maxPerDay) {
+                showToast('❌ Anda sudah mengambil ' + maxPerDay + ' Polar Coin hari ini. Coba lagi besok! 🪙', 'error');
+                return;
+            }
+            
+            // ========== AMBIL LINK PREMADE BERDASARKAN INDEX ==========
+            const index = claimedToday;
+            const link = POLAR_LINKS[index]; // ← Pakai link premade yang sudah di-hardcode
+            
+            if (!link) {
+                showToast('❌ Tidak ada link tersedia. Hubungi admin.', 'error');
+                return;
+            }
+            
+            // Kirim request claim
+            fetch('?action=claim_coin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ index: index })
+            })
+            .then(res => res.json())
+            .then(claimData => {
+                if (claimData.success) {
+                    // ========== BUKA LINK PREMADE ==========
+                    window.open(link, '_blank');
+                    const remaining = maxPerDay - (claimedToday + 1);
+                    showToast('🪙 Polar Coin berhasil diambil! Sisa ' + remaining + ' coin hari ini.', 'gold');
                     
-                    const claimedToday = data.claimed_today || 0;
-                    const maxPerDay = 5;
+                    // Update coin display
+                    const newCoins = parseInt(document.getElementById('coinCount')?.textContent || '0') + 1;
+                    document.querySelectorAll('#coinCount, #claimCoinDisplay, #profileCoinDisplay').forEach(el => {
+                        if (el) el.textContent = newCoins;
+                    });
                     
-                    if (claimedToday >= maxPerDay) {
-                        showToast('❌ Anda sudah mengambil ' + maxPerDay + ' Polar Coin hari ini. Coba lagi besok! 🪙', 'error');
-                        return;
-                    }
+                    // Animasi coin
+                    document.getElementById('coinBadge')?.classList.add('animate-coin');
+                    setTimeout(() => {
+                        document.getElementById('coinBadge')?.classList.remove('animate-coin');
+                    }, 1000);
                     
-                    // Ambil link berdasarkan index
-                    const index = claimedToday;
-                    const link = POLAR_LINKS[index];
-                    
-                    if (!link) {
-                        showToast('❌ Tidak ada link tersedia. Hubungi admin.', 'error');
-                        return;
-                    }
-                    
-                    // Kirim request claim
-                    fetch('?action=claim_coin', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ index: index })
-                    })
-                    .then(res => res.json())
-                    .then(claimData => {
-                        if (claimData.success) {
-                            window.open(link, '_blank');
-                            const remaining = maxPerDay - (claimedToday + 1);
-                            showToast('🪙 Polar Coin berhasil diambil! Sisa ' + remaining + ' coin hari ini.', 'gold');
-                            
-                            // Update coin display
-                            const newCoins = parseInt(document.getElementById('coinCount')?.textContent || '0') + 1;
-                            document.querySelectorAll('#coinCount, #claimCoinDisplay, #profileCoinDisplay').forEach(el => {
-                                if (el) el.textContent = newCoins;
-                            });
-                            
-                            // Animasi coin
-                            document.getElementById('coinBadge')?.classList.add('animate-coin');
-                            setTimeout(() => {
-                                document.getElementById('coinBadge')?.classList.remove('animate-coin');
-                            }, 1000);
-                            
-                            setTimeout(() => location.reload(), 1500);
-                        } else {
-                            showToast('❌ ' + (claimData.message || 'Gagal mengambil Polar Coin'), 'error');
-                        }
-                    })
-                    .catch(() => showToast('❌ Gagal memproses claim', 'error'));
-                })
-                .catch(() => showToast('❌ Gagal terhubung ke server', 'error'))
-                .finally(() => {
-                    isProcessing = false;
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerHTML = originalText;
-                        btn.classList.remove('loading');
-                    }
-                });
-        }
-
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast('❌ ' + (claimData.message || 'Gagal mengambil Polar Coin'), 'error');
+                }
+            })
+            .catch(() => showToast('❌ Gagal memproses claim', 'error'));
+        })
+        .catch(() => showToast('❌ Gagal terhubung ke server', 'error'))
+        .finally(() => {
+            isProcessing = false;
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                btn.classList.remove('loading');
+            }
+        });
+}
+   
         // ========== SUPABASE REQUEST ==========
         async function supabaseRequest(method, endpoint, body = null) {
             const ctrl = new AbortController();
