@@ -55,13 +55,52 @@ if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
     }
 }
 
+// ========== PROSES AJAX ==========
+if (isset($_GET['action']) && $_GET['action'] === 'get_earn_status') {
+    header('Content-Type: application/json');
+    if (!isset($_SESSION['user_google_id'])) {
+        echo json_encode(['success' => false, 'message' => 'Harap login']);
+        exit;
+    }
+    echo json_encode([
+        'success' => true,
+        'claimed_today' => $_SESSION['claimed_today'] ?? 0,
+        'max_per_day' => 5
+    ]);
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'claim_coin') {
+    header('Content-Type: application/json');
+    $input = json_decode(file_get_contents('php://input'), true);
+    $index = $input['index'] ?? 0;
+    
+    if (!isset($_SESSION['user_google_id'])) {
+        echo json_encode(['success' => false, 'message' => 'Harap login']);
+        exit;
+    }
+    
+    $claimedToday = $_SESSION['claimed_today'] ?? 0;
+    $maxPerDay = 5;
+    
+    if ($claimedToday >= $maxPerDay) {
+        echo json_encode(['success' => false, 'message' => 'Sudah mencapai limit 5 coin hari ini']);
+        exit;
+    }
+    
+    $_SESSION['claimed_today'] = $claimedToday + 1;
+    $_SESSION['user_coins'] = ($_SESSION['user_coins'] ?? 0) + 1;
+    
+    echo json_encode(['success' => true]);
+    exit;
+}
+
 // ========== CEK LOGIN ==========
 $is_logged_in = isset($_SESSION['user_google_id']);
 $user_name = $_SESSION['user_name'] ?? "Guest";
 $user_email = $_SESSION['user_email'] ?? "guest@gmail.com";
 $user_avatar = $_SESSION['user_avatar'] ?? "https://ui-avatars.com/api/?name=Guest&background=FF6B00&color=fff";
 $user_coins = $_SESSION['user_coins'] ?? 0;
-$claimed_today = $_SESSION['claimed_today'] ?? 0;
 
 // ========== URL LOGIN GOOGLE ==========
 $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
@@ -198,7 +237,6 @@ $maxSessions = 10;
             --border: #2a2a35;
             --green: #22c55e;
             --red: #ef4444;
-            --purple: #8b5cf6;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
@@ -207,9 +245,8 @@ $maxSessions = 10;
             color: var(--text-main);
             min-height: 100vh;
             overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 20% 50%, rgba(255,107,0,0.03) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(255,107,0,0.03) 0%, transparent 50%);
+            background-image: radial-gradient(circle at 20% 50%, rgba(255,107,0,0.03) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 50%, rgba(255,107,0,0.03) 0%, transparent 50%);
         }
 
         /* Animations */
@@ -217,15 +254,11 @@ $maxSessions = 10;
         @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         @keyframes glow { 0%,100% { box-shadow: 0 0 20px var(--orange-glow); } 50% { box-shadow: 0 0 40px var(--orange-glow); } }
         @keyframes coinSpin { 0% { transform: rotateY(0); } 100% { transform: rotateY(360deg); } }
         
         .animate-in { animation: fadeInUp 0.5s ease forwards; }
-        .animate-in-delay-1 { animation: fadeInUp 0.5s ease 0.1s forwards; opacity: 0; }
-        .animate-in-delay-2 { animation: fadeInUp 0.5s ease 0.2s forwards; opacity: 0; }
-        .animate-in-delay-3 { animation: fadeInUp 0.5s ease 0.3s forwards; opacity: 0; }
         .animate-float { animation: float 3s ease-in-out infinite; }
         .animate-glow { animation: glow 2s ease-in-out infinite; }
         .animate-coin { animation: coinSpin 1s ease forwards; }
@@ -756,7 +789,7 @@ $maxSessions = 10;
                 btn.classList.add('loading');
             }
             
-            // Ambil data dari session via AJAX
+            // Ambil data dari session via AJAX ke file yang sama
             fetch('?action=get_earn_status')
                 .then(res => res.json())
                 .then(data => {
@@ -823,43 +856,6 @@ $maxSessions = 10;
                         btn.classList.remove('loading');
                     }
                 });
-        }
-
-        // ========== GET EARN STATUS (via AJAX) ==========
-        if (window.location.search.includes('action=get_earn_status')) {
-            header('Content-Type: application/json');
-            echo json_encode([
-                'success' => true,
-                'claimed_today' => $_SESSION['claimed_today'] ?? 0,
-                'max_per_day' => 5
-            ]);
-            exit;
-        }
-
-        // ========== CLAIM COIN (via AJAX) ==========
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'claim_coin') {
-            header('Content-Type: application/json');
-            $input = json_decode(file_get_contents('php://input'), true);
-            $index = $input['index'] ?? 0;
-            
-            if (!isset($_SESSION['user_google_id'])) {
-                echo json_encode(['success' => false, 'message' => 'Harap login terlebih dahulu']);
-                exit;
-            }
-            
-            $claimedToday = $_SESSION['claimed_today'] ?? 0;
-            $maxPerDay = 5;
-            
-            if ($claimedToday >= $maxPerDay) {
-                echo json_encode(['success' => false, 'message' => 'Sudah mencapai limit 5 coin hari ini']);
-                exit;
-            }
-            
-            $_SESSION['claimed_today'] = $claimedToday + 1;
-            $_SESSION['user_coins'] = ($_SESSION['user_coins'] ?? 0) + 1;
-            
-            echo json_encode(['success' => true]);
-            exit;
         }
 
         // ========== SUPABASE REQUEST ==========
