@@ -4,35 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     
-    <!-- Primary Meta Tags -->
-    <title>Polar.id — Bot WhatsApp Multi Device Gratis | Dashboard Bot WA</title>
-    <meta name="title" content="Polar.id — Bot WhatsApp Multi Device Gratis | Dashboard Bot WA" />
+    <title>Free Jadibot WhatsApp</title>
+    <meta name="title" content="Free Jadibot WhatsApp" />
     <meta name="description" content="Platform bot WhatsApp multi device gratis. Kelola session bot WA tanpa login, tanpa registrasi. Cepat, mudah, dan support Phoenix MD & Ourin MD." />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
     
-    <!-- Open Graph / Facebook -->
-    <meta property="og:title" content="Polar.id — Bot WhatsApp Multi Device Gratis">
+    <meta property="og:title" content="Free Jadibot WhatsApp">
     <meta property="og:url" content="https://polar.web.id">
     <meta property="og:image" content="https://polar.web.id/og-image.jpg">
     <meta property="og:description" content="Platform bot WhatsApp multi device gratis. Kelola session bot WA tanpa login, tanpa registrasi. Cepat, mudah, dan support Phoenix MD & Ourin MD.">
     <meta property="og:type" content="website">
     
-    <!-- Twitter -->
     <meta name="twitter:card" content="summary">
-    <meta property="twitter:title" content="Polar.id — Bot WhatsApp Multi Device Gratis">
+    <meta property="twitter:title" content="Free Jadibot WhatsApp">
     <meta property="twitter:image" content="https://polar.web.id/og-image.jpg">
     <meta property="twitter:description" content="Platform bot WhatsApp multi device gratis. Kelola session bot WA tanpa login, tanpa registrasi. Cepat, mudah, dan support Phoenix MD & Ourin MD.">
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
-    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1771884647147524" crossorigin="anonymous"></script>
     
     <style>
@@ -98,6 +93,7 @@
             transition: var(--transition);
             overflow-x: hidden;
             line-height: 1.6;
+            padding-top: 24px; /* Sedikit padding atas karena navbar dihapus */
         }
 
         /* Custom Scrollbar */
@@ -164,94 +160,9 @@
             50% { transform: scale(1.05); box-shadow: 0 8px 50px var(--primary-glow); }
         }
 
-        /* ===== NAVBAR SPERTI DI GAMBAR ===== */
-        .navbar {
-            position: sticky; top: 0; z-index: 100;
-            background: #090b11;
-            border-bottom: 1px solid var(--border);
-            padding: 0 clamp(16px, 4vw, 32px);
-            height: 72px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        .nav-logo {
-            display: flex; align-items: center; gap: 10px;
-            text-decoration: none;
-        }
-        .nav-logo-icon {
-            width: 38px; height: 38px;
-            background: var(--primary);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 20px; color: white;
-            font-weight: 900;
-            box-shadow: 0 4px 12px var(--primary-glow);
-        }
-        .nav-logo-text {
-            font-size: 22px; font-weight: 900;
-            color: #ffffff; letter-spacing: -0.5px;
-            text-transform: uppercase;
-        }
-        .nav-logo-text span {
-            color: var(--primary);
-        }
-        .nav-links {
-            display: flex; align-items: center; gap: 12px;
-        }
-        .nav-link {
-            padding: 8px 12px; border-radius: var(--radius-sm);
-            font-size: 14px; font-weight: 600;
-            text-decoration: none; color: var(--gray);
-            transition: var(--transition);
-        }
-        .nav-link:hover { color: #ffffff; }
-        
-        /* Coin Badge Style Shikytero */
-        .coin-badge {
-            background: #1c1a17;
-            border: 1px solid #dcb028;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #ffcc00;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: #161c2b;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 600;
-            color: #ffffff;
-        }
-        .user-avatar {
-            width: 24px; height: 24px;
-            background: #00e1ff;
-            color: #000;
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 11px;
-        }
-        
-        .menu-toggle {
-            background: var(--primary);
-            border: none; border-radius: 8px;
-            width: 38px; height: 38px;
-            font-size: 18px; cursor: pointer;
-            color: white;
-            display: flex; align-items: center; justify-content: center;
-        }
-
         /* ===== HERO SECTION ===== */
         .hero {
-            padding: clamp(50px, 8vw, 100px) clamp(16px, 4vw, 32px);
+            padding: clamp(30px, 6vw, 80px) clamp(16px, 4vw, 32px);
             text-align: center;
             position: relative;
             overflow: hidden;
@@ -451,7 +362,6 @@
         /* Pewarnaan Border Custom Per Item Sesuai Gambar 2 */
         .feature-card.card-mint { border-color: #10b981; }
         .feature-card.card-pink { border-color: #ff2a5f; }
-        .feature-card.card-gold { border-color: #ffcc00; }
         .feature-card.card-cyan { border-color: #00e1ff; }
 
         .feature-icon-box {
@@ -463,7 +373,6 @@
         }
         .card-mint .feature-icon-box { background: #10b981; }
         .card-pink .feature-icon-box { background: #ff2a5f; }
-        .card-gold .feature-icon-box { background: #ffcc00; color: #000; }
         .card-cyan .feature-icon-box { background: #00e1ff; color: #000; }
 
         .feature-name {
@@ -481,7 +390,6 @@
         }
         .card-mint .feature-action-link { color: #10b981; }
         .card-pink .feature-action-link { color: #ff2a5f; }
-        .card-gold .feature-action-link { color: #ffcc00; }
         .card-cyan .feature-action-link { color: #00e1ff; }
 
         /* ===== TESTIMONIALS & REVIEWS (DARK) ===== */
@@ -506,27 +414,6 @@
         .testi-rating { color: var(--gold); font-size: 12px; margin-bottom: 6px; }
         .testi-text { font-size: 13px; color: var(--dark-3); font-style: italic; margin-bottom: 8px; }
         .testi-name { font-size: 13px; font-weight: 700; color: var(--primary); }
-
-        /* ===== RATE & COMMENT ===== */
-        .rate-section {
-            background: #111420; border-radius: var(--radius);
-            padding: 28px 20px; text-align: center;
-            border: 1px solid var(--border); margin: 20px 16px;
-        }
-        .star-rating { display: flex; justify-content: center; gap: 8px; margin: 16px 0; }
-        .star-rating i { font-size: 28px; cursor: pointer; color: var(--gray-light); }
-        .star-rating i.active { color: var(--gold); }
-        .comment-input {
-            width: 100%; padding: 14px; border: 1px solid var(--border);
-            border-radius: 10px; background: var(--bg); color: #fff;
-            font-family: inherit; font-size: 14px; margin-bottom: 12px;
-        }
-        .reviews-list { margin-top: 24px; max-height: 250px; overflow-y: auto; text-align: left; }
-        .review-item { background: var(--bg); border-radius: 8px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
-        .review-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
-        .review-name { font-weight: 700; font-size: 13px; color: #fff; }
-        .review-stars { color: var(--gold); font-size: 11px; }
-        .review-text { font-size: 13px; color: var(--gray); }
 
         /* ===== FAQ ===== */
         .faq-grid { display: flex; flex-direction: column; gap: 10px; }
@@ -569,7 +456,7 @@
             .stats-strip { grid-template-columns: repeat(4, 1fr); }
             .strip-item { border-right: 1px solid var(--border) !important; }
             .strip-item:last-child { border-right: none !important; }
-            .features-grid { grid-template-columns: repeat(2, 1fr); display: grid; }
+            .features-grid { grid-template-columns: repeat(3, 1fr); display: grid; }
             .testi-grid { grid-template-columns: repeat(3, 1fr); display: grid; }
             .footer-content { grid-template-columns: repeat(4, 1fr); }
         }
@@ -591,54 +478,21 @@ foreach ($users as $u) {
     if ($u['fingerprint']) $uniqueFingerprints[$u['fingerprint']] = true;
 }
 $totalUsers = count($uniqueFingerprints);
-
-// Ambil reviews
-$reviews = supabase('GET', 'reviews?order=created_at.desc&limit=10');
-$totalReviews = count($reviews);
-$avgRating = 0;
-$ratingSum = 0;
-foreach ($reviews as $r) {
-    $ratingSum += $r['rating'];
-}
-if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
 ?>
 
-<!-- ===== PROGRESS BAR ===== -->
 <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
 
-<!-- ===== SPLASH SCREEN ===== -->
 <div id="splash">
     <div class="splash-icon">❄️</div>
     <div class="splash-name">Polar.id</div>
     <div class="splash-bar"><div class="splash-fill"></div></div>
 </div>
 
-<!-- ===== NAVBAR (SHIKYTERO PLATFORM STYLE) ===== -->
-<nav class="navbar" id="navbar">
-    <a href="index.php" class="nav-logo">
-        <div class="nav-logo-icon">S</div>
-        <div class="nav-logo-text">POLAR<span>.ID</span></div>
-    </a>
-    <div class="nav-links">
-        <div class="coin-badge">
-            <i class="fas fa-coins"></i> 50
-        </div>
-        <div class="user-profile">
-            <div class="user-avatar">K</div>
-            <span>Kimtha</span>
-        </div>
-        <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
-            <i class="fas fa-bars"></i>
-        </button>
-    </div>
-</nav>
-
-<!-- ===== HERO ===== -->
 <section class="hero" id="home">
     <div class="hero-content">
         <div class="hero-badge">
             <div class="hero-badge-dot"></div>
-            2 Slot Tersedia
+            Unli Slot Tersedia
         </div>
         
         <h1>Free Bot <span class="highlight">Server</span> Hosting</h1>
@@ -656,14 +510,12 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
             </a>
         </div>
         
-        <!-- Trust Badges -->
         <div class="trust-badges">
             <div class="trust-item gratis"><i class="fas fa-check-circle"></i> 100% Gratis</div>
             <div class="trust-item instan"><i class="fas fa-bolt"></i> Setup Instan</div>
             <div class="trust-item pro"><i class="fas fa-star"></i> PRO Available</div>
         </div>
         
-        <!-- Mock Dashboard Specs Window -->
         <div class="mock-dashboard" data-aos="fade-up">
             <div class="mock-header">
                 <div class="mock-dot"></div>
@@ -687,7 +539,6 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
     </div>
 </section>
 
-<!-- ===== STATS STRIP ===== -->
 <div class="stats-strip">
     <div class="strip-item">
         <div class="strip-number" id="liveSessions"><?= number_format($activeSessions) ?></div>
@@ -707,7 +558,6 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
     </div>
 </div>
 
-<!-- ===== JELAJAHI MENU SECTIONS ===== -->
 <section class="section" id="features">
     <div class="section-title">Jelajahi</div>
     <div class="section-desc">Pilih menu yang kamu butuhkan</div>
@@ -727,13 +577,6 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
             <a href="dashboard.php" class="feature-action-link">Claim Sekarang <i class="fas fa-arrow-right"></i></a>
         </div>
         
-        <div class="feature-card card-gold" data-aos="fade-up">
-            <div class="feature-icon-box"><i class="fas fa-key"></i></div>
-            <div class="feature-name">Get Token</div>
-            <div class="feature-desc">Generate token aktivasi harian untuk memperpanjang session bot gratisanmu.</div>
-            <a href="token.php" class="feature-action-link">Ambil Token <i class="fas fa-arrow-right"></i></a>
-        </div>
-        
         <div class="feature-card card-cyan" data-aos="fade-up">
             <div class="feature-icon-box"><i class="fas fa-headset"></i></div>
             <div class="feature-name">Customer Service</div>
@@ -743,7 +586,6 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
     </div>
 </section>
 
-<!-- ===== TESTIMONIALS ===== -->
 <section class="testimonials-section" data-aos="fade-up">
     <div class="section-title">Apa Kata Mereka?</div>
     <div class="section-desc">Ribuan pengguna aktif telah mempercayakan bot mereka di platform kami.</div>
@@ -770,38 +612,6 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
     </div>
 </section>
 
-<!-- ===== RATE & COMMENT ===== -->
-<section class="rate-section" data-aos="fade-up">
-    <div class="section-title">Rate & Comment</div>
-    <div class="section-desc">Bagikan pengalamanmu menggunakan platform kami</div>
-    
-    <div class="star-rating" id="starRating">
-        <i class="far fa-star" data-rating="1"></i>
-        <i class="far fa-star" data-rating="2"></i>
-        <i class="far fa-star" data-rating="3"></i>
-        <i class="far fa-star" data-rating="4"></i>
-        <i class="far fa-star" data-rating="5"></i>
-    </div>
-    <input type="text" class="comment-input" id="reviewName" placeholder="Nama kamu (opsional)">
-    <textarea class="comment-input" id="reviewComment" rows="3" placeholder="Tulis komentar atau saran..."></textarea>
-    <button class="btn btn-primary" onclick="submitReview()">
-        Kirim Review
-    </button>
-    
-    <div class="reviews-list" id="reviewsList">
-        <?php foreach ($reviews as $r): ?>
-        <div class="review-item">
-            <div class="review-header">
-                <span class="review-name"><?= htmlspecialchars($r['name'] ?? 'Anonymous') ?></span>
-                <span class="review-stars"><?= str_repeat('★', $r['rating']) . str_repeat('☆', 5 - $r['rating']) ?></span>
-            </div>
-            <div class="review-text"><?= htmlspecialchars($r['comment']) ?></div>
-        </div>
-        <?php endforeach; ?>
-    </div>
-</section>
-
-<!-- ===== FAQ ===== -->
 <section class="section" data-aos="fade-up">
     <div class="section-title">Pertanyaan Umum</div>
     <div class="section-desc">Jawaban dari pertanyaan yang sering ditanyakan</div>
@@ -822,7 +632,6 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
     </div>
 </section>
 
-<!-- ===== CTA ===== -->
 <div class="cta-wrapper" data-aos="fade-up">
     <div class="cta-box">
         <h2>Siap punya bot WA sendiri?</h2>
@@ -831,12 +640,10 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
     </div>
 </div>
 
-<!-- ===== BACK TO TOP ===== -->
 <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
     <i class="fas fa-arrow-up"></i>
 </button>
 
-<!-- ===== FOOTER ===== -->
 <footer>
     <div class="footer-content">
         <div class="footer-col">
@@ -850,7 +657,6 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
         </div>
         <div class="footer-col">
             <h4>Lainnya</h4>
-            <a href="token.php">Ambil Token</a>
             <a href="https://polar.web.id/otp-web.html">Beli Nokos</a>
         </div>
         <div class="footer-col">
@@ -864,7 +670,6 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
     </div>
 </footer>
 
-<!-- ===== JAVASCRIPT ===== -->
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
     // Load saved theme (force dark mode sesuai gambar)
@@ -887,41 +692,6 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
     document.querySelectorAll('.faq-question').forEach(q => {
         q.addEventListener('click', () => q.closest('.faq-item').classList.toggle('open'));
     });
-
-    // STAR RATING
-    let selectedRating = 0;
-    document.querySelectorAll('#starRating i').forEach(star => {
-        const updateStars = (rating) => {
-            document.querySelectorAll('#starRating i').forEach(s => {
-                const r = parseInt(s.dataset.rating);
-                s.className = r <= rating ? 'fas fa-star active' : 'far fa-star';
-            });
-        };
-        star.addEventListener('click', function() {
-            selectedRating = parseInt(this.dataset.rating);
-            updateStars(selectedRating);
-        });
-    });
-
-    // SUBMIT REVIEW
-    async function submitReview() {
-        const rating = selectedRating;
-        const name = document.getElementById('reviewName').value.trim();
-        const comment = document.getElementById('reviewComment').value.trim();
-        if (rating === 0) { alert('Pilih rating bintang!'); return; }
-        if (!comment) { alert('Tulis komentar!'); return; }
-        
-        try {
-            const res = await fetch('api/submit-review.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ rating, name: name || 'Anonymous', comment })
-            });
-            const data = await res.json();
-            alert(data.success ? '✅ Review dikirim!' : '❌ Gagal');
-            if (data.success) location.reload();
-        } catch(e) { alert('❌ Error'); }
-    }
 
     // SPLASH SCREEN
     window.addEventListener('load', () => {
