@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
@@ -23,10 +23,10 @@
     <!-- Twitter -->
     <meta name="twitter:card" content="summary">
     <meta property="twitter:title" content="Polar.id — Bot WhatsApp Multi Device Gratis">
-    <meta name="twitter:image" content="https://polar.web.id/og-image.jpg">
+    <meta property="twitter:image" content="https://polar.web.id/og-image.jpg">
     <meta property="twitter:description" content="Platform bot WhatsApp multi device gratis. Kelola session bot WA tanpa login, tanpa registrasi. Cepat, mudah, dan support Phoenix MD & Ourin MD.">
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <!-- AOS Animation -->
@@ -36,16 +36,20 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1771884647147524" crossorigin="anonymous"></script>
     
     <style>
-        /* ===== ROOT VARIABLES ===== */
+        /* ===== SHIKYTERO CYBERPUNK THEME STYLE ===== */
         :root {
-            --primary: #f6821f;
-            --primary-dark: #e07010;
-            --primary-light: #fff4eb;
-            --primary-glow: rgba(246, 130, 31, 0.25);
+            --primary: #ff2a5f;       /* Pink/Crimson utama shikytero */
+            --primary-dark: #d91b4b;
+            --primary-light: rgba(255, 42, 95, 0.15);
+            --primary-glow: rgba(255, 42, 95, 0.35);
             
-            --success: #10b981;
+            --mint: #10b981;          /* Hijau mint aksen status */
+            --mint-light: rgba(16, 185, 129, 0.15);
+            --cyan: #00e1ff;          /* Cyan elektrik */
+            
+            --success: #00ffaa;
             --success-dark: #059669;
-            --success-light: #d1fae5;
+            --success-light: rgba(0, 255, 170, 0.1);
             
             --danger: #ef4444;
             --danger-dark: #dc2626;
@@ -54,56 +58,41 @@
             --warning: #f59e0b;
             --warning-light: #fed7aa;
             
-            --info: #3b82f6;
-            --info-light: #dbeafe;
+            --gold: #ffcc00;          /* Kuning koin shikytero */
+            --gold-dark: #e0b000;
+            --gold-light: rgba(255, 204, 0, 0.1);
             
-            --gold: #fbbf24;
-            --gold-dark: #f59e0b;
-            --gold-light: #fef3c7;
+            /* Background Gelap Total Sesuai Gambar */
+            --bg: #090b11; 
+            --card: #121622; 
+            --border: #1e2538;
+            --border-light: #161c2b;
+            --gray-bg: #161c2b;
             
-            --dark: #0f172a;
-            --dark-2: #1e293b;
-            --dark-3: #334155;
-            --gray: #64748b;
-            --gray-light: #94a3b8;
-            --gray-bg: #f1f5f9;
-            
-            --bg: #fafbfc;
-            --card: #ffffff;
-            --border: #e2e8f0;
-            --border-light: #f1f5f9;
-            
-            --radius-sm: 8px;
-            --radius: 12px;
-            --radius-lg: 20px;
-            --radius-xl: 28px;
-            
-            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.07);
-            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08);
-            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08);
-            
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        [data-theme="dark"] {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --border: #334155;
-            --border-light: #1e293b;
-            --gray-bg: #1e293b;
-            --dark: #f1f5f9;
-            --dark-2: #e2e8f0;
+            --dark: #ffffff;
+            --dark-2: #f1f5f9;
             --dark-3: #cbd5e1;
             --gray: #94a3b8;
             --gray-light: #64748b;
+            
+            --radius-sm: 10px;
+            --radius: 18px;
+            --radius-lg: 26px;
+            --radius-xl: 36px;
+            
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.5);
+            --shadow: 0 8px 16px rgba(0,0,0,0.6);
+            --shadow-lg: 0 16px 24px rgba(0,0,0,0.7);
+            --shadow-xl: 0 24px 48px rgba(0,0,0,0.8);
+            
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         /* ===== RESET & BASE ===== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         html { scroll-behavior: smooth; }
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
             background: var(--bg);
             color: var(--dark);
             transition: var(--transition);
@@ -113,7 +102,7 @@
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--gray-bg); border-radius: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
         ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
 
@@ -124,7 +113,7 @@
         }
         .progress-bar {
             height: 100%; width: 0%;
-            background: linear-gradient(90deg, var(--primary), var(--gold), var(--primary));
+            background: linear-gradient(90deg, var(--primary), var(--cyan), var(--primary));
             background-size: 200% 100%;
             transition: width 0.15s ease;
             animation: shimmer 2s linear infinite;
@@ -137,7 +126,7 @@
         /* ===== SPLASH SCREEN ===== */
         #splash {
             position: fixed; inset: 0; z-index: 9999;
-            background: var(--card);
+            background: var(--bg);
             display: flex; flex-direction: column;
             align-items: center; justify-content: center;
             gap: 20px;
@@ -147,7 +136,7 @@
         
         .splash-icon {
             width: 64px; height: 64px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: var(--primary);
             border-radius: 18px;
             display: flex; align-items: center; justify-content: center;
             font-size: 30px;
@@ -155,697 +144,434 @@
             animation: pulse 2s ease-in-out infinite;
         }
         .splash-name {
-            font-size: 28px; font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 28px; font-weight: 800; color: #ffffff;
         }
         .splash-bar {
             width: 120px; height: 4px;
             background: var(--border);
             border-radius: 999px;
             overflow: hidden;
-            opacity: 0;
-            animation: fadeIn 0.4s 0.6s ease forwards;
         }
         .splash-fill {
             height: 100%; width: 0%;
-            background: linear-gradient(90deg, var(--primary), var(--gold));
+            background: var(--primary);
             border-radius: 999px;
             animation: fillBar 1s 0.8s ease forwards;
         }
         @keyframes fillBar { to { width: 100%; } }
-        @keyframes fadeIn { to { opacity: 1; } }
         @keyframes pulse {
             0%, 100% { transform: scale(1); box-shadow: 0 8px 30px var(--primary-glow); }
             50% { transform: scale(1.05); box-shadow: 0 8px 50px var(--primary-glow); }
         }
 
-        /* ===== NAVBAR ===== */
+        /* ===== NAVBAR SPERTI DI GAMBAR ===== */
         .navbar {
             position: sticky; top: 0; z-index: 100;
-            background: rgba(var(--card-rgb, 255,255,255), 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
+            background: #090b11;
             border-bottom: 1px solid var(--border);
-            padding: 0 clamp(16px, 4vw, 48px);
-            height: 68px;
+            padding: 0 clamp(16px, 4vw, 32px);
+            height: 72px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: var(--transition);
-        }
-        [data-theme="dark"] .navbar {
-            background: rgba(15, 23, 42, 0.85);
         }
         .nav-logo {
             display: flex; align-items: center; gap: 10px;
             text-decoration: none;
         }
         .nav-logo-icon {
-            width: 36px; height: 36px;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            width: 38px; height: 38px;
+            background: var(--primary);
             border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            font-size: 18px;
-            box-shadow: 0 2px 10px var(--primary-glow);
+            font-size: 20px; color: white;
+            font-weight: 900;
+            box-shadow: 0 4px 12px var(--primary-glow);
         }
         .nav-logo-text {
-            font-size: 18px; font-weight: 800;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 22px; font-weight: 900;
+            color: #ffffff; letter-spacing: -0.5px;
+            text-transform: uppercase;
         }
-        .nav-links {
-            display: flex; align-items: center; gap: 6px;
-        }
-        .nav-link {
-            padding: 8px 14px; border-radius: var(--radius-sm);
-            font-size: 13px; font-weight: 500;
-            text-decoration: none; color: var(--gray);
-            transition: var(--transition);
-            position: relative;
-        }
-        .nav-link::after {
-            content: ''; position: absolute; bottom: 2px; left: 50%;
-            width: 0; height: 2px; background: var(--primary);
-            transition: var(--transition); transform: translateX(-50%);
-        }
-        .nav-link:hover::after { width: 60%; }
-        .nav-link:hover { color: var(--primary); }
-        
-        .theme-toggle {
-            width: 38px; height: 38px;
-            border-radius: 50%;
-            background: var(--gray-bg);
-            border: 1px solid var(--border);
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            transition: var(--transition);
-            font-size: 16px;
-            color: var(--dark-3);
-        }
-        .theme-toggle:hover {
-            background: var(--primary-light);
-            border-color: var(--primary);
+        .nav-logo-text span {
             color: var(--primary);
         }
-        .nav-cta {
-            padding: 9px 22px;
-            border-radius: var(--radius-sm);
-            font-size: 13px; font-weight: 600;
-            text-decoration: none;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white;
+        .nav-links {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .nav-link {
+            padding: 8px 12px; border-radius: var(--radius-sm);
+            font-size: 14px; font-weight: 600;
+            text-decoration: none; color: var(--gray);
             transition: var(--transition);
-            box-shadow: 0 2px 12px var(--primary-glow);
         }
-        .nav-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px var(--primary-glow);
+        .nav-link:hover { color: #ffffff; }
+        
+        /* Coin Badge Style Shikytero */
+        .coin-badge {
+            background: #1c1a17;
+            border: 1px solid #dcb028;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffcc00;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #161c2b;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #ffffff;
+        }
+        .user-avatar {
+            width: 24px; height: 24px;
+            background: #00e1ff;
+            color: #000;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 11px;
+        }
+        
         .menu-toggle {
-            display: none;
-            background: none; border: none;
-            font-size: 22px; cursor: pointer;
-            color: var(--dark-3);
-            padding: 8px;
+            background: var(--primary);
+            border: none; border-radius: 8px;
+            width: 38px; height: 38px;
+            font-size: 18px; cursor: pointer;
+            color: white;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* ===== HERO ===== */
+        /* ===== HERO SECTION ===== */
         .hero {
-            padding: clamp(60px, 10vw, 120px) clamp(16px, 4vw, 48px);
+            padding: clamp(50px, 8vw, 100px) clamp(16px, 4vw, 32px);
             text-align: center;
             position: relative;
             overflow: hidden;
-            background: linear-gradient(180deg, var(--primary-light) 0%, var(--bg) 70%);
+            background: radial-gradient(circle at center, rgba(255,42,95,0.06) 0%, var(--bg) 80%);
         }
-        .hero::before {
-            content: ''; position: absolute;
-            top: -30%; left: -20%; width: 80%; height: 80%;
-            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
-            pointer-events: none;
-            opacity: 0.3;
-        }
-        .hero::after {
-            content: ''; position: absolute;
-            bottom: -20%; right: -10%; width: 60%; height: 60%;
-            background: radial-gradient(circle, rgba(251,191,36,0.08) 0%, transparent 70%);
-            pointer-events: none;
-        }
-        .hero-content { position: relative; z-index: 1; }
         
+        /* Slot Tersedia Badge */
         .hero-badge {
             display: inline-flex; align-items: center; gap: 8px;
-            padding: 6px 18px; border-radius: 40px;
-            border: 1px solid var(--primary);
-            background: var(--card);
-            font-size: 12px; font-weight: 600;
-            color: var(--primary-dark);
-            margin-bottom: 28px;
-            box-shadow: var(--shadow-sm);
+            padding: 6px 16px; border-radius: 20px;
+            background: #052e21;
+            border: 1px solid #10b981;
+            font-size: 12px; font-weight: 800;
+            color: #10b981;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .hero-badge-dot {
             width: 8px; height: 8px; border-radius: 50%;
-            background: var(--primary);
-            animation: pulse 2s infinite;
+            background: #10b981;
+            box-shadow: 0 0 8px #10b981;
         }
         
         .hero h1 {
-            font-size: clamp(40px, 7vw, 72px);
-            font-weight: 800;
-            line-height: 1.1;
-            letter-spacing: -2px;
-            margin-bottom: 16px;
+            font-size: clamp(38px, 6vw, 64px);
+            font-weight: 900;
+            line-height: 1.15;
+            letter-spacing: -1px;
+            margin-bottom: 20px;
+            color: #ffffff;
         }
         .hero h1 .highlight {
-            background: linear-gradient(135deg, var(--primary), var(--gold));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background: #ffcc00;
+            color: #000000;
+            padding: 2px 14px;
+            border-radius: 6px;
+            display: inline-block;
+            transform: rotate(-1deg);
         }
-        .hero-subtitle {
-            font-size: clamp(18px, 2.5vw, 28px);
-            font-weight: 600;
-            color: var(--dark-3);
-            margin-bottom: 16px;
-            min-height: 50px;
-        }
-        .hero-subtitle .typing {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .hero-subtitle .cursor {
-            display: inline-block; width: 3px; height: 0.9em;
-            background: var(--primary);
-            margin-left: 2px;
-            animation: blink 1s step-end infinite;
-        }
-        @keyframes blink { 50% { opacity: 0; } }
         
-        .hero-desc {
-            font-size: clamp(15px, 1.2vw, 18px);
-            color: var(--gray);
-            max-width: 540px;
-            margin: 0 auto 32px;
-            line-height: 1.8;
+        .hero-subtitle {
+            font-size: clamp(16px, 2vw, 20px);
+            font-weight: 500;
+            color: #94a3b8;
+            max-width: 600px;
+            margin: 0 auto 36px;
+            line-height: 1.6;
         }
+        
         .hero-btns {
-            display: flex; gap: 14px;
-            justify-content: center; flex-wrap: wrap;
+            display: flex; flex-direction: column; gap: 14px;
+            align-items: center; justify-content: center;
+            margin-bottom: 40px;
         }
         .btn {
-            padding: 12px 28px; border-radius: var(--radius-sm);
-            font-size: 14px; font-weight: 600;
+            width: 100%; max-width: 320px;
+            padding: 16px 32px; border-radius: 12px;
+            font-size: 16px; font-weight: 800;
             border: none; cursor: pointer;
             text-decoration: none; display: inline-flex;
-            align-items: center; gap: 8px;
+            align-items: center; justify-content: center; gap: 10px;
             transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: var(--primary);
             color: white;
-            box-shadow: 0 2px 12px var(--primary-glow);
+            box-shadow: 0 4px 20px var(--primary-glow);
         }
         .btn-primary:hover {
+            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 6px 24px var(--primary-glow);
+            box-shadow: 0 6px 28px var(--primary-glow);
         }
         .btn-outline {
-            background: var(--card);
-            color: var(--dark-3);
-            border: 1px solid var(--border);
+            background: #00bfff;
+            color: #000000;
         }
         .btn-outline:hover {
-            background: var(--gray-bg);
-            border-color: var(--primary);
-            color: var(--primary);
+            background: #0099cc;
+            transform: translateY(-2px);
         }
 
-        /* ===== TRUST BADGES ===== */
+        /* Trust Badges Shikytero Style */
         .trust-badges {
             display: flex; justify-content: center;
-            gap: 40px; flex-wrap: wrap;
-            margin-top: 40px;
-            padding: 20px 30px;
-            background: var(--card);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
+            gap: 20px; flex-wrap: wrap;
+            margin-top: 30px;
         }
         .trust-item {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 13px; color: var(--gray);
+            display: flex; align-items: center; gap: 8px;
+            font-size: 14px; color: #ffffff; font-weight: 700;
         }
-        .trust-item i { font-size: 20px; color: var(--primary); }
+        .trust-item.gratis i { color: #10b981; font-size: 18px; }
+        .trust-item.instan i { color: #00e1ff; font-size: 18px; }
+        .trust-item.pro i { color: #ffcc00; font-size: 18px; }
 
-        /* ===== MOCK DASHBOARD ===== */
+        /* ===== MOCK DASHBOARD (Sperti Di Gambar) ===== */
         .mock-dashboard {
-            margin-top: 56px;
-            max-width: 760px; margin-left: auto; margin-right: auto;
-            border-radius: var(--radius-lg);
+            margin-top: 48px;
+            max-width: 450px; margin-left: auto; margin-right: auto;
+            border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow-xl);
-            border: 1px solid var(--border);
-            background: var(--card);
-            transition: var(--transition);
-        }
-        .mock-dashboard:hover { transform: translateY(-4px); box-shadow: 0 24px 48px rgba(0,0,0,0.1); }
-        .mock-header {
-            display: flex; align-items: center; gap: 8px;
-            padding: 12px 16px;
-            background: var(--gray-bg);
-            border-bottom: 1px solid var(--border);
-        }
-        .mock-dot {
-            width: 10px; height: 10px; border-radius: 50%;
-        }
-        .mock-dot:nth-child(1) { background: #ff5f57; }
-        .mock-dot:nth-child(2) { background: #febc2e; }
-        .mock-dot:nth-child(3) { background: #28c840; }
-        .mock-url {
-            margin-left: 10px;
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 4px 14px;
-            font-size: 12px;
-            color: var(--gray-light);
-            font-family: monospace;
-            flex: 1;
+            border: 2px solid var(--primary);
+            background: #111420;
             text-align: left;
         }
-        .mock-body { padding: 20px; display: grid; grid-template-columns: 140px 1fr; gap: 16px; }
-        .mock-sidebar {
-            display: flex; flex-direction: column; gap: 4px;
-        }
-        .mock-nav {
-            padding: 8px 12px; border-radius: var(--radius-sm);
-            font-size: 12px; color: var(--gray);
+        .mock-header {
             display: flex; align-items: center; gap: 8px;
+            padding: 14px 18px;
+            background: #0a0d16;
+            border-bottom: 1px solid var(--border);
         }
-        .mock-nav.active {
-            background: var(--primary-light);
-            color: var(--primary-dark);
-            font-weight: 600;
+        .mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .mock-dot:nth-child(1) { background: #ff5f57; }
+        .mock-dot:nth-child(2) { background: #febc2e; }
+        .mock-dot:nth-child(3) { background: #10b981; }
+        
+        .mock-badge-right {
+            margin-left: auto;
+            background: #052e21;
+            color: #10b981;
+            font-size: 11px; font-weight: 800;
+            padding: 4px 12px; border-radius: 6px;
+            text-transform: uppercase;
         }
-        .mock-nav-dot {
-            width: 5px; height: 5px; border-radius: 50%;
-            background: currentColor;
+        .mock-body { padding: 20px; }
+        .mock-label {
+            font-size: 13px; color: #64748b;
+            text-transform: uppercase; font-weight: 700;
+            margin-bottom: 4px; display: block;
         }
-        .mock-stats {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 10px; margin-bottom: 12px;
+        .mock-value {
+            font-size: 18px; font-weight: 700; color: #00e1ff;
+            font-family: monospace; margin-bottom: 16px;
         }
-        .mock-stat {
-            background: var(--gray-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 10px;
-        }
-        .mock-stat-label {
-            font-size: 9px; color: var(--gray-light);
-            text-transform: uppercase; font-weight: 600;
-        }
-        .mock-stat-value {
-            font-size: 18px; font-weight: 700; color: var(--dark);
-        }
-        .mock-card-item {
-            background: var(--gray-bg);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 12px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .mock-phone { font-size: 12px; font-weight: 600; }
-        .mock-online {
-            display: inline-flex; align-items: center; gap: 4px;
-            font-size: 10px; color: var(--success-dark);
-            background: var(--success-light);
-            padding: 3px 10px; border-radius: 30px;
-            font-weight: 600;
+        .mock-divider {
+            border-top: 1px dashed var(--border);
+            margin: 14px 0;
         }
 
         /* ===== STATS STRIP ===== */
         .stats-strip {
-            display: grid; grid-template-columns: repeat(4, 1fr);
+            display: grid; grid-template-columns: repeat(2, 1fr);
+            border-top: 1px solid var(--border);
             border-bottom: 1px solid var(--border);
-            background: var(--card);
+            background: #0b0e17;
         }
         .strip-item {
-            padding: clamp(28px, 3vw, 40px) clamp(16px, 3vw, 32px);
+            padding: 24px 16px;
             text-align: center;
             border-right: 1px solid var(--border);
-            transition: var(--transition);
         }
-        .strip-item:last-child { border-right: none; }
-        .strip-item:hover { background: var(--gray-bg); }
+        .strip-item:nth-child(2n) { border-right: none; }
         .strip-number {
-            font-size: clamp(32px, 4vw, 44px);
-            font-weight: 800; color: var(--primary);
-            margin-bottom: 4px;
+            font-size: 28px;
+            font-weight: 900; color: #ffffff;
+            margin-bottom: 2px;
         }
         .strip-label {
             font-size: 12px; color: var(--gray);
-            font-weight: 500;
+            font-weight: 600; text-transform: uppercase;
         }
 
-        /* ===== SECTIONS ===== */
+        /* ===== JELAJAHI SECTIONS & CARDS SPERTI DI GAMBAR ===== */
         .section {
-            padding: clamp(60px, 8vw, 100px) clamp(16px, 4vw, 48px);
+            padding: 60px 16px;
             max-width: 1100px; margin: 0 auto;
         }
-        .section-label {
-            font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
-            text-transform: uppercase; color: var(--primary);
-            text-align: center; margin-bottom: 12px;
-        }
         .section-title {
-            font-size: clamp(28px, 3.5vw, 40px);
-            font-weight: 800; letter-spacing: -1px;
-            text-align: center; margin-bottom: 12px;
+            font-size: 32px;
+            font-weight: 900; letter-spacing: -0.5px;
+            text-align: center; margin-bottom: 8px;
+            text-transform: uppercase; color: #ffffff;
         }
         .section-desc {
-            color: var(--gray); font-size: 15px;
-            max-width: 600px; margin: 0 auto 40px;
-            text-align: center; line-height: 1.7;
+            color: var(--gray); font-size: 14px;
+            margin-bottom: 36px; text-align: center; font-weight: 500;
         }
 
-        /* ===== FEATURES ===== */
+        /* Cards Layout Baru (Shikytero Border Concept) */
         .features-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
+            display: flex; flex-direction: column; gap: 20px;
         }
         .feature-card {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
+            background: #111420;
+            border-radius: var(--radius);
             padding: 28px 24px;
-            text-align: center;
-            transition: var(--transition);
             position: relative;
-            overflow: hidden;
-        }
-        .feature-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0;
-            height: 3px; background: linear-gradient(90deg, var(--primary), var(--gold));
-            opacity: 0; transition: var(--transition);
-        }
-        .feature-card:hover::before { opacity: 1; }
-        .feature-card:hover {
-            transform: translateY(-6px);
-            border-color: var(--primary);
-            box-shadow: var(--shadow-lg);
-        }
-        .feature-icon {
-            width: 60px; height: 60px;
-            background: var(--primary-light);
-            border-radius: 16px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 26px; margin: 0 auto 16px;
+            border: 2px solid transparent;
             transition: var(--transition);
         }
-        .feature-card:hover .feature-icon {
-            background: var(--primary);
+        
+        /* Pewarnaan Border Custom Per Item Sesuai Gambar 2 */
+        .feature-card.card-mint { border-color: #10b981; }
+        .feature-card.card-pink { border-color: #ff2a5f; }
+        .feature-card.card-gold { border-color: #ffcc00; }
+        .feature-card.card-cyan { border-color: #00e1ff; }
+
+        .feature-icon-box {
+            width: 54px; height: 54px;
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; margin-bottom: 20px;
             color: white;
         }
+        .card-mint .feature-icon-box { background: #10b981; }
+        .card-pink .feature-icon-box { background: #ff2a5f; }
+        .card-gold .feature-icon-box { background: #ffcc00; color: #000; }
+        .card-cyan .feature-icon-box { background: #00e1ff; color: #000; }
+
         .feature-name {
-            font-size: 16px; font-weight: 700; margin-bottom: 8px;
+            font-size: 22px; font-weight: 800; margin-bottom: 6px;
+            text-transform: uppercase; color: #ffffff;
+            letter-spacing: -0.5px;
         }
         .feature-desc {
-            font-size: 13px; color: var(--gray);
-            line-height: 1.6;
+            font-size: 14px; color: var(--gray);
+            line-height: 1.5; margin-bottom: 18px;
         }
+        .feature-action-link {
+            font-size: 14px; font-weight: 700;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .card-mint .feature-action-link { color: #10b981; }
+        .card-pink .feature-action-link { color: #ff2a5f; }
+        .card-gold .feature-action-link { color: #ffcc00; }
+        .card-cyan .feature-action-link { color: #00e1ff; }
 
-        /* ===== TESTIMONIALS ===== */
+        /* ===== TESTIMONIALS & REVIEWS (DARK) ===== */
         .testimonials-section {
-            background: var(--gray-bg);
-            border-radius: var(--radius-lg);
-            padding: 48px 24px;
-            margin: 40px 0;
+            background: #0b0e17;
+            padding: 48px 16px; margin: 20px 0;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
         }
         .testi-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px; margin-top: 40px;
+            display: flex; flex-direction: column; gap: 16px; margin-top: 24px;
         }
         .testi-card {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 24px;
-            text-align: center;
-            border: 1px solid var(--border);
-            transition: var(--transition);
-        }
-        .testi-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--primary);
-            box-shadow: var(--shadow-md);
+            background: var(--card); border-radius: var(--radius-sm);
+            padding: 20px; border: 1px solid var(--border);
         }
         .testi-avatar {
-            width: 56px; height: 56px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--gold));
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px; margin: 0 auto 14px;
-            color: white;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--primary); display: flex; align-items: center; justify-content: center;
+            font-size: 20px; margin-bottom: 10px; color: white;
         }
-        .testi-rating { color: var(--gold); font-size: 14px; margin-bottom: 10px; }
-        .testi-text {
-            font-size: 13px; color: var(--dark-3);
-            line-height: 1.6; font-style: italic;
-            margin-bottom: 12px;
-        }
-        .testi-name { font-size: 12px; font-weight: 600; color: var(--primary); }
+        .testi-rating { color: var(--gold); font-size: 12px; margin-bottom: 6px; }
+        .testi-text { font-size: 13px; color: var(--dark-3); font-style: italic; margin-bottom: 8px; }
+        .testi-name { font-size: 13px; font-weight: 700; color: var(--primary); }
 
         /* ===== RATE & COMMENT ===== */
         .rate-section {
-            background: linear-gradient(135deg, var(--primary-light), var(--card));
-            border-radius: var(--radius-lg);
-            padding: 40px;
-            text-align: center;
-            border: 1px solid var(--border);
-            margin: 40px 0;
+            background: #111420; border-radius: var(--radius);
+            padding: 28px 20px; text-align: center;
+            border: 1px solid var(--border); margin: 20px 16px;
         }
-        .star-rating {
-            display: flex; justify-content: center; gap: 10px;
-            margin: 20px 0;
-        }
-        .star-rating i {
-            font-size: 36px; cursor: pointer;
-            transition: var(--transition);
-            color: var(--gray-light);
-        }
-        .star-rating i:hover,
-        .star-rating i.active {
-            color: var(--gold);
-            transform: scale(1.15);
-        }
+        .star-rating { display: flex; justify-content: center; gap: 8px; margin: 16px 0; }
+        .star-rating i { font-size: 28px; cursor: pointer; color: var(--gray-light); }
+        .star-rating i.active { color: var(--gold); }
         .comment-input {
-            width: 100%; max-width: 500px;
-            padding: 12px 16px;
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            background: var(--card);
-            font-family: inherit;
-            font-size: 14px;
-            transition: var(--transition);
+            width: 100%; padding: 14px; border: 1px solid var(--border);
+            border-radius: 10px; background: var(--bg); color: #fff;
+            font-family: inherit; font-size: 14px; margin-bottom: 12px;
         }
-        .comment-input:focus {
-            outline: none; border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-glow);
-        }
-        .reviews-list {
-            margin-top: 30px; max-height: 300px; overflow-y: auto;
-        }
-        .review-item {
-            background: var(--card);
-            border-radius: var(--radius-sm);
-            padding: 14px 16px;
-            margin-bottom: 10px;
-            text-align: left;
-            border: 1px solid var(--border);
-        }
-        .review-header {
-            display: flex; align-items: center; gap: 12px;
-            margin-bottom: 6px;
-        }
-        .review-name { font-weight: 600; font-size: 13px; }
-        .review-stars { color: var(--gold); font-size: 12px; }
-        .review-text { font-size: 12px; color: var(--gray); line-height: 1.5; }
-        .review-date { font-size: 10px; color: var(--gray-light); margin-top: 4px; }
+        .reviews-list { margin-top: 24px; max-height: 250px; overflow-y: auto; text-align: left; }
+        .review-item { background: var(--bg); border-radius: 8px; padding: 12px; margin-bottom: 10px; border: 1px solid var(--border); }
+        .review-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .review-name { font-weight: 700; font-size: 13px; color: #fff; }
+        .review-stars { color: var(--gold); font-size: 11px; }
+        .review-text { font-size: 13px; color: var(--gray); }
 
         /* ===== FAQ ===== */
-        .faq-grid { max-width: 800px; margin: 0 auto; }
-        .faq-item {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            margin-bottom: 12px;
-            overflow: hidden;
-            transition: var(--transition);
-        }
-        .faq-item:hover { border-color: var(--primary); }
-        .faq-question {
-            padding: 16px 20px;
-            font-size: 15px; font-weight: 600;
-            cursor: pointer;
-            display: flex; justify-content: space-between;
-            align-items: center;
-            background: var(--card);
-            transition: var(--transition);
-        }
-        .faq-question:hover { background: var(--gray-bg); }
-        .faq-question i { transition: transform 0.3s; }
-        .faq-item.open .faq-question i { transform: rotate(180deg); }
-        .faq-answer {
-            padding: 0 20px; max-height: 0; overflow: hidden;
-            transition: all 0.3s ease;
-            font-size: 13px; color: var(--gray);
-            line-height: 1.7;
-        }
-        .faq-item.open .faq-answer {
-            padding: 0 20px 18px; max-height: 300px;
-        }
+        .faq-grid { display: flex; flex-direction: column; gap: 10px; }
+        .faq-item { background: #111420; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .faq-question { padding: 16px; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .faq-question i { transition: transform 0.2s; }
+        .faq-item.open .faq-question i { transform: rotate(180deg); color: var(--primary); }
+        .faq-answer { padding: 0 16px; max-height: 0; overflow: hidden; transition: all 0.25s ease; font-size: 13px; color: var(--gray); line-height: 1.6; }
+        .faq-item.open .faq-answer { padding: 0 16px 16px; max-height: 200px; }
 
         /* ===== CTA ===== */
-        .cta-wrapper {
-            padding: 0 clamp(16px, 4vw, 48px) clamp(60px, 8vw, 100px);
-        }
+        .cta-wrapper { padding: 40px 16px; }
         .cta-box {
-            max-width: 700px; margin: 0 auto;
-            background: linear-gradient(135deg, var(--primary-light), rgba(246,130,31,0.05));
-            border: 1px solid var(--primary);
-            border-radius: var(--radius-lg);
-            padding: clamp(40px, 5vw, 60px) clamp(24px, 4vw, 48px);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
+            background: linear-gradient(135deg, #1a1520, #111420);
+            border: 2px solid var(--primary); border-radius: var(--radius);
+            padding: 40px 20px; text-align: center;
         }
-        .cta-box::before {
-            content: ''; position: absolute;
-            top: -50%; right: -30%; width: 60%; height: 100%;
-            background: radial-gradient(circle, rgba(246,130,31,0.05) 0%, transparent 70%);
-        }
-        .cta-box h2 {
-            font-size: clamp(26px, 3vw, 36px);
-            font-weight: 800; letter-spacing: -1px;
-            margin-bottom: 12px;
-        }
-        .cta-box p {
-            color: var(--gray); font-size: 15px;
-            margin-bottom: 28px; line-height: 1.7;
-        }
-        .cta-buttons {
-            display: flex; gap: 14px;
-            justify-content: center; flex-wrap: wrap;
-        }
-
-        /* ===== LIVE CHAT ===== */
-        .live-chat-preview {
-            position: fixed; bottom: 100px; right: 20px;
-            z-index: 150; cursor: pointer;
-            animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
-        .chat-bubble {
-            background: var(--card);
-            border-radius: 20px; padding: 12px 18px;
-            box-shadow: var(--shadow-lg);
-            border: 1px solid var(--border);
-            max-width: 240px;
-            position: relative;
-        }
-        .chat-bubble::after {
-            content: ''; position: absolute;
-            bottom: -8px; right: 20px;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-            border-top: 8px solid var(--card);
-        }
-        .chat-agent {
-            display: flex; align-items: center; gap: 8px;
-            margin-bottom: 6px;
-        }
-        .chat-agent-img {
-            width: 28px; height: 28px; border-radius: 50%;
-            background: var(--primary);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 12px; color: white;
-        }
-        .chat-agent-name { font-size: 12px; font-weight: 600; }
-        .chat-agent-status { font-size: 10px; color: var(--success); }
-        .chat-message { font-size: 12px; color: var(--dark-3); line-height: 1.4; }
-        .chat-typing {
-            display: inline-block; width: 4px; height: 4px;
-            border-radius: 50%; background: var(--gray);
-            animation: typing 1.4s infinite;
-        }
-        @keyframes typing {
-            0%, 60%, 100% { transform: translateY(0); }
-            30% { transform: translateY(-4px); }
-        }
+        .cta-box h2 { font-size: 28px; font-weight: 900; margin-bottom: 10px; }
+        .cta-box p { color: var(--gray); font-size: 14px; margin-bottom: 24px; }
 
         /* ===== BACK TO TOP ===== */
         .back-to-top {
-            position: fixed; bottom: 30px; left: 20px;
-            width: 44px; height: 44px; border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            color: white; border: none; cursor: pointer;
-            box-shadow: 0 4px 16px var(--primary-glow);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px;
-            opacity: 0; visibility: hidden;
-            transition: var(--transition);
-            z-index: 150;
+            position: fixed; bottom: 24px; left: 24px; width: 44px; height: 44px; border-radius: 50%;
+            background: var(--primary); color: white; border: none; cursor: pointer;
+            box-shadow: 0 4px 12px var(--primary-glow); display: flex; align-items: center; justify-content: center;
+            font-size: 16px; opacity: 0; visibility: hidden; transition: var(--transition); z-index: 150;
         }
         .back-to-top.show { opacity: 1; visibility: visible; }
-        .back-to-top:hover { transform: scale(1.1); }
 
         /* ===== FOOTER ===== */
-        footer {
-            border-top: 1px solid var(--border);
-            padding: 40px clamp(16px, 4vw, 48px) 24px;
-            background: var(--card);
-        }
-        .footer-content {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 32px; max-width: 1100px; margin: 0 auto;
-        }
-        .footer-col h4 {
-            font-size: 14px; font-weight: 700; margin-bottom: 16px;
-        }
-        .footer-col a {
-            display: block; color: var(--gray);
-            text-decoration: none; font-size: 12px;
-            margin-bottom: 8px; transition: var(--transition);
-        }
-        .footer-col a:hover { color: var(--primary); transform: translateX(4px); }
-        .footer-bottom {
-            text-align: center; padding-top: 24px;
-            margin-top: 24px; border-top: 1px solid var(--border);
-            font-size: 11px; color: var(--gray-light);
-        }
+        footer { border-top: 1px solid var(--border); padding: 40px 16px 24px; background: #06080d; }
+        .footer-content { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+        .footer-col h4 { font-size: 14px; font-weight: 800; margin-bottom: 12px; text-transform: uppercase; color: #fff; }
+        .footer-col a { display: block; color: var(--gray); text-decoration: none; font-size: 13px; margin-bottom: 8px; }
+        .footer-bottom { text-align: center; padding-top: 20px; margin-top: 20px; border-top: 1px solid var(--border); font-size: 12px; color: var(--gray-light); }
 
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 1024px) {
-            .features-grid { grid-template-columns: 1fr 1fr; }
-            .mock-body { grid-template-columns: 1fr; }
-            .mock-sidebar { display: none; }
-        }
-        @media (max-width: 768px) {
-            .features-grid { grid-template-columns: 1fr; }
-            .stats-strip { grid-template-columns: 1fr 1fr; }
-            .trust-badges { gap: 16px; }
-            .trust-item { font-size: 11px; }
-            .testi-grid { grid-template-columns: 1fr; }
-            .rate-section { padding: 24px; }
-            .star-rating i { font-size: 28px; }
-            .nav-links .nav-link { display: none; }
-            .menu-toggle { display: block; }
-            .live-chat-preview { display: none; }
-            .mock-stats { grid-template-columns: 1fr; }
-        }
-        @media (max-width: 480px) {
-            .hero-btns { flex-direction: column; align-items: stretch; }
-            .stats-strip { grid-template-columns: 1fr; }
-            .strip-item { border-right: none; border-bottom: 1px solid var(--border); }
-            .strip-item:last-child { border-bottom: none; }
-            .mock-body { padding: 12px; }
+        /* ===== RESPONSIVE LAPTOP / TABLET ===== */
+        @media (min-width: 768px) {
+            .hero-btns { flex-direction: row; }
+            .stats-strip { grid-template-columns: repeat(4, 1fr); }
+            .strip-item { border-right: 1px solid var(--border) !important; }
+            .strip-item:last-child { border-right: none !important; }
+            .features-grid { grid-template-columns: repeat(2, 1fr); display: grid; }
+            .testi-grid { grid-template-columns: repeat(3, 1fr); display: grid; }
+            .footer-content { grid-template-columns: repeat(4, 1fr); }
         }
     </style>
 </head>
@@ -887,21 +613,20 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
     <div class="splash-bar"><div class="splash-fill"></div></div>
 </div>
 
-<!-- ===== NAVBAR ===== -->
+<!-- ===== NAVBAR (SHIKYTERO PLATFORM STYLE) ===== -->
 <nav class="navbar" id="navbar">
     <a href="index.php" class="nav-logo">
-        <div class="nav-logo-icon">❄️</div>
-        <div class="nav-logo-text">Polar.id</div>
+        <div class="nav-logo-icon">S</div>
+        <div class="nav-logo-text">POLAR<span>.ID</span></div>
     </a>
     <div class="nav-links">
-        <a href="features.php" class="nav-link">Fitur</a>
-        <a href="event.php" class="nav-link">Event</a>
-        <a href="token.php" class="nav-link">Token</a>
-        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-            <i class="fas fa-moon" id="themeIcon"></i>
-        </button>
-        <a href="https://wa.me/<?= CS_NUMBER ?>" target="_blank" class="nav-link"><i class="fab fa-whatsapp"></i> CS</a>
-        <a href="dashboard.php" class="nav-cta"><i class="fas fa-robot"></i> Dashboard</a>
+        <div class="coin-badge">
+            <i class="fas fa-coins"></i> 50
+        </div>
+        <div class="user-profile">
+            <div class="user-avatar">K</div>
+            <span>Kimtha</span>
+        </div>
         <button class="menu-toggle" onclick="toggleMobileMenu()" aria-label="Menu">
             <i class="fas fa-bars"></i>
         </button>
@@ -913,74 +638,50 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
     <div class="hero-content">
         <div class="hero-badge">
             <div class="hero-badge-dot"></div>
-            Bot WhatsApp Multi Device
+            2 Slot Tersedia
         </div>
         
-        <h1>Bot WA Kamu,<br><span class="highlight">Satu Dashboard.</span></h1>
+        <h1>Free Bot <span class="highlight">Server</span> Hosting</h1>
         
-        <div class="hero-subtitle">
-            <span class="typing" id="typingText"></span><span class="cursor">|</span>
-        </div>
-        
-        <p class="hero-desc">
-            Aktifkan dan kelola session bot WhatsApp tanpa login, tanpa ribet. 
-            Buka dashboard dan langsung pakai. Gratis selamanya!
+        <p class="hero-subtitle">
+            Dapatkan server bot gratis dengan spesifikasi terbaik. Claim sekarang sebelum slot habis!
         </p>
         
         <div class="hero-btns">
             <a href="dashboard.php" class="btn btn-primary">
-                <i class="fas fa-arrow-right"></i> Buka Dashboard
+                <i class="fas fa-download"></i> Claim Sekarang
             </a>
             <a href="features.php" class="btn btn-outline">
-                <i class="fas fa-list"></i> Lihat Fitur
+                Lihat Specs <i class="fas fa-arrow-right"></i>
             </a>
         </div>
         
         <!-- Trust Badges -->
-        <div class="trust-badges" data-aos="fade-up" data-aos-delay="100">
-            <div class="trust-item"><i class="fas fa-check-circle"></i> 100% Gratis</div>
-            <div class="trust-item"><i class="fas fa-shield-alt"></i> No Login Required</div>
-            <div class="trust-item"><i class="fas fa-headset"></i> 24/7 Support</div>
-            <div class="trust-item"><i class="fas fa-database"></i> Data Terenkripsi</div>
+        <div class="trust-badges">
+            <div class="trust-item gratis"><i class="fas fa-check-circle"></i> 100% Gratis</div>
+            <div class="trust-item instan"><i class="fas fa-bolt"></i> Setup Instan</div>
+            <div class="trust-item pro"><i class="fas fa-star"></i> PRO Available</div>
         </div>
         
-        <!-- Mock Dashboard -->
-        <div class="mock-dashboard" data-aos="fade-up" data-aos-delay="200">
+        <!-- Mock Dashboard Specs Window -->
+        <div class="mock-dashboard" data-aos="fade-up">
             <div class="mock-header">
                 <div class="mock-dot"></div>
                 <div class="mock-dot"></div>
                 <div class="mock-dot"></div>
-                <div class="mock-url">polar.web.id/dashboard</div>
+                <div class="mock-badge-right">Online</div>
             </div>
             <div class="mock-body">
-                <div class="mock-sidebar">
-                    <div class="mock-nav active"><div class="mock-nav-dot"></div> Dashboard</div>
-                    <div class="mock-nav"><div class="mock-nav-dot"></div> Session</div>
-                    <div class="mock-nav"><div class="mock-nav-dot"></div> Settings</div>
-                </div>
-                <div>
-                    <div class="mock-stats">
-                        <div class="mock-stat">
-                            <div class="mock-stat-label">Session</div>
-                            <div class="mock-stat-value">3</div>
-                        </div>
-                        <div class="mock-stat">
-                            <div class="mock-stat-label">Online</div>
-                            <div class="mock-stat-value" style="color: var(--success);">2</div>
-                        </div>
-                        <div class="mock-stat">
-                            <div class="mock-stat-label">Expired</div>
-                            <div class="mock-stat-value">1</div>
-                        </div>
-                    </div>
-                    <div class="mock-card-item">
-                        <div>
-                            <div class="mock-phone">+6281234567890</div>
-                            <div style="font-size: 10px; color: var(--gray); margin-top: 2px;">Phoenix MD</div>
-                        </div>
-                        <div class="mock-online"><i class="fas fa-circle" style="font-size: 6px;"></i> Online</div>
-                    </div>
-                </div>
+                <div class="mock-label">RAM</div>
+                <div class="mock-value">Unlimited</div>
+                
+                <div class="mock-label">CPU Cores</div>
+                <div class="mock-value">High Performance</div>
+                
+                <div class="mock-divider"></div>
+                
+                <div class="mock-label">Active Session ID</div>
+                <div class="mock-value" style="color: #ff2a5f;">+6281234567890</div>
             </div>
         </div>
     </div>
@@ -990,87 +691,80 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
 <div class="stats-strip">
     <div class="strip-item">
         <div class="strip-number" id="liveSessions"><?= number_format($activeSessions) ?></div>
-        <div class="strip-label"><i class="fas fa-circle" style="font-size: 8px; color: var(--success);"></i> Session Aktif</div>
+        <div class="strip-label">Session Aktif</div>
     </div>
     <div class="strip-item">
         <div class="strip-number"><?= number_format($totalUsers) ?>+</div>
-        <div class="strip-label"><i class="fas fa-users"></i> Pengguna Aktif</div>
+        <div class="strip-label">Pengguna</div>
     </div>
     <div class="strip-item">
         <div class="strip-number">100%</div>
-        <div class="strip-label"><i class="fas fa-charging-station"></i> Gratis</div>
+        <div class="strip-label">Gratis</div>
     </div>
     <div class="strip-item">
         <div class="strip-number">24/7</div>
-        <div class="strip-label"><i class="fas fa-clock"></i> Bot Online</div>
+        <div class="strip-label">Uptime</div>
     </div>
 </div>
 
-<!-- ===== FEATURES ===== -->
+<!-- ===== JELAJAHI MENU SECTIONS ===== -->
 <section class="section" id="features">
-    <div class="section-label">Kenapa Polar.id?</div>
-    <div class="section-title">Semua yang kamu butuhkan.</div>
-    <div class="section-desc">
-        Platform lengkap untuk menjalankan bot WhatsApp. Tanpa akun, tanpa login — langsung pakai.
-    </div>
+    <div class="section-title">Jelajahi</div>
+    <div class="section-desc">Pilih menu yang kamu butuhkan</div>
     
     <div class="features-grid">
-        <div class="feature-card" data-aos="fade-up" data-aos-delay="0">
-            <div class="feature-icon">⚡</div>
-            <div class="feature-name">Tanpa Login</div>
-            <div class="feature-desc">Tidak perlu daftar. Browser kamu jadi identitasmu — langsung buka dan pakai.</div>
+        <div class="feature-card card-mint" data-aos="fade-up">
+            <div class="feature-icon-box"><i class="fas fa-heartbeat"></i></div>
+            <div class="feature-name">Server Status</div>
+            <div class="feature-desc">Monitoring real-time keadaan load server bot WhatsApp secara live.</div>
+            <a href="dashboard.php" class="feature-action-link">Cek Status <i class="fas fa-arrow-right"></i></a>
         </div>
-        <div class="feature-card" data-aos="fade-up" data-aos-delay="100">
-            <div class="feature-icon">🛡️</div>
-            <div class="feature-name">Privasi Terjaga</div>
-            <div class="feature-desc">Data session terikat ke browser kamu. Orang lain tidak bisa akses session milikmu.</div>
+        
+        <div class="feature-card card-pink" data-aos="fade-up">
+            <div class="feature-icon-box"><i class="fas fa-download"></i></div>
+            <div class="feature-name">Claim Server</div>
+            <div class="feature-desc">Dapatkan slot session bot WhatsApp multi-device gratis secara instan.</div>
+            <a href="dashboard.php" class="feature-action-link">Claim Sekarang <i class="fas fa-arrow-right"></i></a>
         </div>
-        <div class="feature-card" data-aos="fade-up" data-aos-delay="200">
-            <div class="feature-icon">🎛️</div>
-            <div class="feature-name">Dashboard Bersih</div>
-            <div class="feature-desc">Tambah session, lihat pairing code, hapus — semua dari satu halaman yang simpel.</div>
+        
+        <div class="feature-card card-gold" data-aos="fade-up">
+            <div class="feature-icon-box"><i class="fas fa-key"></i></div>
+            <div class="feature-name">Get Token</div>
+            <div class="feature-desc">Generate token aktivasi harian untuk memperpanjang session bot gratisanmu.</div>
+            <a href="token.php" class="feature-action-link">Ambil Token <i class="fas fa-arrow-right"></i></a>
         </div>
-        <div class="feature-card" data-aos="fade-up" data-aos-delay="300">
-            <div class="feature-icon">🔄</div>
-            <div class="feature-name">Pairing Ulang</div>
-            <div class="feature-desc">Session terputus? Request pairing code baru langsung dari dashboard tanpa repot.</div>
-        </div>
-        <div class="feature-card" data-aos="fade-up" data-aos-delay="400">
-            <div class="feature-icon">🆓</div>
-            <div class="feature-name">Token Gratis</div>
-            <div class="feature-desc">Generate token aktivasi gratis kapan saja. Tidak perlu bayar untuk memulai.</div>
-        </div>
-        <div class="feature-card" data-aos="fade-up" data-aos-delay="500">
-            <div class="feature-icon">💬</div>
-            <div class="feature-name">Support Aktif</div>
-            <div class="feature-desc">CS kami siap membantu via WhatsApp. Beli nokos murah juga tersedia.</div>
+        
+        <div class="feature-card card-cyan" data-aos="fade-up">
+            <div class="feature-icon-box"><i class="fas fa-headset"></i></div>
+            <div class="feature-name">Customer Service</div>
+            <div class="feature-desc">Butuh bantuan teknis atau ingin upgrade slot limit? Hubungi CS kami.</div>
+            <a href="https://wa.me/<?= CS_NUMBER ?>" target="_blank" class="feature-action-link">Hubungi CS <i class="fas fa-arrow-right"></i></a>
         </div>
     </div>
 </section>
 
 <!-- ===== TESTIMONIALS ===== -->
 <section class="testimonials-section" data-aos="fade-up">
-    <div class="section-label">Testimoni</div>
-    <div class="section-title">💬 Apa Kata Mereka?</div>
-    <div class="section-desc">Ribuan pengguna sudah merasakan kemudahan menggunakan Polar.id</div>
+    <div class="section-title">Apa Kata Mereka?</div>
+    <div class="section-desc">Ribuan pengguna aktif telah mempercayakan bot mereka di platform kami.</div>
     
     <div class="testi-grid">
         <div class="testi-card">
             <div class="testi-avatar">👤</div>
             <div class="testi-rating">★★★★★</div>
-            <div class="testi-text">"Mudah banget pakenya, tinggal klik langsung jadi. Bot langsung online tanpa ribet. Recommended banget!"</div>
+            <div class="testi-text">"Mudah banget pakenya, tinggal klik langsung jadi. Bot langsung online tanpa ribet. Recommended!"</div>
             <div class="testi-name">— Andi Setiawan</div>
         </div>
         <div class="testi-card">
             <div class="testi-avatar">👤</div>
             <div class="testi-rating">★★★★★</div>
-            <div class="testi-text">"Pairing cepat, bot langsung online. Dashboardnya simpel dan mudah dipahami. CS juga responsif banget."</div>
+            <div class="testi-text">"Pairing cepat, bot langsung online. Dashboardnya simpel dan mudah dipahami."</div>
             <div class="testi-name">— Budi Santoso</div>
         </div>
         <div class="testi-card">
             <div class="testi-avatar">👤</div>
-            <div class="testi-rating">★★★★☆</div>
-            <div class="testi-text">"Sangat membantu untuk yang butuh bot WA cepat. Gratis tanpa daftar, langsung bisa pakai. Mantap!"</div>
+            <div class="testi-rating">★★★★★</div>
+            <div class="testi-text">"Sangat membantu untuk yang butuh bot WA cepat. Gratis tanpa daftar."</div>
             <div class="testi-name">— Citra Dewi</div>
         </div>
     </div>
@@ -1078,9 +772,8 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
 
 <!-- ===== RATE & COMMENT ===== -->
 <section class="rate-section" data-aos="fade-up">
-    <div class="section-label">Beri Penilaian</div>
-    <div class="section-title">⭐ Rate & Comment</div>
-    <div class="section-desc">Bagikan pengalamanmu menggunakan Polar.id</div>
+    <div class="section-title">Rate & Comment</div>
+    <div class="section-desc">Bagikan pengalamanmu menggunakan platform kami</div>
     
     <div class="star-rating" id="starRating">
         <i class="far fa-star" data-rating="1"></i>
@@ -1091,8 +784,8 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
     </div>
     <input type="text" class="comment-input" id="reviewName" placeholder="Nama kamu (opsional)">
     <textarea class="comment-input" id="reviewComment" rows="3" placeholder="Tulis komentar atau saran..."></textarea>
-    <button class="btn btn-primary" onclick="submitReview()" style="margin-top: 10px;">
-        <i class="fas fa-paper-plane"></i> Kirim Review
+    <button class="btn btn-primary" onclick="submitReview()">
+        Kirim Review
     </button>
     
     <div class="reviews-list" id="reviewsList">
@@ -1103,7 +796,6 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
                 <span class="review-stars"><?= str_repeat('★', $r['rating']) . str_repeat('☆', 5 - $r['rating']) ?></span>
             </div>
             <div class="review-text"><?= htmlspecialchars($r['comment']) ?></div>
-            <div class="review-date"><?= date('d M Y', strtotime($r['created_at'])) ?></div>
         </div>
         <?php endforeach; ?>
     </div>
@@ -1111,34 +803,21 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
 
 <!-- ===== FAQ ===== -->
 <section class="section" data-aos="fade-up">
-    <div class="section-label">FAQ</div>
-    <div class="section-title">❓ Pertanyaan Umum</div>
-    <div class="section-desc">Temukan jawaban dari pertanyaan yang sering ditanyakan</div>
+    <div class="section-title">Pertanyaan Umum</div>
+    <div class="section-desc">Jawaban dari pertanyaan yang sering ditanyakan</div>
     
     <div class="faq-grid">
         <div class="faq-item">
             <div class="faq-question"><span>❓ Apa itu Polar.id?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer">Polar.id adalah platform untuk mengaktifkan dan mengelola bot WhatsApp secara gratis tanpa perlu registrasi. Cukup buka dashboard, generate token, dan masukkan nomor bot.</div>
+            <div class="faq-answer">Platform pengelolaan session hosting bot WhatsApp multi-device gratis tanpa ribet registrasi.</div>
         </div>
         <div class="faq-item">
             <div class="faq-question"><span>🔗 Bagaimana cara pairing bot?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer">Setelah membuat session, akan muncul pairing code. Buka WhatsApp di HP → Settings → Linked Devices → Link with phone number → Masukkan kode pairing yang muncul.</div>
+            <div class="faq-answer">Buka dashboard -> request pairing code -> buka perangkat tertaut di WhatsApp smartphone kamu -> input kodenya.</div>
         </div>
         <div class="faq-item">
-            <div class="faq-question"><span>🛡️ Apakah aman menggunakan Polar.id?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer">Ya, aman. Data session tersimpan di browser kamu sendiri (fingerprint). Tidak ada orang lain yang bisa mengakses session milikmu karena terikat dengan device ID unik.</div>
-        </div>
-        <div class="faq-item">
-            <div class="faq-question"><span>💰 Apakah benar-benar gratis?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer">Ya, 100% gratis untuk membuat dan menjalankan bot WhatsApp. Token aktivasi juga gratis bisa didapatkan kapan saja.</div>
-        </div>
-        <div class="faq-item">
-            <div class="faq-question"><span>📱 Bisa pakai berapa session?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer">Setiap device ID bisa membuat maksimal 3 session. Jika butuh lebih, hubungi CS untuk menambah slot.</div>
-        </div>
-        <div class="faq-item">
-            <div class="faq-question"><span>⏰ Berapa lama session aktif?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer">Session aktif selama 3 hari. Kamu bisa memperpanjang session menggunakan token baru melalui dashboard.</div>
+            <div class="faq-question"><span>🛡️ Apakah aman?</span><i class="fas fa-chevron-down"></i></div>
+            <div class="faq-answer">Ya, data terenkripsi lokal di browser session ID kamu masing-masing.</div>
         </div>
     </div>
 </section>
@@ -1146,28 +825,9 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
 <!-- ===== CTA ===== -->
 <div class="cta-wrapper" data-aos="fade-up">
     <div class="cta-box">
-        <h2>🚀 Siap punya bot WA sendiri?</h2>
-        <p>Gratis. Tanpa daftar. Langsung pakai.<br>Buka dashboard dan aktifkan bot pertama kamu sekarang.</p>
-        <div class="cta-buttons">
-            <a href="dashboard.php" class="btn btn-primary"><i class="fas fa-arrow-right"></i> Buka Dashboard — Gratis</a>
-            <a href="https://wa.me/<?= CS_NUMBER ?>" target="_blank" class="btn btn-outline"><i class="fab fa-whatsapp"></i> Tanya CS dulu</a>
-        </div>
-    </div>
-</div>
-
-<!-- ===== LIVE CHAT PREVIEW ===== -->
-<div class="live-chat-preview" onclick="window.open('https://wa.me/<?= CS_NUMBER ?>', '_blank')">
-    <div class="chat-bubble">
-        <div class="chat-agent">
-            <div class="chat-agent-img">🤖</div>
-            <div>
-                <div class="chat-agent-name">Polar.id Bot</div>
-                <div class="chat-agent-status">● Online</div>
-            </div>
-        </div>
-        <div class="chat-message">
-            Halo! Ada yang bisa dibantu? <span class="chat-typing"></span>
-        </div>
+        <h2>Siap punya bot WA sendiri?</h2>
+        <p>Gratis. Tanpa daftar. Langsung pakai. Buka dashboard dan aktifkan bot kamu sekarang.</p>
+        <a href="dashboard.php" class="btn btn-primary">Buka Dashboard</a>
     </div>
 </div>
 
@@ -1180,99 +840,37 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
 <footer>
     <div class="footer-content">
         <div class="footer-col">
-            <h4><i class="fas fa-snowflake"></i> Polar.id</h4>
-            <p style="font-size: 12px; color: var(--gray); line-height: 1.6;">Platform bot WhatsApp multi device. Gratis, cepat, dan mudah digunakan.</p>
+            <h4>Polar.id</h4>
+            <p style="font-size: 13px; color: var(--gray);">Platform server hosting bot WhatsApp multi-device berkecepatan tinggi.</p>
         </div>
         <div class="footer-col">
             <h4>Menu</h4>
             <a href="index.php">Beranda</a>
-            <a href="features.php">Fitur</a>
-            <a href="event.php">Event</a>
             <a href="dashboard.php">Dashboard</a>
         </div>
         <div class="footer-col">
             <h4>Lainnya</h4>
-            <a href="https://sfl.gl/lvvR">Ambil Token</a>
-            <a href="https://wa.me/<?= CS_NUMBER ?>">Customer Service</a>
+            <a href="token.php">Ambil Token</a>
             <a href="https://polar.web.id/otp-web.html">Beli Nokos</a>
         </div>
         <div class="footer-col">
-            <h4>Ikuti Kami</h4>
-            <a href="#"><i class="fab fa-instagram"></i> Instagram</a>
-            <a href="#"><i class="fab fa-tiktok"></i> TikTok</a>
-            <a href="#"><i class="fab fa-youtube"></i> YouTube</a>
+            <h4>Socials</h4>
+            <a href="#">Instagram</a>
+            <a href="#">TikTok</a>
         </div>
     </div>
     <div class="footer-bottom">
-        © <?= date('Y') ?> Polar.id — Bot WhatsApp Multi Device. All rights reserved.
+        © <?= date('Y') ?> Polar.id. All rights reserved.
     </div>
 </footer>
 
-<!-- ============================================================ -->
 <!-- ===== JAVASCRIPT ===== -->
-<!-- ============================================================ -->
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-    // ============================================================
-    // 1. THEME TOGGLE
-    // ============================================================
-    function toggleTheme() {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        if (isDark) {
-            document.documentElement.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-            document.getElementById('themeIcon').className = 'fas fa-moon';
-        } else {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-            document.getElementById('themeIcon').className = 'fas fa-sun';
-        }
-    }
+    // Load saved theme (force dark mode sesuai gambar)
+    document.documentElement.setAttribute('data-theme', 'dark');
 
-    // Load saved theme
-    (function loadTheme() {
-        const saved = localStorage.getItem('theme');
-        if (saved === 'dark') {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            document.getElementById('themeIcon').className = 'fas fa-sun';
-        }
-    })();
-
-    // ============================================================
-    // 2. TYPING ANIMATION
-    // ============================================================
-    (function initTyping() {
-        const words = ["Bot WhatsApp", "Auto Reply", "Group Manager", "AI Assistant", "Multi Device"];
-        let i = 0, j = 0, isDeleting = false;
-        const el = document.getElementById('typingText');
-        if (!el) return;
-
-        function typeEffect() {
-            const current = words[i];
-            if (isDeleting) {
-                el.textContent = current.substring(0, j - 1);
-                j--;
-            } else {
-                el.textContent = current.substring(0, j + 1);
-                j++;
-            }
-            if (!isDeleting && j === current.length) {
-                isDeleting = true;
-                setTimeout(typeEffect, 2000);
-            } else if (isDeleting && j === 0) {
-                isDeleting = false;
-                i = (i + 1) % words.length;
-                setTimeout(typeEffect, 500);
-            } else {
-                setTimeout(typeEffect, isDeleting ? 50 : 100);
-            }
-        }
-        typeEffect();
-    })();
-
-    // ============================================================
-    // 3. SCROLL PROGRESS BAR
-    // ============================================================
+    // SCROLL PROGRESS BAR
     (function initProgressBar() {
         const bar = document.getElementById('progressBar');
         const backBtn = document.getElementById('backToTop');
@@ -1285,55 +883,34 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
         });
     })();
 
-    // ============================================================
-    // 4. FAQ ACCORDION
-    // ============================================================
+    // FAQ ACCORDION
     document.querySelectorAll('.faq-question').forEach(q => {
         q.addEventListener('click', () => q.closest('.faq-item').classList.toggle('open'));
     });
 
-    // ============================================================
-    // 5. STAR RATING
-    // ============================================================
+    // STAR RATING
     let selectedRating = 0;
     document.querySelectorAll('#starRating i').forEach(star => {
         const updateStars = (rating) => {
             document.querySelectorAll('#starRating i').forEach(s => {
                 const r = parseInt(s.dataset.rating);
-                s.className = r <= rating ? 'fas fa-star' : 'far fa-star';
-                s.style.color = r <= rating ? '#fbbf24' : '';
+                s.className = r <= rating ? 'fas fa-star active' : 'far fa-star';
             });
         };
         star.addEventListener('click', function() {
             selectedRating = parseInt(this.dataset.rating);
             updateStars(selectedRating);
         });
-        star.addEventListener('mouseenter', function() {
-            updateStars(parseInt(this.dataset.rating));
-        });
-        star.addEventListener('mouseleave', function() {
-            if (selectedRating > 0) updateStars(selectedRating);
-            else {
-                document.querySelectorAll('#starRating i').forEach(s => {
-                    s.className = 'far fa-star';
-                    s.style.color = '';
-                });
-            }
-        });
     });
 
-    // ============================================================
-    // 6. SUBMIT REVIEW
-    // ============================================================
+    // SUBMIT REVIEW
     async function submitReview() {
         const rating = selectedRating;
         const name = document.getElementById('reviewName').value.trim();
         const comment = document.getElementById('reviewComment').value.trim();
         if (rating === 0) { alert('Pilih rating bintang!'); return; }
         if (!comment) { alert('Tulis komentar!'); return; }
-        const btn = event.target;
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Mengirim...';
+        
         try {
             const res = await fetch('api/submit-review.php', {
                 method: 'POST',
@@ -1341,77 +918,18 @@ if ($totalReviews > 0) $avgRating = round($ratingSum / $totalReviews, 1);
                 body: JSON.stringify({ rating, name: name || 'Anonymous', comment })
             });
             const data = await res.json();
-            alert(data.success ? '✅ Terima kasih atas review-nya!' : '❌ Gagal: ' + data.message);
+            alert(data.success ? '✅ Review dikirim!' : '❌ Gagal');
             if (data.success) location.reload();
-        } catch(e) { alert('❌ Error: ' + e.message); }
-        finally { btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Kirim Review'; }
+        } catch(e) { alert('❌ Error'); }
     }
 
-    // ============================================================
-    // 7. LIVE COUNTER UPDATE
-    // ============================================================
-    async function updateLiveCounter() {
-        try {
-            const res = await fetch('api/get-stats.php');
-            const data = await res.json();
-            if (data.active_sessions) {
-                document.getElementById('liveSessions').textContent = data.active_sessions.toLocaleString();
-            }
-        } catch(e) {}
-    }
-    setInterval(updateLiveCounter, 30000);
-
-    // ============================================================
-    // 8. SPLASH SCREEN
-    // ============================================================
+    // SPLASH SCREEN
     window.addEventListener('load', () => {
-        setTimeout(() => document.getElementById('splash')?.classList.add('hide'), 1800);
+        setTimeout(() => document.getElementById('splash')?.classList.add('hide'), 1200);
     });
 
-    // ============================================================
-    // 9. MOBILE MENU
-    // ============================================================
-    let mobileMenuOpen = false;
-    function toggleMobileMenu() {
-        // Implementasi sederhana: toggle class pada navbar
-        document.querySelector('.nav-links').classList.toggle('mobile-open');
-        const icon = document.querySelector('.menu-toggle i');
-        if (icon) icon.className = mobileMenuOpen ? 'fas fa-bars' : 'fas fa-times';
-        mobileMenuOpen = !mobileMenuOpen;
-    }
-
-    // ============================================================
-    // 10. AOS INIT
-    // ============================================================
-    AOS.init({
-        duration: 700,
-        once: true,
-        offset: 50,
-        easing: 'ease-out-cubic'
-    });
-
-    // ============================================================
-    // 11. HIDE CHAT ON MOBILE
-    // ============================================================
-    if (window.innerWidth < 768) {
-        document.querySelector('.live-chat-preview')?.remove();
-    }
-
-    // ============================================================
-    // 12. SMOOTH SCROLL FOR NAV LINKS
-    // ============================================================
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function(e) {
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                e.preventDefault();
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-        });
-    });
-
-    console.log('🚀 Polar.id loaded successfully!');
-    console.log('📊 Active sessions:', document.getElementById('liveSessions')?.textContent || 'N/A');
+    // AOS INIT
+    AOS.init({ duration: 600, once: true });
 </script>
 </body>
 </html>
