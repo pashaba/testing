@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_google_id'])) {
     exit;
 }
 
-$_SESSION['user_coins'] = ($_SESSION['user_coins'] ?? 0) + $amount;
+$_SESSION['user_coins'] = max(0, ($_SESSION['user_coins'] ?? 0) + $amount);
 
 echo json_encode(['success' => true, 'coins' => $_SESSION['user_coins']]);
 ?>
