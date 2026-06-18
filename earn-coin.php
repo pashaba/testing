@@ -2,26 +2,37 @@
 session_start();
 require_once 'config.php';
 
-header('Content-Type: application/json');
-
 // Harus sudah login
 if (!isset($_SESSION['user_google_id'])) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'Belum login']);
+    header('Location: dashboard.php');
     exit;
 }
 
-// Cek apakah sudah ada flag aktif (belum dipakai)
+// ===== TAHAP 2: Balik dari SFL, flag sudah ON → kasih coin =====
 if (!empty($_SESSION['earn_flag'])) {
-    echo json_encode(['success' => false, 'message' => 'Sudah ada earn yang sedang berjalan']);
+
+    // Cek expiry 10 menit
+    if (time() - ($_SESSION['earn_flag_time'] ?? 0) > 600) {
+        unset($_SESSION['earn_flag'], $_SESSION['earn_flag_time']);
+        header('Location: dashboard.php?earn=expired');
+        exit;
+    }
+
+    // Hapus flag DULU (anti double claim)
+    unset($_SESSION['earn_flag'], $_SESSION['earn_flag_time']);
+
+    // Tambah coin
+    $_SESSION['user_coins'] = ($_SESSION['user_coins'] ?? 0) + 1;
+
+    // Redirect ke dashboard dengan notif sukses
+    header('Location: dashboard.php?earn=success&coins=' . $_SESSION['user_coins']);
     exit;
 }
 
-// Set flag
+// ===== TAHAP 1: Pertama kali klik → set flag → redirect ke SFL =====
 $_SESSION['earn_flag'] = true;
 $_SESSION['earn_flag_time'] = time();
 
-// Ganti dengan link SFL kamu di bawah ini (baris 18)
-$sfl_url = 'https://sfl.gl/HrOL7';
-
-echo json_encode(['success' => true, 'url' => $sfl_url]);
+// Ganti URL ini dengan link SFL kamu (destination-nya ke polar.web.id/earn-coin.php)
+header('Location: https://safelinku.com/polar-earn');
+exit;
