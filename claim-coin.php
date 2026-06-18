@@ -1,5 +1,4 @@
 <?php
-// claim-coin.php
 session_start();
 require_once 'config.php';
 
@@ -9,7 +8,7 @@ if (!$token) {
     die('❌ Token tidak valid');
 }
 
-// ========== VALIDASI 1: Cek token di database premade_links ==========
+// Cek token di database premade_links
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/premade_links?token=eq.' . urlencode($token) . '&select=*');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -29,20 +28,12 @@ if (empty($data)) {
 
 $link = $data[0];
 
-// ========== VALIDASI 2: Cek apakah sudah dipakai ==========
+// Cek apakah sudah dipakai
 if ($link['used_by'] !== null) {
-    // Cek siapa yang sudah memakai
-    $usedBy = $link['used_by'];
-    $currentUser = $_SESSION['user_google_id'] ?? null;
-    
-    if ($usedBy === $currentUser) {
-        die('❌ Anda sudah pernah mengklaim token ini sebelumnya!');
-    } else {
-        die('❌ Token ini sudah digunakan oleh user lain.');
-    }
+    die('❌ Token sudah pernah digunakan');
 }
 
-// ========== VALIDASI 3: Cek apakah user login ==========
+// Cek login
 if (!isset($_SESSION['user_google_id'])) {
     die('❌ Silakan login terlebih dahulu');
 }
@@ -50,7 +41,7 @@ if (!isset($_SESSION['user_google_id'])) {
 $user_id = $_SESSION['user_google_id'];
 $today = date('Y-m-d');
 
-// ========== VALIDASI 4: Cek limit 5 per hari ==========
+// Cek limit 5 per hari
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/premade_links?used_by=eq.' . urlencode($user_id) . '&used_at=gte.' . urlencode($today . ' 00:00:00') . '&select=count');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -91,7 +82,7 @@ curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_exec($ch);
 curl_close($ch);
 
-// 2. Tambah koin ke user
+// 2. Tambah koin ke session
 $_SESSION['user_coins'] = ($_SESSION['user_coins'] ?? 0) + 1;
 $remaining = 5 - ($claimedToday + 1);
 
@@ -184,12 +175,6 @@ $remaining = 5 - ($claimedToday + 1);
             background: rgba(255,255,255,0.08);
             color: white;
         }
-        .token-info {
-            font-size: 11px;
-            color: #4a4a55;
-            margin-top: 20px;
-            word-break: break-all;
-        }
     </style>
 </head>
 <body>
@@ -213,10 +198,6 @@ $remaining = 5 - ($claimedToday + 1);
         <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali ke Dashboard</a>
         <br>
         <a href="dashboard.php" class="btn-secondary">🔄 Refresh halaman</a>
-        
-        <div class="token-info">
-            Token: <?= htmlspecialchars($token) ?>
-        </div>
     </div>
 </body>
 </html>
