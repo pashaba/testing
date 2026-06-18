@@ -982,62 +982,28 @@ $maxSessions = 10;
 
         // ========== EARN COIN (Session Flag) ==========
         function earnCoin() {
-            if (isProcessing) return;
-            isProcessing = true;
-
-            const btn = event?.target?.closest?.('.earn-btn, .nav-link') || document.querySelector('.earn-btn');
-            const originalText = btn ? btn.innerHTML : '';
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
-            }
-
-            // Set flag via PHP lalu redirect ke SFL
-            fetch('earn-coin.php')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.url) {
-                        showToast('🪙 Tonton iklan sebentar untuk dapat Polar Coin!', 'gold');
-                        // Redirect tab saat ini ke SFL (bukan open new tab)
-                        // supaya session PHP ikut terbawa
-                        setTimeout(() => { window.location.href = data.url; }, 800);
-                    } else {
-                        isProcessing = false;
-                        if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
-                        showToast('❌ ' + (data.message || 'Gagal'), 'error');
-                    }
-                })
-                .catch(() => {
-                    isProcessing = false;
-                    if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
-                    showToast('❌ Gagal terhubung ke server', 'error');
-                });
+            window.location.href = 'earn-coin.php';
         }
 
-        // ========== HANDLE REDIRECT BALIK DARI SFL ==========
+        // ========== HANDLE REDIRECT BALIK DARI earn-coin.php ==========
         function checkEarnCoinReturn() {
-            if (window.location.hash !== '#earn-coin') return;
+            const params = new URLSearchParams(window.location.search);
+            const earn = params.get('earn');
+            if (!earn) return;
 
-            // Hapus hash dari URL supaya tidak trigger ulang kalau refresh
+            // Bersihkan URL dari query param
             history.replaceState(null, '', window.location.pathname);
 
-            // Panggil claim-coin.php untuk verifikasi flag & kasih coin
-            fetch('claim-coin.php')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        showToast('🎉 ' + data.message, 'gold');
-                        // Update coin display semua elemen
-                        document.querySelectorAll('#coinCount, #claimCoinDisplay, #profileCoinDisplay').forEach(el => {
-                            if (el) el.textContent = data.coins;
-                        });
-                    } else {
-                        showToast('❌ ' + data.message, 'error');
-                    }
-                })
-                .catch(() => {
-                    showToast('❌ Gagal klaim coin', 'error');
+            if (earn === 'success') {
+                const coins = params.get('coins') || '?';
+                showToast('🎉 +1 Polar Coin berhasil diklaim! Total: ' + coins + ' 🪙', 'gold');
+                // Update semua coin display
+                document.querySelectorAll('#coinCount, #claimCoinDisplay, #profileCoinDisplay').forEach(el => {
+                    if (el) el.textContent = coins;
                 });
+            } else if (earn === 'expired') {
+                showToast('⏰ Link kadaluarsa. Silakan earn coin lagi.', 'error');
+            }
         }
 
         // ========== SUPABASE REQUEST ==========
