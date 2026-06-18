@@ -1342,13 +1342,11 @@ $maxSessions = 10;
         document.addEventListener('DOMContentLoaded', function() {
             setInterval(updateCoinDisplay, 30000);
 
-            const isLoggedIn = <?= $is_logged_in ? 'true' : 'false' ?>;
-            if (isLoggedIn) {
-                let tutorialDone = false;
-                try { tutorialDone = localStorage.getItem('polar_tutorial_done') === '1'; } catch(e) {}
-                if (!tutorialDone) {
-                    setTimeout(startTutorial, 600);
-                }
+            // Kalau login overlay tidak ada di DOM = user sudah login = jalankan tutorial
+            const hasLoginOverlay = document.querySelector('.login-overlay') !== null;
+            if (!hasLoginOverlay) {
+                try { localStorage.removeItem('polar_tutorial_done'); } catch(e) {}
+                setTimeout(startTutorial, 600);
             }
         });
 
