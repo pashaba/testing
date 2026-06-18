@@ -984,36 +984,59 @@ $maxSessions = 10;
         function earnCoin() {
             if (isProcessing) return;
             isProcessing = true;
-            
-            const btn = event?.target?.closest?.('.earn-btn') || document.querySelector('.earn-btn');
-            const originalText = btn ? btn.innerHTML : 'EARN';
+
+            const btn = event?.target?.closest?.('.earn-btn, .nav-link') || document.querySelector('.earn-btn');
+            const originalText = btn ? btn.innerHTML : '';
             if (btn) {
                 btn.disabled = true;
                 btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Memproses...';
-                btn.classList.add('loading');
             }
-            
+
+            // Set flag via PHP lalu redirect ke SFL
             fetch('earn-coin.php')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.url) {
-                        showToast('🪙 Klik link di bawah untuk dapat Polar Coin!', 'gold');
-                        window.open(data.url, '_blank');
-                        setTimeout(() => location.reload(), 3000);
+                        showToast('🪙 Tonton iklan sebentar untuk dapat Polar Coin!', 'gold');
+                        // Redirect tab saat ini ke SFL (bukan open new tab)
+                        // supaya session PHP ikut terbawa
+                        setTimeout(() => { window.location.href = data.url; }, 800);
                     } else {
-                        showToast('❌ ' + (data.message || 'Gagal mengambil Polar Coin'), 'error');
+                        isProcessing = false;
+                        if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+                        showToast('❌ ' + (data.message || 'Gagal'), 'error');
                     }
                 })
                 .catch(() => {
-                    showToast('❌ Gagal terhubung ke server', 'error');
-                })
-                .finally(() => {
                     isProcessing = false;
-                    if (btn) {
-                        btn.disabled = false;
-                        btn.innerHTML = originalText;
-                        btn.classList.remove('loading');
+                    if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+                    showToast('❌ Gagal terhubung ke server', 'error');
+                });
+        }
+
+        // ========== HANDLE REDIRECT BALIK DARI SFL ==========
+        function checkEarnCoinReturn() {
+            if (window.location.hash !== '#earn-coin') return;
+
+            // Hapus hash dari URL supaya tidak trigger ulang kalau refresh
+            history.replaceState(null, '', window.location.pathname);
+
+            // Panggil claim-coin.php untuk verifikasi flag & kasih coin
+            fetch('claim-coin.php')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('🎉 ' + data.message, 'gold');
+                        // Update coin display semua elemen
+                        document.querySelectorAll('#coinCount, #claimCoinDisplay, #profileCoinDisplay').forEach(el => {
+                            if (el) el.textContent = data.coins;
+                        });
+                    } else {
+                        showToast('❌ ' + data.message, 'error');
                     }
+                })
+                .catch(() => {
+                    showToast('❌ Gagal klaim coin', 'error');
                 });
         }
 
@@ -1341,6 +1364,9 @@ $maxSessions = 10;
         // ========== INIT ==========
         document.addEventListener('DOMContentLoaded', function() {
             setInterval(updateCoinDisplay, 30000);
+
+            // Cek apakah user baru balik dari SFL
+            checkEarnCoinReturn();
 
             // Kalau login overlay tidak ada di DOM = user sudah login = jalankan tutorial
             const hasLoginOverlay = document.querySelector('.login-overlay') !== null;
