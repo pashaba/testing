@@ -213,9 +213,18 @@ $maxSessions = 10;
 
         /* ===== LOGIN POPUP ===== */
         .login-overlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(16px);
+            position: fixed; inset: 0; background: rgba(10,10,15,0.55); backdrop-filter: blur(10px);
             z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;
             animation: fadeInUp 0.5s ease;
+        }
+        /* Dashboard tetap terlihat samar di belakang popup login */
+        body.locked-bg .navbar,
+        body.locked-bg .main-container,
+        body.locked-bg .sidebar,
+        body.locked-bg .sidebar-overlay {
+            filter: blur(4px) brightness(0.55) saturate(0.7);
+            pointer-events: none;
+            user-select: none;
         }
         .login-card {
             background: var(--bg-card);
@@ -480,6 +489,74 @@ $maxSessions = 10;
         .toast.error { border-left: 4px solid var(--red); }
         .toast.gold { border-left: 4px solid var(--gold); }
 
+        /* ===== TUTORIAL SPOTLIGHT ===== */
+        .tutorial-overlay {
+            position: fixed; inset: 0; z-index: 1300; display: none;
+        }
+        .tutorial-overlay.active { display: block; }
+        .tutorial-dim {
+            position: fixed; inset: 0;
+            background: rgba(5,5,8,0.78);
+            transition: clip-path 0.35s cubic-bezier(0.4,0,0.2,1), background 0.3s ease;
+        }
+        .tutorial-spotlight-ring {
+            position: absolute;
+            border: 3px solid var(--orange);
+            border-radius: 14px;
+            box-shadow: 0 0 0 6px rgba(255,107,0,0.18), 0 0 30px rgba(255,107,0,0.35);
+            transition: top 0.35s cubic-bezier(0.4,0,0.2,1), left 0.35s cubic-bezier(0.4,0,0.2,1),
+                        width 0.35s cubic-bezier(0.4,0,0.2,1), height 0.35s cubic-bezier(0.4,0,0.2,1);
+            pointer-events: none;
+            animation: tutorialPulse 1.6s ease-in-out infinite;
+        }
+        @keyframes tutorialPulse {
+            0%,100% { box-shadow: 0 0 0 6px rgba(255,107,0,0.18), 0 0 30px rgba(255,107,0,0.35); }
+            50% { box-shadow: 0 0 0 10px rgba(255,107,0,0.1), 0 0 45px rgba(255,107,0,0.5); }
+        }
+        .tutorial-arrow {
+            position: absolute;
+            font-size: 26px;
+            color: var(--orange);
+            filter: drop-shadow(0 0 8px rgba(255,107,0,0.6));
+            animation: tutorialBounce 1.2s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1302;
+        }
+        @keyframes tutorialBounce {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .tutorial-card {
+            position: absolute;
+            z-index: 1302;
+            background: var(--bg-card);
+            border: 2px solid var(--orange);
+            border-radius: 16px;
+            padding: 16px 18px;
+            max-width: 260px;
+            box-shadow: 0 16px 50px rgba(0,0,0,0.5);
+            animation: fadeInUp 0.35s ease;
+        }
+        .tutorial-step-badge {
+            display: inline-block;
+            background: var(--gold);
+            color: #000;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 2px 10px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .tutorial-card h4 { font-size: 14px; font-weight: 800; margin-bottom: 4px; }
+        .tutorial-card p { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
+        .tutorial-card-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .tutorial-skip { font-size: 11px; color: var(--text-muted); background: none; border: none; cursor: pointer; font-weight: 600; text-decoration: underline; }
+        .tutorial-next { padding: 7px 16px; font-size: 11px; }
+        .tutorial-dots { display: flex; gap: 4px; }
+        .tutorial-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: var(--transition); }
+        .tutorial-dot.active { background: var(--orange); width: 16px; border-radius: 4px; }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .hero h1 { font-size: 26px; }
@@ -492,9 +569,9 @@ $maxSessions = 10;
         }
     </style>
 </head>
-<body>
+<body class="<?= !$is_logged_in ? 'locked-bg' : '' ?>">
 <?php if (!$is_logged_in): ?>
-    <!-- LOGIN POPUP -->
+    <!-- LOGIN POPUP (mengambang di atas dashboard yang diblur) -->
     <div class="login-overlay">
         <div class="login-card">
             <div class="login-badge">✦ NEW PLAYER</div>
@@ -518,7 +595,8 @@ $maxSessions = 10;
             </div>
         </div>
     </div>
-<?php else: ?>
+<?php endif; ?>
+
     <!-- TOAST -->
     <div class="toast" id="toast"></div>
 
@@ -552,19 +630,36 @@ $maxSessions = 10;
         </div>
     </div>
 
+    <!-- TUTORIAL SPOTLIGHT OVERLAY -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-dim" id="tutorialDim"></div>
+        <div class="tutorial-spotlight-ring" id="tutorialRing"></div>
+        <i class="fas fa-arrow-up tutorial-arrow" id="tutorialArrow"></i>
+        <div class="tutorial-card" id="tutorialCard">
+            <span class="tutorial-step-badge" id="tutorialStepBadge">STEP 1/5</span>
+            <h4 id="tutorialTitle">Judul</h4>
+            <p id="tutorialDesc">Deskripsi</p>
+            <div class="tutorial-card-footer">
+                <button class="tutorial-skip" onclick="skipTutorial()">Lewati</button>
+                <div class="tutorial-dots" id="tutorialDots"></div>
+                <button class="btn btn-orange tutorial-next" id="tutorialNextBtn" onclick="nextTutorialStep()">Lanjut <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== NAVBAR ===== -->
     <nav class="navbar" id="navbar">
-        <div class="nav-brand"><span class="brand-icon">✦</span> POLAR.ID</div>
+        <div class="nav-brand" id="tut-brand"><span class="brand-icon">✦</span> POLAR.ID</div>
         <div class="nav-right">
-            <div class="coin-badge" id="coinBadge">
+            <div class="coin-badge" id="coinBadge" data-tut="coin">
                 <i class="fas fa-coins"></i>
                 <span id="coinCount"><?= $user_coins ?></span>
             </div>
-            <div class="profile-btn" id="profileBtn" onclick="navTo('profile')">
+            <div class="profile-btn" id="profileBtn" data-tut="profile" onclick="navTo('profile')">
                 <img src="<?= $user_avatar ?>" alt="Avatar">
                 <span class="hide-mobile"><?= explode(' ', $user_name)[0] ?></span>
             </div>
-            <button class="menu-btn" id="menuBtn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+            <button class="menu-btn" id="menuBtn" data-tut="menu" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
         </div>
     </nav>
 
@@ -575,12 +670,12 @@ $maxSessions = 10;
             <div class="nav-brand" style="font-size:14px;"><span class="brand-icon">✦</span> MENU</div>
             <button class="sidebar-close" onclick="toggleMenu()"><i class="fas fa-times"></i></button>
         </div>
-        <a href="#" class="nav-link active" onclick="navTo('home'); toggleMenu();"><i class="fas fa-home"></i> HOME</a>
-        <a href="#" class="nav-link" onclick="navTo('status'); toggleMenu();"><i class="fas fa-server"></i> STATUS</a>
-        <a href="#" class="nav-link" onclick="navTo('claim'); toggleMenu();"><i class="fas fa-download"></i> CLAIM</a>
-        <a href="#" class="nav-link" onclick="navTo('sessions'); toggleMenu();"><i class="fas fa-robot"></i> SESSIONS</a>
-        <a href="#" class="nav-link" onclick="navTo('profile'); toggleMenu();"><i class="fas fa-user"></i> PROFILE</a>
-        <a href="#" class="nav-link" onclick="earnCoin()" style="background:linear-gradient(135deg,rgba(255,107,0,0.1),rgba(251,191,36,0.05));border:1px solid var(--orange);">
+        <a href="#" class="nav-link active" data-tut="nav-home" onclick="navTo('home'); toggleMenu();"><i class="fas fa-home"></i> HOME</a>
+        <a href="#" class="nav-link" data-tut="nav-status" onclick="navTo('status'); toggleMenu();"><i class="fas fa-server"></i> STATUS</a>
+        <a href="#" class="nav-link" data-tut="nav-claim" onclick="navTo('claim'); toggleMenu();"><i class="fas fa-download"></i> CLAIM</a>
+        <a href="#" class="nav-link" data-tut="nav-sessions" onclick="navTo('sessions'); toggleMenu();"><i class="fas fa-robot"></i> SESSIONS</a>
+        <a href="#" class="nav-link" data-tut="nav-profile" onclick="navTo('profile'); toggleMenu();"><i class="fas fa-user"></i> PROFILE</a>
+        <a href="#" class="nav-link" data-tut="nav-earn" onclick="earnCoin()" style="background:linear-gradient(135deg,rgba(255,107,0,0.1),rgba(251,191,36,0.05));border:1px solid var(--orange);">
             <i class="fas fa-coins" style="color:var(--gold);"></i> EARN POLAR COIN
         </a>
         <a href="logout.php" class="nav-link" style="color:var(--orange);margin-top:auto;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
@@ -1050,15 +1145,186 @@ $maxSessions = 10;
                 .catch(() => {});
         }
 
+        // ========== TUTORIAL SPOTLIGHT ==========
+        const TUTORIAL_STEPS = [
+            {
+                selector: '#tut-brand',
+                title: 'Selamat Datang di Polar.id! 👋',
+                desc: 'Ini logo Polar.id. Yuk kenalan dulu sama bagian-bagian penting di dashboard.',
+                arrow: 'down'
+            },
+            {
+                selector: '[data-tut="coin"]',
+                title: 'Polar Coin 🪙',
+                desc: 'Ini saldo Polar Coin kamu. Coin dipakai untuk claim server bot WhatsApp.',
+                arrow: 'down'
+            },
+            {
+                selector: '[data-tut="profile"]',
+                title: 'Profil Kamu',
+                desc: 'Tap di sini buat lihat profil, statistik, dan info akun Google kamu.',
+                arrow: 'down'
+            },
+            {
+                selector: '[data-tut="menu"]',
+                title: 'Menu Navigasi ☰',
+                desc: 'Tombol ini buka menu utama buat pindah-pindah halaman dashboard.',
+                arrow: 'down'
+            }
+        ];
+        let tutStep = 0;
+        let tutSidebarOpened = false;
+
+        function getTutorialSidebarSteps() {
+            return [
+                { selector: '[data-tut="nav-home"]', title: 'Home', desc: 'Halaman utama buat claim server dengan cepat.', arrow: 'left' },
+                { selector: '[data-tut="nav-status"]', title: 'Status Server', desc: 'Pantau status server Phoenix MD & Ourin secara real-time.', arrow: 'left' },
+                { selector: '[data-tut="nav-claim"]', title: 'Claim Server', desc: 'Pilih paket, masukkan nomor WhatsApp, dan claim bot gratis di sini.', arrow: 'left' },
+                { selector: '[data-tut="nav-sessions"]', title: 'My Bots', desc: 'Lihat semua bot WhatsApp yang sudah kamu claim dan kelola statusnya.', arrow: 'left' },
+                { selector: '[data-tut="nav-earn"]', title: 'Earn Polar Coin', desc: 'Dapatkan Polar Coin gratis di sini buat claim lebih banyak server.', arrow: 'left' }
+            ];
+        }
+
+        function allTutorialSteps() {
+            return TUTORIAL_STEPS.concat(getTutorialSidebarSteps());
+        }
+
+        function positionTutorialStep(step) {
+            const el = document.querySelector(step.selector);
+            if (!el) { nextTutorialStep(); return; }
+
+            const rect = el.getBoundingClientRect();
+            const pad = 8;
+            const ring = document.getElementById('tutorialRing');
+            const arrow = document.getElementById('tutorialArrow');
+            const card = document.getElementById('tutorialCard');
+
+            ring.style.top = (rect.top - pad) + 'px';
+            ring.style.left = (rect.left - pad) + 'px';
+            ring.style.width = (rect.width + pad * 2) + 'px';
+            ring.style.height = (rect.height + pad * 2) + 'px';
+
+            // Cutout: blur semua kecuali area spotlight
+            const dim = document.getElementById('tutorialDim');
+            const top = rect.top - pad, left = rect.left - pad, right = rect.right + pad, bottom = rect.bottom + pad;
+            dim.style.clipPath = `polygon(
+                0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+                ${left}px ${top}px, ${right}px ${top}px, ${right}px ${bottom}px, ${left}px ${bottom}px, ${left}px ${top}px
+            )`;
+
+            // Posisi arrow & card relatif ke arah yang ditentukan
+            arrow.className = 'tutorial-arrow fas fa-arrow-' + (step.arrow === 'left' ? 'right' : 'up');
+            let cardTop, cardLeft, arrowTop, arrowLeft;
+
+            if (step.arrow === 'left') {
+                arrowTop = rect.top + rect.height / 2 - 13;
+                arrowLeft = rect.left - 38;
+                cardTop = rect.top + rect.height / 2 - 60;
+                cardLeft = rect.left - 280;
+                if (cardLeft < 10) { cardLeft = rect.right + 20; arrow.className = 'tutorial-arrow fas fa-arrow-left'; arrowLeft = rect.right + 8; }
+            } else {
+                arrowTop = rect.bottom + 8;
+                arrowLeft = rect.left + rect.width / 2 - 13;
+                cardTop = rect.bottom + 40;
+                cardLeft = Math.max(10, Math.min(window.innerWidth - 280, rect.left + rect.width / 2 - 130));
+                if (cardTop + 140 > window.innerHeight) {
+                    cardTop = rect.top - 150;
+                    arrowTop = rect.top - 34;
+                    arrow.className = 'tutorial-arrow fas fa-arrow-down';
+                }
+            }
+
+            arrow.style.top = arrowTop + 'px';
+            arrow.style.left = arrowLeft + 'px';
+            card.style.top = cardTop + 'px';
+            card.style.left = cardLeft + 'px';
+
+            document.getElementById('tutorialTitle').textContent = step.title;
+            document.getElementById('tutorialDesc').textContent = step.desc;
+        }
+
+        function renderTutorialDots(total) {
+            const dotsEl = document.getElementById('tutorialDots');
+            dotsEl.innerHTML = '';
+            for (let i = 0; i < total; i++) {
+                const dot = document.createElement('span');
+                dot.className = 'tutorial-dot' + (i === tutStep ? ' active' : '');
+                dotsEl.appendChild(dot);
+            }
+        }
+
+        function showTutorialStep() {
+            const steps = allTutorialSteps();
+            if (tutStep >= steps.length) { finishTutorial(); return; }
+
+            // Step 5 ke atas berarti sudah masuk daftar sidebar -> buka sidebar otomatis
+            if (tutStep >= TUTORIAL_STEPS.length && !tutSidebarOpened) {
+                document.getElementById('sidebar').classList.add('active');
+                document.getElementById('sidebarOverlay').classList.add('active');
+                tutSidebarOpened = true;
+            }
+
+            const total = steps.length;
+            document.getElementById('tutorialStepBadge').textContent = `STEP ${tutStep + 1}/${total}`;
+            document.getElementById('tutorialNextBtn').innerHTML = (tutStep === total - 1)
+                ? 'Selesai <i class="fas fa-check"></i>'
+                : 'Lanjut <i class="fas fa-arrow-right"></i>';
+            renderTutorialDots(total);
+
+            // Kasih sedikit delay biar sidebar transition selesai sebelum diukur posisinya
+            requestAnimationFrame(() => {
+                setTimeout(() => positionTutorialStep(steps[tutStep]), tutSidebarOpened && tutStep === TUTORIAL_STEPS.length ? 320 : 0);
+            });
+        }
+
+        function nextTutorialStep() {
+            tutStep++;
+            showTutorialStep();
+        }
+
+        function startTutorial() {
+            tutStep = 0;
+            tutSidebarOpened = false;
+            document.getElementById('tutorialOverlay').classList.add('active');
+            showTutorialStep();
+        }
+
+        function skipTutorial() { finishTutorial(); }
+
+        function finishTutorial() {
+            document.getElementById('tutorialOverlay').classList.remove('active');
+            if (tutSidebarOpened) {
+                document.getElementById('sidebar').classList.remove('active');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            }
+            try { localStorage.setItem('polar_tutorial_done', '1'); } catch(e) {}
+        }
+
+        window.addEventListener('resize', () => {
+            const overlay = document.getElementById('tutorialOverlay');
+            if (overlay.classList.contains('active')) {
+                const steps = allTutorialSteps();
+                positionTutorialStep(steps[tutStep]);
+            }
+        });
+
         // ========== INIT ==========
         document.addEventListener('DOMContentLoaded', function() {
             setInterval(updateCoinDisplay, 30000);
+
+            const isLoggedIn = <?= $is_logged_in ? 'true' : 'false' ?>;
+            if (isLoggedIn) {
+                let tutorialDone = false;
+                try { tutorialDone = localStorage.getItem('polar_tutorial_done') === '1'; } catch(e) {}
+                if (!tutorialDone) {
+                    setTimeout(startTutorial, 600);
+                }
+            }
         });
 
         document.getElementById('pairingOverlay').addEventListener('click', function(e) {
             if (e.target === this) closePairingModal();
         });
     </script>
-<?php endif; ?>
 </body>
 </html>
