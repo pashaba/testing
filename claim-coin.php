@@ -5,18 +5,193 @@ require_once 'config.php';
 
 // ========== CEK SESSION FLAG ==========
 if (!isset($_SESSION['can_claim']) || $_SESSION['can_claim'] !== true) {
-    die('❌ Akses ditolak. Silakan klik "EARN POLAR COIN" terlebih dahulu.');
+    ?>
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Akses Ditolak — Polar.id</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Poppins', sans-serif;
+                background: #0a0a0f;
+                color: white;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .card {
+                background: #14141e;
+                border: 1px solid #2a2a35;
+                border-radius: 20px;
+                padding: 48px 36px;
+                max-width: 420px;
+                width: 100%;
+                text-align: center;
+                animation: slideUp 0.5s ease;
+            }
+            @keyframes slideUp {
+                from { opacity: 0; transform: translateY(30px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .icon { font-size: 64px; margin-bottom: 16px; }
+            h1 { font-size: 24px; font-weight: 900; margin-bottom: 8px; color: #ef4444; }
+            p { color: #8b8b9b; font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
+            .btn {
+                display: inline-block;
+                padding: 14px 32px;
+                background: linear-gradient(135deg, #FF6B00, #e05e00);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-weight: 800;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-size: 14px;
+            }
+            .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,0,0.3); }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="icon">🚫</div>
+            <h1>Akses Ditolak</h1>
+            <p>Silakan klik <strong>"EARN POLAR COIN"</strong> terlebih dahulu di dashboard untuk mendapatkan akses.</p>
+            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali ke Dashboard</a>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
 }
 
 // ========== CEK EXPIRED (10 menit) ==========
 if (isset($_SESSION['claim_time']) && (time() - $_SESSION['claim_time']) > 600) {
     $_SESSION['can_claim'] = false;
-    die('❌ Sesi kedaluwarsa. Silakan klik "EARN POLAR COIN" lagi.');
+    ?>
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sesi Kedaluwarsa — Polar.id</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Poppins', sans-serif;
+                background: #0a0a0f;
+                color: white;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .card {
+                background: #14141e;
+                border: 1px solid #2a2a35;
+                border-radius: 20px;
+                padding: 48px 36px;
+                max-width: 420px;
+                width: 100%;
+                text-align: center;
+                animation: slideUp 0.5s ease;
+            }
+            .icon { font-size: 64px; margin-bottom: 16px; }
+            h1 { font-size: 24px; font-weight: 900; margin-bottom: 8px; color: #f59e0b; }
+            p { color: #8b8b9b; font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
+            .btn {
+                display: inline-block;
+                padding: 14px 32px;
+                background: linear-gradient(135deg, #FF6B00, #e05e00);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-weight: 800;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-size: 14px;
+            }
+            .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,0,0.3); }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="icon">⏰</div>
+            <h1>Sesi Kedaluwarsa</h1>
+            <p>Waktu claim sudah habis (10 menit). Silakan klik <strong>"EARN POLAR COIN"</strong> lagi di dashboard.</p>
+            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali ke Dashboard</a>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
 }
 
 // ========== CEK LOGIN ==========
 if (!isset($_SESSION['user_google_id'])) {
-    die('❌ Silakan login terlebih dahulu');
+    ?>
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Harap Login — Polar.id</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Poppins', sans-serif;
+                background: #0a0a0f;
+                color: white;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .card {
+                background: #14141e;
+                border: 1px solid #2a2a35;
+                border-radius: 20px;
+                padding: 48px 36px;
+                max-width: 420px;
+                width: 100%;
+                text-align: center;
+                animation: slideUp 0.5s ease;
+            }
+            .icon { font-size: 64px; margin-bottom: 16px; }
+            h1 { font-size: 24px; font-weight: 900; margin-bottom: 8px; color: #3b82f6; }
+            p { color: #8b8b9b; font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
+            .btn {
+                display: inline-block;
+                padding: 14px 32px;
+                background: linear-gradient(135deg, #FF6B00, #e05e00);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-weight: 800;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-size: 14px;
+            }
+            .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,0,0.3); }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="icon">🔐</div>
+            <h1>Harap Login</h1>
+            <p>Silakan login terlebih dahulu untuk mengklaim Polar Coin.</p>
+            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Login</a>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
 }
 
 $user_id = $_SESSION['user_google_id'];
@@ -39,11 +214,67 @@ $claimedToday = $data[0]['count'] ?? 0;
 
 if ($claimedToday >= 5) {
     $_SESSION['can_claim'] = false;
-    die('❌ Anda sudah mengambil 5 Polar Coin hari ini. Coba lagi besok! 🪙');
+    ?>
+    <!DOCTYPE html>
+    <html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Limit Tercapai — Polar.id</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800;900&display=swap" rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Poppins', sans-serif;
+                background: #0a0a0f;
+                color: white;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+            }
+            .card {
+                background: #14141e;
+                border: 1px solid #2a2a35;
+                border-radius: 20px;
+                padding: 48px 36px;
+                max-width: 420px;
+                width: 100%;
+                text-align: center;
+                animation: slideUp 0.5s ease;
+            }
+            .icon { font-size: 64px; margin-bottom: 16px; }
+            h1 { font-size: 24px; font-weight: 900; margin-bottom: 8px; color: #ef4444; }
+            p { color: #8b8b9b; font-size: 14px; margin-bottom: 20px; line-height: 1.6; }
+            .btn {
+                display: inline-block;
+                padding: 14px 32px;
+                background: linear-gradient(135deg, #FF6B00, #e05e00);
+                color: white;
+                border: none;
+                border-radius: 12px;
+                font-weight: 800;
+                text-decoration: none;
+                transition: all 0.3s ease;
+                font-size: 14px;
+            }
+            .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,0,0.3); }
+        </style>
+    </head>
+    <body>
+        <div class="card">
+            <div class="icon">🛑</div>
+            <h1>Limit Tercapai!</h1>
+            <p>Anda sudah mengambil <strong>5 Polar Coin</strong> hari ini. Coba lagi besok! 🪙</p>
+            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali ke Dashboard</a>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
 }
 
 // ========== UPDATE STATUS CLAIM ==========
-// Update record pending menjadi claimed
 $updateData = json_encode([
     'status' => 'claimed',
     'claimed_at' => date('Y-m-d H:i:s')
@@ -89,6 +320,7 @@ $remaining = 5 - ($claimedToday + 1);
             align-items: center;
             justify-content: center;
             padding: 20px;
+            background-image: radial-gradient(circle at 50% 50%, rgba(255,107,0,0.05) 0%, transparent 50%);
         }
         .card {
             background: #14141e;
@@ -104,11 +336,29 @@ $remaining = 5 - ($claimedToday + 1);
             from { opacity: 0; transform: translateY(30px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        .icon { font-size: 72px; margin-bottom: 16px; animation: bounce 1s ease infinite; }
-        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        h1 { font-size: 28px; font-weight: 900; margin-bottom: 8px; }
-        h1 span { color: #ffcc00; }
-        p { color: #8b8b9b; font-size: 14px; margin-bottom: 8px; line-height: 1.6; }
+        .icon {
+            font-size: 72px;
+            margin-bottom: 16px;
+            animation: bounce 1s ease infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+        h1 span {
+            color: #ffcc00;
+        }
+        p {
+            color: #8b8b9b;
+            font-size: 14px;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
         .coin-display {
             font-size: 48px;
             font-weight: 900;
@@ -119,7 +369,11 @@ $remaining = 5 - ($claimedToday + 1);
             border-radius: 12px;
             border: 1px solid rgba(255,204,0,0.1);
         }
-        .remaining { font-size: 13px; color: #8b8b9b; margin-bottom: 20px; }
+        .remaining {
+            font-size: 13px;
+            color: #8b8b9b;
+            margin-bottom: 20px;
+        }
         .btn {
             display: inline-block;
             padding: 14px 32px;
@@ -132,7 +386,10 @@ $remaining = 5 - ($claimedToday + 1);
             transition: all 0.3s ease;
             font-size: 14px;
         }
-        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(255,107,0,0.3); }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(255,107,0,0.3);
+        }
         .btn-secondary {
             background: rgba(255,255,255,0.05);
             border: 1px solid #2a2a35;
@@ -145,25 +402,123 @@ $remaining = 5 - ($claimedToday + 1);
             font-size: 13px;
             transition: all 0.3s ease;
         }
-        .btn-secondary:hover { background: rgba(255,255,255,0.08); color: white; }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.08);
+            color: white;
+        }
+
+        /* Loading state */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #ffcc00;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success animation */
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            z-index: 999;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            animation: confettiFall 2s ease forwards;
+        }
+        @keyframes confettiFall {
+            0% { opacity: 1; transform: translateY(0) rotate(0deg); }
+            100% { opacity: 0; transform: translateY(300px) rotate(720deg); }
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="icon">🪙</div>
-        <h1>+1 <span>Polar Coin</span></h1>
-        <p>Polar Coin berhasil ditambahkan ke akun Anda!</p>
-        <div class="coin-display"><?= $_SESSION['user_coins'] ?? 0 ?> 🪙</div>
-        <div class="remaining">
-            <?php if ($remaining > 0): ?>
-                Sisa claim hari ini: <strong style="color:#ffcc00;"><?= $remaining ?></strong> lagi
-            <?php else: ?>
-                🎉 Anda sudah mencapai limit 5 Polar Coin hari ini!
-            <?php endif; ?>
+    <div class="card" id="claimCard">
+        <!-- Loading State -->
+        <div id="loadingState" style="display:none;">
+            <div style="margin-bottom:16px;">
+                <div class="loading-spinner"></div>
+            </div>
+            <h2 style="font-size:20px;font-weight:700;">Memproses...</h2>
+            <p style="color:var(--text-muted);">Mohon tunggu sebentar</p>
         </div>
-        <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali ke Dashboard</a>
-        <br>
-        <a href="dashboard.php" class="btn-secondary">🔄 Refresh</a>
+
+        <!-- Success State -->
+        <div id="successState">
+            <div class="icon">🪙</div>
+            <h1>+1 <span>Polar Coin</span></h1>
+            <p>Polar Coin berhasil ditambahkan ke akun Anda!</p>
+            <div class="coin-display">
+                <?= $_SESSION['user_coins'] ?? 0 ?> 🪙
+            </div>
+            <div class="remaining">
+                <?php if ($remaining > 0): ?>
+                    Sisa claim hari ini: <strong style="color:#ffcc00;"><?= $remaining ?></strong> lagi
+                <?php else: ?>
+                    🎉 Anda sudah mencapai limit 5 Polar Coin hari ini!
+                <?php endif; ?>
+            </div>
+            <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali ke Dashboard</a>
+            <br>
+            <a href="dashboard.php" class="btn-secondary">🔄 Refresh</a>
+        </div>
     </div>
+
+    <script>
+        // Confetti effect
+        function launchConfetti() {
+            const colors = ['#ffcc00', '#FF6B00', '#10b981', '#3b82f6', '#ef4444', '#8b5cf6'];
+            const container = document.createElement('div');
+            container.className = 'confetti';
+            container.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:999;overflow:hidden;';
+            
+            for (let i = 0; i < 50; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.cssText = `
+                    position:absolute;
+                    width:${6 + Math.random() * 8}px;
+                    height:${6 + Math.random() * 8}px;
+                    background:${colors[Math.floor(Math.random() * colors.length)]};
+                    top:${-10 + Math.random() * 10}%;
+                    left:${Math.random() * 100}%;
+                    border-radius:${Math.random() > 0.5 ? '50%' : '2px'};
+                    animation-delay:${Math.random() * 0.5}s;
+                    animation-duration:${1.5 + Math.random() * 1}s;
+                `;
+                container.appendChild(piece);
+            }
+            document.body.appendChild(container);
+            
+            setTimeout(() => container.remove(), 3000);
+        }
+
+        // Tampilkan loading dulu, lalu success
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingState = document.getElementById('loadingState');
+            const successState = document.getElementById('successState');
+            
+            // Tampilkan loading
+            loadingState.style.display = 'block';
+            successState.style.display = 'none';
+            
+            // Setelah 1.5 detik, tampilkan success + confetti
+            setTimeout(() => {
+                loadingState.style.display = 'none';
+                successState.style.display = 'block';
+                launchConfetti();
+            }, 1500);
+        });
+    </script>
 </body>
 </html>
