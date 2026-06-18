@@ -14,7 +14,7 @@ $today = date('Y-m-d');
 
 // ========== CEK SUDAH BERAPA KOIN YANG DIAMBIL HARI INI ==========
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/coin_claims?user_id=eq.' . urlencode($user_id) . '&status=eq.claimed&claimed_at=gte.' . urlencode($today . ' 00:00:00') . '&select=count');
+curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/premade_links?used_by=eq.' . urlencode($user_id) . '&used_at=gte.' . urlencode($today . ' 00:00:00') . '&select=count');
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     'apikey: ' . SUPABASE_KEY,
@@ -31,7 +31,7 @@ $maxPerDay = 5;
 if ($claimedToday >= $maxPerDay) {
     echo json_encode([
         'success' => false,
-        'message' => 'Anda sudah mengambil ' . $maxPerDay . ' koin hari ini. Coba lagi besok!',
+        'message' => 'Anda sudah mengambil ' . $maxPerDay . ' Polar Coin hari ini. Coba lagi besok! 🪙',
         'claimed_today' => $claimedToday,
         'max_per_day' => $maxPerDay
     ]);
@@ -62,7 +62,7 @@ if (empty($premade)) {
 
 $link = $premade[0];
 $linkId = $link['id'];
-$claim_url = $link['url']; // Link premade sudah dalam bentuk shortened
+$claim_url = $link['url'];
 
 // ========== TANDAI LINK SUDAH DIGUNAKAN ==========
 $updateData = json_encode([
@@ -88,6 +88,9 @@ curl_close($ch);
 // ========== TAMBAH KOIN KE USER ==========
 $_SESSION['user_coins'] = ($_SESSION['user_coins'] ?? 0) + 1;
 
+// ========== UPDATE KOIN DI DATABASE (opsional) ==========
+// Jika ada tabel users, update di sini
+
 // ========== KIRIM RESPONSE ==========
 $remaining = $maxPerDay - ($claimedToday + 1);
 
@@ -97,6 +100,6 @@ echo json_encode([
     'claimed_today' => $claimedToday + 1,
     'max_per_day' => $maxPerDay,
     'remaining' => $remaining,
-    'message' => 'Koin berhasil diambil! Sisa ' . $remaining . ' koin hari ini.'
+    'message' => '🪙 Polar Coin berhasil diambil! Sisa ' . $remaining . ' coin hari ini.'
 ]);
 ?>
