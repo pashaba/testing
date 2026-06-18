@@ -1,39 +1,66 @@
 <?php
+// claim-coin.php
+// Wajib di awal, sebelum output apapun
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Matikan display error di production
+
 session_start();
 require_once 'config.php';
 
+// ========== KONFIGURASI ==========
+$SUPABASE_URL = 'https://xcxciixqhmghitmyigbj.supabase.co';
+$SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhjeGNpaXhxaG1naGl0bXlpZ2JqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODU2MzQ2MCwiZXhwIjoyMDk0MTM5NDYwfQ.Tzg34ww9r2X2WrZ9wcYoajoQUjUfRkOxnsdARskfvJE';
+
+// ========== FUNGSI CURL KE SUPABASE ==========
+function supabaseRequest($method, $endpoint, $body = null) {
+    global $SUPABASE_URL, $SUPABASE_KEY;
+    $url = $SUPABASE_URL . '/rest/v1/' . $endpoint;
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'apikey: ' . $SUPABASE_KEY,
+        'Authorization: Bearer ' . $SUPABASE_KEY,
+        'Content-Type: application/json',
+        'Prefer: return=representation'
+    ]);
+    if ($body) {
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
+    }
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    return ['code' => $httpCode, 'data' => json_decode($response, true)];
+}
+
+// ========== AMBIL TOKEN ==========
 $token = $_GET['token'] ?? '';
 
 if (!$token) {
     die('❌ Token tidak valid');
 }
 
-// Cek token di database premade_links
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/premade_links?token=eq.' . urlencode($token) . '&select=*');
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'apikey: ' . SUPABASE_KEY,
-    'Authorization: Bearer ' . SUPABASE_KEY
-]);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-$response = curl_exec($ch);
-curl_close($ch);
+// ========== VALIDASI 1: Cek token di database ==========
+$result = supabaseRequest('GET', 'premade_links?token=eq.' . urlencode($token) . '&select=*');
+$data = $result['data'];
 
-$data = json_decode($response, true);
-
-if (empty($data)) {
+if (empty($data) || $result['code'] !== 200) {
     die('❌ Token tidak ditemukan di database');
 }
 
 $link = $data[0];
 
-// Cek apakah sudah dipakai
+// ========== VALIDASI 2: Cek sudah dipakai ==========
 if ($link['used_by'] !== null) {
     die('❌ Token sudah pernah digunakan');
 }
 
-// Cek login
+// ========== VALIDASI 3: Cek login ==========
 if (!isset($_SESSION['user_google_id'])) {
     die('❌ Silakan login terlebih dahulu');
 }
@@ -41,19 +68,9 @@ if (!isset($_SESSION['user_google_id'])) {
 $user_id = $_SESSION['user_google_id'];
 $today = date('Y-m-d');
 
-// Cek limit 5 per hari
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/premade_links?used_by=eq.' . urlencode($user_id) . '&used_at=gte.' . urlencode($today . ' 00:00:00') . '&select=count');
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'apikey: ' . SUPABASE_KEY,
-    'Authorization: Bearer ' . SUPABASE_KEY
-]);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-$response = curl_exec($ch);
-curl_close($ch);
-
-$countData = json_decode($response, true);
+// ========== VALIDASI 4: Cek limit 5 per hari ==========
+$countResult = supabaseRequest('GET', 'premade_links?used_by=eq.' . urlencode($user_id) . '&used_at=gte.' . urlencode($today . ' 00:00:00') . '&select=count');
+$countData = $countResult['data'];
 $claimedToday = $countData[0]['count'] ?? 0;
 
 if ($claimedToday >= 5) {
@@ -62,25 +79,16 @@ if ($claimedToday >= 5) {
 
 // ========== PROSES KLAIM ==========
 // 1. Tandai token sudah dipakai
-$updateData = json_encode([
+$updateData = [
     'used_by' => $user_id,
     'used_at' => date('Y-m-d H:i:s'),
     'status' => 'claimed'
-]);
+];
+$updateResult = supabaseRequest('PATCH', 'premade_links?id=eq.' . $link['id'], $updateData);
 
-$ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, SUPABASE_URL . '/rest/v1/premade_links?id=eq.' . $link['id']);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_PATCH, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, $updateData);
-curl_setopt($ch, CURLOPT_HTTPHEADER, [
-    'Content-Type: application/json',
-    'apikey: ' . SUPABASE_KEY,
-    'Authorization: Bearer ' . SUPABASE_KEY
-]);
-curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-curl_exec($ch);
-curl_close($ch);
+if ($updateResult['code'] !== 200) {
+    die('❌ Gagal memproses klaim, coba lagi');
+}
 
 // 2. Tambah koin ke session
 $_SESSION['user_coins'] = ($_SESSION['user_coins'] ?? 0) + 1;
@@ -175,6 +183,12 @@ $remaining = 5 - ($claimedToday + 1);
             background: rgba(255,255,255,0.08);
             color: white;
         }
+        .token-info {
+            font-size: 11px;
+            color: #4a4a55;
+            margin-top: 16px;
+            word-break: break-all;
+        }
     </style>
 </head>
 <body>
@@ -198,6 +212,10 @@ $remaining = 5 - ($claimedToday + 1);
         <a href="dashboard.php" class="btn"><i class="fas fa-arrow-right"></i> Kembali ke Dashboard</a>
         <br>
         <a href="dashboard.php" class="btn-secondary">🔄 Refresh halaman</a>
+        
+        <div class="token-info">
+            Token: <?= htmlspecialchars($token) ?>
+        </div>
     </div>
 </body>
 </html>
