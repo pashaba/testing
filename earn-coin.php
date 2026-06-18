@@ -34,5 +34,5 @@ $_SESSION['earn_flag'] = true;
 $_SESSION['earn_flag_time'] = time();
 
 // Ganti URL ini dengan link SFL kamu (destination-nya ke polar.web.id/earn-coin.php)
-header('Location: https://safelinku.com/polar-earn');
+header('Location: https://sfl.gl/tNNrdyA');
 exit;
