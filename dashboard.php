@@ -106,6 +106,7 @@ if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
 
 // ========== CEK LOGIN ==========
 $is_logged_in = isset($_SESSION['user_google_id']);
+$earn_flag_active = !empty($_SESSION['earn_flag']);
 $user_name = $_SESSION['user_name'] ?? "Guest";
 $user_email = $_SESSION['user_email'] ?? "guest@gmail.com";
 $user_avatar = $_SESSION['user_avatar'] ?? "https://ui-avatars.com/api/?name=Guest&background=FF6B00&color=fff";
@@ -725,8 +726,9 @@ $maxSessions = 10;
         <a href="#" class="nav-link" data-tut="nav-claim" onclick="navTo('claim'); toggleMenu();"><i class="fas fa-download"></i> CLAIM</a>
         <a href="#" class="nav-link" data-tut="nav-sessions" onclick="navTo('sessions'); toggleMenu();"><i class="fas fa-robot"></i> SESSIONS</a>
         <a href="#" class="nav-link" data-tut="nav-profile" onclick="navTo('profile'); toggleMenu();"><i class="fas fa-user"></i> PROFILE</a>
-        <a href="#" class="nav-link" data-tut="nav-earn" onclick="earnCoin()" style="background:linear-gradient(135deg,rgba(255,107,0,0.1),rgba(251,191,36,0.05));border:1px solid var(--orange);">
-            <i class="fas fa-coins" style="color:var(--gold);"></i> EARN POLAR COIN
+        <a href="#" class="nav-link" onclick="toggleMenu(); setTimeout(startTutorial, 350);"><i class="fas fa-circle-question"></i> MULAI TUTORIAL</a>
+        <a href="#" class="nav-link" data-tut="nav-earn" onclick="<?= $earn_flag_active ? 'return false;' : 'earnCoin()' ?>" style="background:linear-gradient(135deg,rgba(255,107,0,0.1),rgba(251,191,36,0.05));border:1px solid var(--orange);<?= $earn_flag_active ? 'opacity:0.5;cursor:not-allowed;' : '' ?>">
+            <i class="fas fa-coins" style="color:var(--gold);"></i> <?= $earn_flag_active ? 'MENUNGGU...' : 'EARN POLAR COIN' ?>
         </a>
         <a href="logout.php" class="nav-link" style="color:var(--orange);margin-top:auto;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
     </div>
@@ -743,6 +745,7 @@ $maxSessions = 10;
                 <div class="btn-group">
                     <button class="btn btn-orange" onclick="navTo('claim')"><i class="fas fa-download"></i> CLAIM SEKARANG</button>
                     <button class="btn btn-white" onclick="navTo('status')">LIHAT STATUS <i class="fas fa-arrow-right"></i></button>
+                    <button class="btn btn-close-modal" onclick="startTutorial()" style="border:1px solid var(--border);"><i class="fas fa-circle-question"></i> MULAI TUTORIAL</button>
                 </div>
             </div>
         </div>
@@ -763,7 +766,7 @@ $maxSessions = 10;
                     </div>
                     <div style="display:flex;align-items:center;gap:8px;">
                         <span style="color:var(--gold);font-weight:700;font-size:13px;"><i class="fas fa-coins"></i> <span id="claimCoinDisplay"><?= $user_coins ?></span></span>
-                        <button class="earn-btn" onclick="earnCoin()" style="font-size:9px;padding:3px 10px;"><i class="fas fa-plus"></i></button>
+                        <button class="earn-btn" id="earnBtnClaim" onclick="earnCoin()" <?= $earn_flag_active ? 'disabled style="font-size:9px;padding:3px 10px;opacity:0.5;cursor:not-allowed;"' : 'style="font-size:9px;padding:3px 10px;"' ?>><i class="fas <?= $earn_flag_active ? 'fa-clock' : 'fa-plus' ?>"></i></button>
                     </div>
                 </div>
             </div>
@@ -911,7 +914,7 @@ $maxSessions = 10;
                 <div style="background:rgba(255,255,255,0.05);border:1px solid var(--border);display:inline-flex;align-items:center;gap:12px;padding:6px 18px;border-radius:50px;margin-top:12px;">
                     <div style="font-weight:700;color:var(--gold);font-size:13px;"><i class="fas fa-coins"></i> <span id="profileCoinDisplay"><?= $user_coins ?></span></div>
                     <div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--text-muted);">POLAR COIN</div>
-                    <button class="earn-btn" onclick="earnCoin()" style="font-size:9px;padding:3px 10px;"><i class="fas fa-plus"></i> EARN</button>
+                    <button class="earn-btn" id="earnBtnProfile" onclick="earnCoin()" <?= $earn_flag_active ? 'disabled style="font-size:9px;padding:3px 10px;opacity:0.5;cursor:not-allowed;"' : 'style="font-size:9px;padding:3px 10px;"' ?>><i class="fas <?= $earn_flag_active ? 'fa-clock' : 'fa-plus' ?>"></i> <?= $earn_flag_active ? 'MENUNGGU' : 'EARN' ?></button>
                 </div>
                 <div style="margin-top:12px;">
                     <a href="logout.php" style="color:var(--text-muted);font-size:11px;font-weight:600;text-decoration:none;">LOGOUT <i class="fas fa-arrow-right"></i></a>
@@ -1034,7 +1037,12 @@ $maxSessions = 10;
         }
 
         // ========== EARN COIN (Session Flag) ==========
+        const EARN_FLAG_ACTIVE = <?= $earn_flag_active ? 'true' : 'false' ?>;
         function earnCoin() {
+            if (EARN_FLAG_ACTIVE) {
+                showToast('⏳ Selesaikan dulu earn coin yang sedang berjalan!', 'error');
+                return;
+            }
             window.location.href = 'earn-coin.php';
         }
 
@@ -1387,16 +1395,6 @@ $maxSessions = 10;
 
             // Cek apakah user baru balik dari SFL
             checkEarnCoinReturn();
-
-            // Kalau login overlay tidak ada di DOM = user sudah login = jalankan tutorial
-            const hasLoginOverlay = document.querySelector('.login-overlay') !== null;
-            if (!hasLoginOverlay) {
-                const uid = '<?= $_SESSION['user_google_id'] ?? '' ?>';
-                const tutKey = 'polar_tutorial_done_' + uid;
-                let tutorialDone = false;
-                try { tutorialDone = localStorage.getItem(tutKey) === '1'; } catch(e) {}
-                if (!tutorialDone) setTimeout(startTutorial, 600);
-            }
         });
 
         document.getElementById('pairingOverlay').addEventListener('click', function(e) {
