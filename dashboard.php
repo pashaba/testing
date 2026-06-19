@@ -42,12 +42,62 @@ if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
         curl_close($ch);
         
         $user_data = json_decode($user_response, true);
-        
-        $_SESSION['user_google_id'] = $user_data['id'];
-        $_SESSION['user_name'] = $user_data['name'] ?? 'User';
-        $_SESSION['user_email'] = $user_data['email'] ?? '';
-        $_SESSION['user_avatar'] = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($user_data['name'] ?? 'User') . '&background=FF6B00&color=fff';
-        $_SESSION['user_coins'] = 0;
+
+        $google_id = $user_data['id'];
+        $name      = $user_data['name'] ?? 'User';
+        $email     = $user_data['email'] ?? '';
+        $avatar    = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=FF6B00&color=fff';
+
+        // ===== UPSERT ke Supabase =====
+        // Cek apakah user sudah ada (untuk ambil coins yang tersimpan)
+        $sb_url = rtrim($SUPABASE_URL, '/');
+        $sb_key = $SUPABASE_KEY;
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $sb_url . '/rest/v1/polar_users?google_id=eq.' . urlencode($google_id) . '&select=coins');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'apikey: ' . $sb_key,
+            'Authorization: Bearer ' . $sb_key
+        ]);
+        $existing_raw = curl_exec($ch);
+        curl_close($ch);
+
+        $existing = json_decode($existing_raw, true);
+        $saved_coins = (!empty($existing) && isset($existing[0]['coins'])) ? (int)$existing[0]['coins'] : 0;
+
+        // Upsert: insert kalau baru, update name/email/avatar kalau sudah ada (coins tidak ditimpa)
+        $upsert_data = json_encode([
+            'google_id'  => $google_id,
+            'name'       => $name,
+            'email'      => $email,
+            'avatar'     => $avatar,
+            'coins'      => $saved_coins,
+            'created_at' => time()
+        ]);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $sb_url . '/rest/v1/polar_users');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $upsert_data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'apikey: ' . $sb_key,
+            'Authorization: Bearer ' . $sb_key,
+            'Prefer: resolution=merge-duplicates,return=minimal'
+        ]);
+        curl_exec($ch);
+        curl_close($ch);
+
+        // Set session
+        $_SESSION['user_google_id'] = $google_id;
+        $_SESSION['user_name']      = $name;
+        $_SESSION['user_email']     = $email;
+        $_SESSION['user_avatar']    = $avatar;
+        $_SESSION['user_coins']     = $saved_coins;
         
         header('Location: dashboard.php');
         exit;
@@ -959,7 +1009,10 @@ $maxSessions = 10;
                         if (data[0].status === 'online') {
                             document.getElementById('pairingCodeDisplay').textContent = '✅ Bot Online!';
                             clearInterval(pairInterval);
-                            setTimeout(() => closePairingModal(), 2000);
+                            setTimeout(() => {
+                                closePairingModal();
+                                location.reload(); // refresh list session setelah bot benar-benar online
+                            }, 2000);
                         }
                     }
                 } catch(e) { console.error(e); }
@@ -1090,8 +1143,8 @@ $maxSessions = 10;
                 showToast('✅ Server berhasil di-claim! ' + days + ' hari aktif. 🎉', 'success');
                 
                 showPairingModal(cleanPhone);
-                
-                setTimeout(() => location.reload(), 3000);
+                // Tidak ada reload otomatis di sini — modal pairing akan menutup
+                // sendiri (lewat polling di showPairingModal) begitu status bot online.
 
             } catch(e) {
                 hideLoading();
