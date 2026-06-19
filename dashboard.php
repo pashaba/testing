@@ -1043,7 +1043,7 @@ $maxSessions = 10;
                 showToast('⏳ Selesaikan dulu earn coin yang sedang berjalan!', 'error');
                 return;
             }
-            window.location.href = 'earn-coin.php';
+            window.location.href = 'start-earn.php';
         }
 
         // ========== HANDLE REDIRECT BALIK DARI earn-coin.php ==========
