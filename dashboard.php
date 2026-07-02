@@ -221,6 +221,734 @@ $maxSessions = 10;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* ============================================================
+   NEOBRUTALISM ENHANCEMENTS — ALL IN ONE
+   Include this file after your main CSS
+   ============================================================ */
+
+/* ===== 1. FONT & TYPOGRAPHY ===== */
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap');
+
+* {
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ===== 2. ANIMATIONS ===== */
+@keyframes brutalShake {
+    0%, 100% { transform: translate(0, 0); }
+    25% { transform: translate(-3px, 3px); }
+    75% { transform: translate(3px, -3px); }
+}
+
+@keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-3px, 3px); }
+    40% { transform: translate(3px, -3px); }
+    60% { transform: translate(-2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+}
+
+@keyframes typing {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes marquee {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+}
+
+@keyframes pulseBorder {
+    0%, 100% { box-shadow: 8px 8px 0px 0px #111; }
+    50% { box-shadow: 4px 4px 0px 0px #111; }
+}
+
+@keyframes rainbowShadow {
+    0% { box-shadow: 8px 8px 0px 0px #ff006e; }
+    25% { box-shadow: 8px 8px 0px 0px #ff5e00; }
+    50% { box-shadow: 8px 8px 0px 0px #ffe600; }
+    75% { box-shadow: 8px 8px 0px 0px #00d4ff; }
+    100% { box-shadow: 8px 8px 0px 0px #ff006e; }
+}
+
+/* ===== 3. SHADOWS ===== */
+:root {
+    --shadow-heavy: 8px 8px 0px 0px #111111;
+    --shadow-light: 6px 6px 0px 0px #333333;
+    --shadow-orange: 8px 8px 0px 0px #ff5e00;
+    --shadow-gold: 8px 8px 0px 0px #fbbf24;
+    --shadow-pink: 8px 8px 0px 0px #ff006e;
+    --shadow-blue: 8px 8px 0px 0px #00d4ff;
+    --shadow-green: 8px 8px 0px 0px #00ff87;
+}
+
+/* Shadow classes */
+.shadow-orange { box-shadow: var(--shadow-orange) !important; }
+.shadow-gold { box-shadow: var(--shadow-gold) !important; }
+.shadow-pink { box-shadow: var(--shadow-pink) !important; }
+.shadow-blue { box-shadow: var(--shadow-blue) !important; }
+.shadow-green { box-shadow: var(--shadow-green) !important; }
+.shadow-rainbow { animation: rainbowShadow 3s ease-in-out infinite; }
+
+/* ===== 4. BACKGROUND PATTERN ===== */
+body {
+    background-color: #f7f7f7;
+    background-image: 
+        repeating-linear-gradient(45deg, rgba(255,94,0,0.04) 0px, rgba(255,94,0,0.04) 15px, transparent 15px, transparent 30px),
+        repeating-linear-gradient(-45deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 15px, transparent 15px, transparent 30px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 2px, transparent 2px, transparent 4px);
+}
+
+/* ===== 5. BUTTONS ===== */
+.btn {
+    transition: all 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+}
+
+/* Hover efek untuk semua button */
+.btn:hover {
+    animation: brutalShake 0.2s ease;
+    transform: translate(-2px, -2px);
+}
+
+/* Active/pressed effect */
+.btn:active {
+    transform: translate(4px, 4px) !important;
+    box-shadow: 2px 2px 0px 0px #111 !important;
+    transition: all 0.05s ease;
+}
+
+/* Button variants yang lebih ekstrim */
+.btn-pink {
+    background: #ff006e;
+    color: #fff;
+    box-shadow: var(--shadow-pink);
+}
+.btn-pink:hover {
+    background: #e60062;
+    box-shadow: 6px 6px 0px 0px #111;
+}
+
+.btn-blue {
+    background: #00d4ff;
+    color: #111;
+    box-shadow: var(--shadow-blue);
+}
+.btn-blue:hover {
+    background: #00b8e6;
+    box-shadow: 6px 6px 0px 0px #111;
+}
+
+.btn-green {
+    background: #00ff87;
+    color: #111;
+    box-shadow: var(--shadow-green);
+}
+.btn-green:hover {
+    background: #00e67a;
+    box-shadow: 6px 6px 0px 0px #111;
+}
+
+.btn-rainbow {
+    background: linear-gradient(45deg, #ff006e, #ff5e00, #ffe600, #00d4ff);
+    color: #fff;
+    box-shadow: var(--shadow-heavy);
+    background-size: 300% 300%;
+    animation: rainbowBg 3s ease infinite;
+}
+@keyframes rainbowBg {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* ===== 6. CARDS ===== */
+.card {
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.card:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 12px 12px 0px 0px #111 !important;
+}
+
+/* Corner accents on cards */
+.card::before {
+    content: '◆';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    font-size: 24px;
+    color: #ff5e00;
+    background: #fff;
+    padding: 0 4px;
+    border: 3px solid #111;
+    line-height: 1;
+}
+
+.card::after {
+    content: '◆';
+    position: absolute;
+    bottom: -10px;
+    right: -10px;
+    font-size: 24px;
+    color: #ff5e00;
+    background: #fff;
+    padding: 0 4px;
+    border: 3px solid #111;
+    line-height: 1;
+}
+
+/* ===== 7. HERO SECTION ===== */
+.hero h1 {
+    overflow: hidden;
+    white-space: nowrap;
+    animation: typing 2s steps(30) 1s forwards;
+    width: 0;
+}
+
+.hero h1 span {
+    transform: skew(-6deg) rotate(-2deg);
+    display: inline-block;
+    padding: 0 16px;
+}
+
+.slot-badge {
+    background: #ff5e00 !important;
+    color: #fff !important;
+    transform: rotate(-1deg);
+}
+
+/* ===== 8. STICKERS ===== */
+.sticker {
+    transform: rotate(-2deg);
+    border: 4px solid #111;
+    box-shadow: 8px 8px 0px 0px #111;
+    background: #ff5e00;
+    color: white;
+    padding: 8px 24px;
+    display: inline-block;
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.sticker-gold {
+    background: #fbbf24;
+    transform: rotate(3deg);
+}
+
+.sticker-pink {
+    background: #ff006e;
+    transform: rotate(-4deg);
+}
+
+.sticker-blue {
+    background: #00d4ff;
+    transform: rotate(2deg);
+    color: #111;
+}
+
+/* ===== 9. BORDERS ===== */
+.border-double {
+    border: 6px double #111 !important;
+}
+
+.border-dashed-heavy {
+    border: 4px dashed #111 !important;
+}
+
+.border-dotted-heavy {
+    border: 4px dotted #111 !important;
+}
+
+/* ===== 10. LOADING MODAL ===== */
+.loading-box.active {
+    animation: glitch 0.3s ease;
+}
+
+.loading-spinner {
+    border-width: 6px;
+    border-style: solid;
+    border-color: #111;
+    border-top-color: #ff5e00;
+    border-radius: 0px;
+}
+
+/* ===== 11. PROGRESS BAR ===== */
+.progress-bar {
+    width: 100%;
+    height: 24px;
+    background: #fff;
+    border: 3px solid #111;
+    box-shadow: inset 3px 3px 0px 0px #111;
+    border-radius: 0px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: #ff5e00;
+    border-right: 3px solid #111;
+    width: 0%;
+    transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.progress-fill.striped {
+    background-image: repeating-linear-gradient(45deg, #ff5e00, #ff5e00 10px, #ff7a2e 10px, #ff7a2e 20px);
+}
+
+/* ===== 12. MARQUEE ===== */
+.marquee {
+    background: #111;
+    color: #fff;
+    padding: 10px 0;
+    overflow: hidden;
+    white-space: nowrap;
+    border-top: 3px solid #ff5e00;
+    border-bottom: 3px solid #ff5e00;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.marquee span {
+    display: inline-block;
+    padding-left: 100%;
+    animation: marquee 20s linear infinite;
+}
+
+/* ===== 13. ALERTS ===== */
+.alert-brutal {
+    background: #fff;
+    border: 4px solid #111;
+    box-shadow: 8px 8px 0px 0px #111;
+    padding: 16px 24px;
+    margin: 12px 0;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 0px;
+}
+
+.alert-brutal.warning {
+    border-left: 12px solid #fbbf24;
+}
+
+.alert-brutal.error {
+    border-left: 12px solid #e0002b;
+}
+
+.alert-brutal.success {
+    border-left: 12px solid #00b341;
+}
+
+.alert-brutal.info {
+    border-left: 12px solid #00d4ff;
+}
+
+/* ===== 14. RIBBON ===== */
+.ribbon {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #ff5e00;
+    color: #fff;
+    padding: 4px 20px;
+    font-weight: 900;
+    font-size: 11px;
+    transform: rotate(6deg);
+    border: 3px solid #111;
+    box-shadow: 6px 6px 0px 0px #111;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.ribbon::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    border: 8px solid transparent;
+    border-right-color: #111;
+    border-bottom-color: #111;
+}
+
+.ribbon-gold {
+    background: #fbbf24;
+    color: #111;
+    transform: rotate(-4deg);
+}
+
+.ribbon-pink {
+    background: #ff006e;
+    transform: rotate(8deg);
+}
+
+/* ===== 15. TOGGLE SWITCH ===== */
+.toggle {
+    width: 64px;
+    height: 32px;
+    background: #fff;
+    border: 3px solid #111;
+    border-radius: 0px;
+    cursor: pointer;
+    position: relative;
+    box-shadow: inset 3px 3px 0px 0px #111;
+    transition: all 0.2s ease;
+}
+
+.toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 20px;
+    background: #ff5e00;
+    border: 2px solid #111;
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.toggle.active::after {
+    left: 35px;
+    background: #00b341;
+}
+
+.toggle:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px 0px #111;
+}
+
+/* ===== 16. TOOLTIP ===== */
+.tooltip {
+    position: relative;
+    cursor: help;
+    border-bottom: 2px dashed #111;
+}
+
+.tooltip::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #111;
+    color: #fff;
+    padding: 6px 16px;
+    border: 2px solid #fff;
+    white-space: nowrap;
+    font-size: 11px;
+    font-weight: 700;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    z-index: 999;
+}
+
+.tooltip:hover::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-6px);
+}
+
+/* ===== 17. SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-left: 3px solid #111;
+    border-top: 3px solid #111;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ff5e00;
+    border: 3px solid #111;
+    border-radius: 0px;
+    box-shadow: inset 2px 2px 0px 0px rgba(255,255,255,0.3);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #cc4b00;
+}
+
+::-webkit-scrollbar-corner {
+    background: #f0f0f0;
+    border: 3px solid #111;
+}
+
+/* ===== 18. STEP INDICATOR ===== */
+.step-indicator {
+    display: flex;
+    gap: 6px;
+    margin: 16px 0;
+}
+
+.step {
+    flex: 1;
+    height: 10px;
+    background: #fff;
+    border: 2px solid #111;
+    border-radius: 0px;
+    transition: all 0.3s ease;
+}
+
+.step.active {
+    background: #ff5e00;
+    height: 14px;
+    margin-top: -2px;
+    box-shadow: 3px 3px 0px 0px #111;
+}
+
+.step.done {
+    background: #00b341;
+}
+
+/* ===== 19. SELECT BOX ENHANCEMENT ===== */
+.select-box {
+    transition: all 0.15s ease;
+}
+
+.select-box:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 8px 8px 0px 0px #111 !important;
+}
+
+.select-box:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0px 0px #111 !important;
+}
+
+.select-box.active {
+    background: #ff5e00 !important;
+    color: #fff !important;
+    transform: translate(-2px, -2px);
+    box-shadow: 10px 10px 0px 0px #111 !important;
+}
+
+/* ===== 20. STAT BOX ===== */
+.stat-box {
+    transition: all 0.15s ease;
+}
+
+.stat-box:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 8px 8px 0px 0px #111 !important;
+}
+
+.stat-box:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0px 0px #111 !important;
+}
+
+/* ===== 21. SESSION ITEMS ===== */
+.session-item {
+    transition: all 0.15s ease;
+    padding: 12px 0;
+}
+
+.session-item:hover {
+    padding-left: 8px;
+    border-left: 6px solid #ff5e00;
+}
+
+/* ===== 22. BADGE ===== */
+.badge-status {
+    transition: all 0.15s ease;
+    border-radius: 0px;
+}
+
+.badge-status:hover {
+    transform: scale(1.05) rotate(-2deg);
+}
+
+/* ===== 23. INPUT FIELDS ===== */
+input[type="text"],
+input[type="number"],
+input[type="email"],
+input[type="password"],
+textarea,
+select {
+    transition: all 0.15s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px 0px #111 !important;
+    outline: none;
+}
+
+/* ===== 24. SIDEBAR ENHANCEMENT ===== */
+.sidebar .nav-link {
+    transition: all 0.15s ease;
+}
+
+.sidebar .nav-link:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 8px 8px 0px 0px #111 !important;
+}
+
+.sidebar .nav-link:active {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px 0px #111 !important;
+}
+
+/* ===== 25. MODAL OVERLAY ===== */
+.login-overlay,
+.pairing-overlay,
+.loading-overlay {
+    backdrop-filter: blur(4px);
+}
+
+/* ===== 26. TOAST ===== */
+.toast {
+    border-radius: 0px;
+    border-width: 4px;
+}
+
+.toast.success { border-left: 12px solid #00b341; }
+.toast.error { border-left: 12px solid #e0002b; }
+.toast.gold { border-left: 12px solid #fbbf24; }
+.toast.info { border-left: 12px solid #00d4ff; }
+
+/* ===== 27. SPECIAL EFFECTS ===== */
+.brutal-glow {
+    animation: pulseBorder 2s ease-in-out infinite;
+}
+
+.text-stroke {
+    -webkit-text-stroke: 2px #111;
+    color: #fff;
+    text-shadow: 4px 4px 0px #111;
+}
+
+/* ===== 28. RESPONSIVE FIX ===== */
+@media (max-width: 480px) {
+    .card::before,
+    .card::after {
+        font-size: 18px;
+        top: -6px;
+        left: -6px;
+        bottom: -6px;
+        right: -6px;
+    }
+    
+    .hero h1 {
+        white-space: normal;
+        animation: none;
+        width: auto;
+    }
+    
+    .sticker {
+        font-size: 11px;
+        padding: 4px 14px;
+    }
+}
+
+/* ===== 29. PRINT STYLES ===== */
+@media print {
+    .btn,
+    .earn-btn,
+    .menu-btn {
+        display: none !important;
+    }
+    .card {
+        box-shadow: none !important;
+        border: 2px solid #111 !important;
+    }
+}
+
+/* ===== 30. EXTRA: LOADING SKELETON ===== */
+.skeleton {
+    background: #e0e0e0;
+    border: 3px solid #111;
+    animation: skeletonPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ===== 31. GLITCH TEXT EFFECT ===== */
+.glitch-text {
+    animation: glitchText 2s infinite;
+    position: relative;
+}
+
+@keyframes glitchText {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(2px, -2px); }
+    60% { transform: translate(-1px, 1px); }
+    80% { transform: translate(1px, -1px); }
+}
+
+/* ===== 32. FLOATING ACTION BUTTON ===== */
+.fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 56px;
+    height: 56px;
+    background: #ff5e00;
+    border: 3px solid #111;
+    box-shadow: 6px 6px 0px 0px #111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    z-index: 999;
+}
+
+.fab:hover {
+    transform: translate(-3px, -3px);
+    box-shadow: 10px 10px 0px 0px #111;
+}
+
+.fab:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0px 0px #111;
+}
+
+/* ===== 33. DIVIDER ===== */
+.divider-brutal {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.divider-brutal::before,
+.divider-brutal::after {
+    content: '';
+    flex: 1;
+    border-bottom: 4px dashed #111;
+}
+
+.divider-brutal span {
+    padding: 0 16px;
+    font-weight: 900;
+    font-size: 14px;
+    text-transform: uppercase;
+    background: #f7f7f7;
+}
+
+/* ============================================================
+   END OF NEOBRUTALISM ENHANCEMENTS
+   ============================================================ */
+        /* ============================================================
                    NEOBRUTALISM STYLE — tanpa mengubah sistem seidkitpun
                    ============================================================ */
         :root {
