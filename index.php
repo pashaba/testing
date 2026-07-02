@@ -19,31 +19,30 @@
     <meta property="twitter:title" content="Free Jadibot WhatsApp">
     <meta property="twitter:image" content="https://polar.web.id/og-image.jpg">
     <meta property="twitter:description" content="Platform bot WhatsApp multi device gratis. Kelola session bot WA tanpa login, tanpa registrasi. Cepat, mudah, dan support Phoenix MD & Ourin MD.">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
         /* ============================================================
-           NEO-BRUTALISM THEME — BOLD, RAW, NO BULLSHIT
+           NEO-BRUTALISM REFINED — BOLD, CLEAN, LESS CLUTTER
            ============================================================ */
         :root {
             --black: #0a0a0a;
             --white: #ffffff;
-            --off-white: #f5f5f0;
+            --off-white: #f4f4ef;
             
-            --primary: #ff0055;      /* Hot pink — energi */
+            --primary: #ff0055;
             --primary-dark: #cc0044;
-            --secondary: #00e5ff;    /* Cyan — aksen tajam */
-            --yellow: #ffdd00;       /* Kuning neon */
-            --green: #00ff88;        /* Mint neon */
+            --secondary: #00e5ff;
+            --yellow: #ffdd00;
+            --green: #00ff88;
+            --orange: #ff6b35;
             
             --border-thick: 4px solid var(--black);
             --shadow-heavy: 8px 8px 0px 0px var(--black);
-            --shadow-hover: 4px 4px 0px 0px var(--black);
+            --shadow-light: 4px 4px 0px 0px var(--black);
             
-            --radius: 0px;           /* Neo-brutalism = kotak, tajam */
-            --radius-sm: 0px;
-            --radius-lg: 0px;
+            --radius: 0px;
             
             --font-display: 'Space Grotesk', sans-serif;
             --font-body: 'Inter', sans-serif;
@@ -51,7 +50,6 @@
             --bg-body: #f0ede8;
             --text-body: #0a0a0a;
             --card-bg: #ffffff;
-            --border-color: #0a0a0a;
         }
 
         * {
@@ -69,21 +67,21 @@
             background: var(--bg-body);
             color: var(--text-body);
             line-height: 1.6;
-            padding: 20px;
             min-height: 100vh;
+            padding: 16px;
         }
 
         /* ---- TYPOGRAPHY ---- */
         h1, h2, h3, h4 {
             font-family: var(--font-display);
             font-weight: 900;
-            letter-spacing: -0.03em;
+            letter-spacing: -0.02em;
             text-transform: uppercase;
         }
 
         /* ---- UTILITY ---- */
         .container {
-            max-width: 1200px;
+            max-width: 1120px;
             margin: 0 auto;
             padding: 0 12px;
         }
@@ -95,18 +93,17 @@
             gap: 12px;
             font-family: var(--font-display);
             font-weight: 800;
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-transform: uppercase;
-            padding: 16px 36px;
+            padding: 14px 32px;
             border: var(--border-thick);
             box-shadow: var(--shadow-heavy);
             background: var(--white);
             color: var(--black);
             cursor: pointer;
-            transition: all 0.12s ease;
+            transition: all 0.1s ease;
             text-decoration: none;
-            letter-spacing: 0.5px;
-            position: relative;
+            letter-spacing: 0.3px;
         }
 
         .btn-primary {
@@ -121,21 +118,7 @@
             background: var(--primary-dark);
         }
 
-        .btn-outline {
-            background: transparent;
-            border-color: var(--black);
-            color: var(--black);
-            box-shadow: var(--shadow-heavy);
-        }
-
-        .btn-outline:hover {
-            transform: translate(4px, 4px);
-            box-shadow: none;
-            background: var(--black);
-            color: var(--white);
-        }
-
-        /* ---- SPLASH SCREEN (Neo) ---- */
+        /* ---- SPLASH SCREEN (REFINED) ---- */
         #splash {
             position: fixed;
             inset: 0;
@@ -146,7 +129,7 @@
             align-items: center;
             justify-content: center;
             gap: 28px;
-            transition: opacity 0.5s ease, visibility 0.5s ease;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
         }
 
         #splash.hide {
@@ -155,37 +138,58 @@
             pointer-events: none;
         }
 
-        .splash-icon {
-            font-size: 64px;
+        /* Logo lingkaran dengan ikon keren */
+        .splash-logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
             background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 44px;
             color: var(--white);
-            padding: 20px 28px;
-            border: var(--border-thick);
-            box-shadow: var(--shadow-heavy);
-            transform: rotate(-2deg);
+            border: 5px solid var(--white);
+            box-shadow: 0 0 0 4px var(--black), 0 12px 40px rgba(255, 0, 85, 0.4);
+            position: relative;
+            animation: logoPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.04); }
         }
 
         .splash-name {
             font-family: var(--font-display);
-            font-size: 2.4rem;
+            font-size: 2.2rem;
             font-weight: 900;
             color: var(--white);
             text-transform: uppercase;
             letter-spacing: -0.02em;
         }
 
-        .splash-bar {
-            width: 180px;
-            height: 12px;
-            background: #222;
-            border: var(--border-thick);
+        /* SPINNER LOADING — muter */
+        .splash-spinner {
+            width: 48px;
+            height: 48px;
+            border: 5px solid #222;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-top: 4px;
         }
 
-        .splash-fill {
-            height: 100%;
-            width: 0%;
-            background: var(--yellow);
-            transition: width 1s ease;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .splash-sub {
+            color: #888;
+            font-weight: 500;
+            font-size: 0.9rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         /* ---- PROGRESS BAR ---- */
@@ -194,7 +198,7 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 6px;
+            height: 5px;
             z-index: 1000;
             background: transparent;
         }
@@ -207,64 +211,65 @@
             transition: width 0.15s ease;
         }
 
-        /* ---- HERO SECTION ---- */
+        /* ---- HERO (LEBIH LEGA) ---- */
         .hero {
-            padding: 40px 0 60px;
-            position: relative;
+            padding: 30px 0 50px;
             border-bottom: var(--border-thick);
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .hero-content {
-            max-width: 900px;
+            max-width: 820px;
             margin: 0 auto;
+            text-align: center;
         }
 
         .hero-badge {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             background: var(--black);
             color: var(--white);
             font-family: var(--font-display);
             font-weight: 800;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
-            padding: 8px 20px;
+            padding: 6px 18px;
             border: var(--border-thick);
-            margin-bottom: 28px;
-            letter-spacing: 1px;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
         }
 
         .hero-badge-dot {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             background: var(--green);
-            border: 2px solid var(--black);
+            border: 2px solid var(--white);
+            border-radius: 50%;
         }
 
         .hero h1 {
-            font-size: clamp(3rem, 8vw, 5.5rem);
+            font-size: clamp(2.8rem, 7vw, 4.8rem);
             line-height: 1.05;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             color: var(--black);
         }
 
         .hero h1 .highlight {
             background: var(--yellow);
-            padding: 0 12px;
+            padding: 0 10px;
             display: inline-block;
-            transform: rotate(-1deg);
+            transform: rotate(-0.5deg);
             border: var(--border-thick);
             box-shadow: var(--shadow-heavy);
         }
 
         .hero-subtitle {
-            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            font-size: clamp(1rem, 1.6vw, 1.25rem);
             font-weight: 600;
             color: #1a1a1a;
-            max-width: 600px;
-            margin: 0 auto 40px;
+            max-width: 520px;
+            margin: 0 auto 32px;
             line-height: 1.5;
         }
 
@@ -272,8 +277,8 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
-            margin-bottom: 40px;
+            gap: 14px;
+            margin-bottom: 32px;
         }
 
         @media (min-width: 640px) {
@@ -283,63 +288,61 @@
             }
         }
 
-        /* ---- TRUST BADGES ---- */
+        /* ---- TRUST BADGES (LEBIH RAPIH) ---- */
         .trust-badges {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 24px 40px;
-            margin-top: 24px;
+            gap: 16px 28px;
+            margin-top: 16px;
         }
 
         .trust-item {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             font-family: var(--font-display);
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 0.85rem;
             text-transform: uppercase;
-            padding: 8px 16px;
+            padding: 6px 14px;
             background: var(--white);
             border: var(--border-thick);
-            box-shadow: var(--shadow-heavy);
+            box-shadow: var(--shadow-light);
         }
 
         .trust-item i {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
         }
-
         .trust-item.gratis i { color: var(--green); }
         .trust-item.instan i { color: var(--secondary); }
         .trust-item.pro i { color: var(--yellow); }
 
-        /* ---- MOCK DASHBOARD (Neo Brutal) ---- */
+        /* ---- MOCK DASHBOARD (LEBIH MINIMAL) ---- */
         .mock-dashboard {
-            margin: 48px auto 0;
-            max-width: 480px;
+            margin: 36px auto 0;
+            max-width: 440px;
             background: var(--white);
             border: var(--border-thick);
             box-shadow: var(--shadow-heavy);
-            text-align: left;
             overflow: hidden;
         }
 
         .mock-header {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 14px 20px;
+            gap: 8px;
+            padding: 12px 18px;
             background: var(--black);
             border-bottom: var(--border-thick);
         }
 
         .mock-dot {
-            width: 14px;
-            height: 14px;
+            width: 12px;
+            height: 12px;
             border: 2px solid var(--white);
+            border-radius: 50%;
         }
-
         .mock-dot:nth-child(1) { background: #ff3b30; }
         .mock-dot:nth-child(2) { background: #ffcc00; }
         .mock-dot:nth-child(3) { background: #34c759; }
@@ -350,54 +353,54 @@
             color: var(--white);
             font-family: var(--font-display);
             font-weight: 800;
-            font-size: 0.8rem;
-            padding: 6px 16px;
+            font-size: 0.7rem;
+            padding: 4px 14px;
             border: 2px solid var(--white);
             text-transform: uppercase;
         }
 
         .mock-body {
-            padding: 24px;
+            padding: 20px 22px;
         }
 
         .mock-label {
             font-family: var(--font-display);
             font-weight: 800;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            color: #555;
-            letter-spacing: 1px;
+            color: #666;
+            letter-spacing: 0.5px;
             margin-bottom: 2px;
         }
 
         .mock-value {
             font-family: var(--font-display);
             font-weight: 900;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             color: var(--black);
-            margin-bottom: 16px;
+            margin-bottom: 12px;
         }
 
         .mock-divider {
             border-top: 3px dashed var(--black);
-            margin: 16px 0;
+            margin: 12px 0;
         }
 
         .mock-value.highlight-pink {
             color: var(--primary);
         }
 
-        /* ---- STATS STRIP ---- */
+        /* ---- STATS STRIP (LEBIH RINGAN) ---- */
         .stats-strip {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             border: var(--border-thick);
             background: var(--white);
-            margin: 20px 0 30px;
+            margin: 12px 0 24px;
         }
 
         .strip-item {
-            padding: 24px 12px;
+            padding: 18px 8px;
             text-align: center;
             border-right: var(--border-thick);
             border-bottom: var(--border-thick);
@@ -409,7 +412,7 @@
 
         .strip-number {
             font-family: var(--font-display);
-            font-size: 2.2rem;
+            font-size: 2rem;
             font-weight: 900;
             color: var(--black);
             line-height: 1.1;
@@ -418,10 +421,10 @@
         .strip-label {
             font-family: var(--font-display);
             font-weight: 800;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
-            color: #333;
-            letter-spacing: 0.5px;
+            color: #444;
+            letter-spacing: 0.3px;
         }
 
         @media (min-width: 768px) {
@@ -435,44 +438,43 @@
             .strip-item:last-child { border-right: none !important; }
         }
 
-        /* ---- SECTION TITLE ---- */
+        /* ---- SECTION (LEBIH LEGA) ---- */
         .section {
-            padding: 40px 0;
+            padding: 28px 0 36px;
         }
 
         .section-title {
             font-family: var(--font-display);
-            font-size: 2.6rem;
+            font-size: 2.2rem;
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: -0.02em;
             text-align: center;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             color: var(--black);
         }
 
         .section-desc {
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: #1a1a1a;
             text-align: center;
-            margin-bottom: 36px;
+            margin-bottom: 28px;
         }
 
-        /* ---- FEATURES GRID (Neo Brutal Cards) ---- */
+        /* ---- FEATURES (LEBIH RINGAN, TIDAK PADAT) ---- */
         .features-grid {
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 20px;
         }
 
         .feature-card {
             background: var(--white);
             border: var(--border-thick);
             box-shadow: var(--shadow-heavy);
-            padding: 28px 24px;
+            padding: 24px 22px;
             transition: all 0.12s ease;
-            position: relative;
         }
 
         .feature-card:hover {
@@ -481,13 +483,13 @@
         }
 
         .feature-icon-box {
-            font-size: 2.4rem;
+            font-size: 2rem;
             display: inline-block;
-            padding: 8px 16px;
+            padding: 6px 14px;
             background: var(--black);
             color: var(--white);
             border: var(--border-thick);
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .feature-card.card-mint .feature-icon-box { background: var(--green); color: var(--black); }
@@ -496,30 +498,30 @@
 
         .feature-name {
             font-family: var(--font-display);
-            font-size: 1.7rem;
+            font-size: 1.5rem;
             font-weight: 900;
             text-transform: uppercase;
             color: var(--black);
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .feature-desc {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 500;
             color: #1a1a1a;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
 
         .feature-action-link {
             font-family: var(--font-display);
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 0.9rem;
             text-transform: uppercase;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
-            padding: 10px 20px;
+            gap: 8px;
+            padding: 8px 18px;
             border: var(--border-thick);
             background: var(--black);
             color: var(--white);
@@ -544,86 +546,88 @@
             .features-grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
+                gap: 24px;
             }
         }
 
-        /* ---- TESTIMONIALS ---- */
+        /* ---- TESTIMONIALS (LEBIH RINGAN) ---- */
         .testimonials-section {
             background: var(--white);
             border-top: var(--border-thick);
             border-bottom: var(--border-thick);
-            padding: 40px 0;
-            margin: 20px 0;
+            padding: 32px 0;
+            margin: 12px 0;
         }
 
         .testi-grid {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
 
         .testi-card {
             background: var(--off-white);
             border: var(--border-thick);
-            padding: 20px 24px;
-            box-shadow: var(--shadow-heavy);
+            padding: 18px 22px;
+            box-shadow: var(--shadow-light);
         }
 
         .testi-avatar {
-            font-size: 2rem;
-            margin-bottom: 8px;
+            font-size: 1.6rem;
+            margin-bottom: 4px;
         }
 
         .testi-rating {
             color: var(--yellow);
-            font-size: 1.2rem;
-            letter-spacing: 2px;
+            font-size: 1rem;
+            letter-spacing: 1px;
             margin-bottom: 4px;
         }
 
         .testi-text {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 500;
             font-style: italic;
             color: #1a1a1a;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .testi-name {
             font-family: var(--font-display);
             font-weight: 800;
             text-transform: uppercase;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         @media (min-width: 768px) {
             .testi-grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
             }
         }
 
-        /* ---- FAQ ---- */
+        /* ---- FAQ (LEBIH RINGAN) ---- */
         .faq-grid {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            max-width: 800px;
+            gap: 10px;
+            max-width: 720px;
             margin: 0 auto;
         }
 
         .faq-item {
             background: var(--white);
             border: var(--border-thick);
-            box-shadow: var(--shadow-heavy);
+            box-shadow: var(--shadow-light);
             overflow: hidden;
         }
 
         .faq-question {
-            padding: 18px 20px;
+            padding: 14px 18px;
             font-family: var(--font-display);
             font-weight: 800;
-            font-size: 1.1rem;
+            font-size: 1rem;
             text-transform: uppercase;
             display: flex;
             justify-content: space-between;
@@ -639,7 +643,7 @@
         }
 
         .faq-question i {
-            font-size: 1.2rem;
+            font-size: 1rem;
             transition: transform 0.2s ease;
         }
 
@@ -654,7 +658,7 @@
         }
 
         .faq-answer {
-            padding: 0 20px;
+            padding: 0 18px;
             max-height: 0;
             overflow: hidden;
             transition: all 0.25s ease;
@@ -663,36 +667,36 @@
         }
 
         .faq-item.open .faq-answer {
-            padding: 18px 20px;
+            padding: 14px 18px;
             max-height: 200px;
         }
 
-        /* ---- CTA ---- */
+        /* ---- CTA (LEBIH RINGAN) ---- */
         .cta-wrapper {
-            padding: 30px 0 40px;
+            padding: 24px 0 32px;
         }
 
         .cta-box {
             background: var(--black);
             border: var(--border-thick);
             box-shadow: var(--shadow-heavy);
-            padding: 48px 24px;
+            padding: 36px 20px;
             text-align: center;
             color: var(--white);
         }
 
         .cta-box h2 {
-            font-size: 2.4rem;
+            font-size: 2rem;
             color: var(--white);
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .cta-box p {
             font-weight: 500;
-            font-size: 1.1rem;
-            color: #ccc;
-            margin-bottom: 28px;
-            max-width: 500px;
+            font-size: 1rem;
+            color: #bbb;
+            margin-bottom: 20px;
+            max-width: 460px;
             margin-left: auto;
             margin-right: auto;
         }
@@ -714,13 +718,13 @@
             position: fixed;
             bottom: 24px;
             left: 24px;
-            width: 56px;
-            height: 56px;
+            width: 50px;
+            height: 50px;
             background: var(--primary);
             color: var(--white);
             border: var(--border-thick);
             box-shadow: var(--shadow-heavy);
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -747,48 +751,48 @@
         footer {
             border-top: var(--border-thick);
             background: var(--white);
-            padding: 40px 0 24px;
-            margin-top: 20px;
+            padding: 32px 0 20px;
+            margin-top: 12px;
         }
 
         .footer-content {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
+            gap: 24px;
         }
 
         .footer-col h4 {
             font-family: var(--font-display);
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 900;
             text-transform: uppercase;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             color: var(--black);
         }
 
         .footer-col p,
         .footer-col a {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 500;
             color: #1a1a1a;
             text-decoration: none;
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         .footer-col a:hover {
             text-decoration: underline;
-            text-decoration-thickness: 4px;
+            text-decoration-thickness: 3px;
         }
 
         .footer-bottom {
             text-align: center;
-            padding-top: 24px;
-            margin-top: 24px;
+            padding-top: 16px;
+            margin-top: 16px;
             border-top: var(--border-thick);
             font-family: var(--font-display);
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
 
         @media (min-width: 768px) {
@@ -817,11 +821,12 @@ $totalUsers = count($uniqueFingerprints);
 <!-- PROGRESS BAR -->
 <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
 
-<!-- SPLASH SCREEN -->
+<!-- SPLASH SCREEN — LOGO BULAT + SPINNER -->
 <div id="splash">
-    <div class="splash-icon">❄️</div>
+    <div class="splash-logo">❄️</div>
     <div class="splash-name">Polar.web.id</div>
-    <div class="splash-bar"><div class="splash-fill" id="splashFill"></div></div>
+    <div class="splash-spinner"></div>
+    <div class="splash-sub">Memuat...</div>
 </div>
 
 <!-- ===== HERO ===== -->
@@ -842,7 +847,6 @@ $totalUsers = count($uniqueFingerprints);
             <a href="dashboard.php" class="btn btn-primary">
                 <i class="fas fa-download"></i> Claim Sekarang
             </a>
-            <!-- Tombol "Lihat Specs" TELAH DIHAPUS sesuai permintaan -->
         </div>
 
         <div class="trust-badges">
@@ -861,12 +865,9 @@ $totalUsers = count($uniqueFingerprints);
             <div class="mock-body">
                 <div class="mock-label">RAM</div>
                 <div class="mock-value">Unlimited</div>
-
                 <div class="mock-label">CPU Cores</div>
                 <div class="mock-value">High Performance</div>
-
                 <div class="mock-divider"></div>
-
                 <div class="mock-label">Active Session ID</div>
                 <div class="mock-value highlight-pink">+6281234567890</div>
             </div>
@@ -935,7 +936,7 @@ $totalUsers = count($uniqueFingerprints);
             <div class="testi-card">
                 <div class="testi-avatar">👤</div>
                 <div class="testi-rating">★★★★★</div>
-                <div class="testi-text">"Mudah banget pakenya, tinggal klik langsung jadi. Bot langsung online tanpa ribet. Recommended!"</div>
+                <div class="testi-text">"Mudah banget pakenya, tinggal klik langsung jadi. Bot langsung online tanpa ribet."</div>
                 <div class="testi-name">— Andi Setiawan</div>
             </div>
             <div class="testi-card">
@@ -1020,17 +1021,11 @@ $totalUsers = count($uniqueFingerprints);
 
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-    // Force Dark Mode (tapi kita pake light neo-brutal, jadi abaikan)
-    // document.documentElement.setAttribute('data-theme', 'dark'); // tidak dipakai
-
-    // SPLASH FILL
+    // SPLASH — hide setelah loading
     window.addEventListener('load', () => {
-        const fill = document.getElementById('splashFill');
-        if (fill) fill.style.width = '100%';
         setTimeout(() => {
-            const splash = document.getElementById('splash');
-            if (splash) splash.classList.add('hide');
-        }, 1200);
+            document.getElementById('splash')?.classList.add('hide');
+        }, 1600);
     });
 
     // PROGRESS BAR
