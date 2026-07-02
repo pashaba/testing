@@ -4,7 +4,7 @@ header('Content-Type: application/json');
 
 $panel = 'https://private.pterokudesu.web.id';
 $apiKey = 'ptlc_UUp3T2RayUkXnIVt0dHIie1EXWwcC5Tu9U9yysRqKwj';
-$identifier = 'e076c725';
+$identifier = 'b70c577e';
 
 /**
  * Fungsi untuk coba berbagai kemungkinan endpoint
