@@ -1,3 +1,216 @@
+<?php
+session_start();
+require_once 'config.php';
+
+// ========== KONFIGURASI GOOGLE ==========
+$client_id = '1054465623984-re5q3ehnrk4qrne8da214jjvltnut630.apps.googleusercontent.com';
+$client_secret = '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';
+$redirect_uri = 'https://polar.web.id/dashboard.php';
+
+// ========== PROSES CALLBACK GOOGLE ==========
+if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
+    $code = $_GET['code'];
+    
+    $token_url = 'https://oauth2.googleapis.com/token';
+    $post_data = [
+        'code' => $code,
+        'client_id' => $client_id,
+        'client_secret' => $client_secret,
+        'redirect_uri' => $redirect_uri,
+        'grant_type' => 'authorization_code'
+    ];
+    
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $token_url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    
+    $token_data = json_decode($response, true);
+    
+    if (isset($token_data['access_token'])) {
+        $userinfo_url = 'https://www.googleapis.com/oauth2/v2/userinfo';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $userinfo_url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token_data['access_token']]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $user_response = curl_exec($ch);
+        curl_close($ch);
+        
+        $user_data = json_decode($user_response, true);
+
+        $google_id = $user_data['id'];
+        $name      = $user_data['name'] ?? 'User';
+        $email     = $user_data['email'] ?? '';
+        $avatar    = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=FF6B00&color=fff';
+
+        // ===== UPSERT ke Supabase =====
+        $sb_url = rtrim($SUPABASE_URL, '/');
+        $sb_key = $SUPABASE_KEY;
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $sb_url . '/rest/v1/polar_users?google_id=eq.' . urlencode($google_id) . '&select=coins');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'apikey: ' . $sb_key,
+            'Authorization: Bearer ' . $sb_key
+        ]);
+        $existing_raw = curl_exec($ch);
+        curl_close($ch);
+
+        $existing = json_decode($existing_raw, true);
+        $saved_coins = (!empty($existing) && isset($existing[0]['coins'])) ? (int)$existing[0]['coins'] : 0;
+
+        $upsert_data = json_encode([
+            'google_id'  => $google_id,
+            'name'       => $name,
+            'email'      => $email,
+            'avatar'     => $avatar,
+            'coins'      => $saved_coins,
+            'created_at' => time()
+        ]);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $sb_url . '/rest/v1/polar_users');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $upsert_data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'apikey: ' . $sb_key,
+            'Authorization: Bearer ' . $sb_key,
+            'Prefer: resolution=merge-duplicates,return=minimal'
+        ]);
+        curl_exec($ch);
+        curl_close($ch);
+
+        $_SESSION['user_google_id'] = $google_id;
+        $_SESSION['user_name']      = $name;
+        $_SESSION['user_email']     = $email;
+        $_SESSION['user_avatar']    = $avatar;
+        $_SESSION['user_coins']     = $saved_coins;
+        
+        header('Location: dashboard.php');
+        exit;
+    }
+}
+
+// ========== CEK LOGIN ==========
+$is_logged_in = isset($_SESSION['user_google_id']);
+$earn_flag_active = !empty($_SESSION['earn_flag']);
+$user_name = $_SESSION['user_name'] ?? "Guest";
+$user_email = $_SESSION['user_email'] ?? "guest@gmail.com";
+$user_avatar = $_SESSION['user_avatar'] ?? "https://ui-avatars.com/api/?name=Guest&background=FF6B00&color=fff";
+$user_coins = $_SESSION['user_coins'] ?? 0;
+
+// ========== URL LOGIN GOOGLE ==========
+$auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
+    'client_id' => $client_id,
+    'redirect_uri' => $redirect_uri,
+    'response_type' => 'code',
+    'scope' => 'email profile',
+    'access_type' => 'online',
+    'prompt' => 'select_account'
+]);
+
+// ========== CEK SERVER ==========
+function checkPhoenixServer() {
+    $ptero_panel = 'https://private.pterokudesu.web.id';
+    $api_key = 'ptlc_UUp3T2RayUkXnIVt0dHIie1EXWwcC5Tu9U9yysRqKwj';
+    $uuid = 'b70c577e-f1ad-42bf-92da-1f6ecbb5190d';
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $ptero_panel . '/api/client/servers/' . $uuid . '/resources');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $api_key,
+        'Accept: application/json'
+    ]);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($httpCode >= 200 && $httpCode < 300) {
+        $data = json_decode($response, true);
+        $ramBytes = $data['attributes']['resources']['memory_bytes'] ?? 0;
+        $ramMB = round($ramBytes / 1024 / 1024, 2);
+        return [
+            'online' => ($ramMB > 0),
+            'ram' => $ramMB . ' MB',
+            'ping' => rand(20, 150) . 'ms'
+        ];
+    }
+    return ['online' => false, 'ram' => '0 MB', 'ping' => 'Timeout'];
+}
+
+function checkOurinServer() {
+    $ptero_panel = 'https://private.pterokudesu.web.id';
+    $api_key = 'ptlc_qEYuw1Iv0NQXPUMKzCUJhENIJ7P7SL6KFHTQ0kv9ckh';
+    $uuid = 'e076c725-f16d-4a7d-93d9-82c294e07f38';
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $ptero_panel . '/api/client/servers/' . $uuid . '/resources');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Authorization: Bearer ' . $api_key,
+        'Accept: application/json'
+    ]);
+    
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    if ($httpCode >= 200 && $httpCode < 300) {
+        $data = json_decode($response, true);
+        $ramBytes = $data['attributes']['resources']['memory_bytes'] ?? 0;
+        $ramMB = round($ramBytes / 1024 / 1024, 2);
+        return [
+            'online' => ($ramMB > 0),
+            'ram' => $ramMB . ' MB',
+            'ping' => rand(20, 150) . 'ms'
+        ];
+    }
+    return ['online' => false, 'ram' => '0 MB', 'ping' => 'Timeout'];
+}
+
+$phoenix_status = checkPhoenixServer();
+$ourin_status = checkOurinServer();
+
+// ========== AMBIL SESSION DARI SUPABASE ==========
+function getSessions($fingerprint) {
+    global $SUPABASE_URL, $SUPABASE_KEY;
+    $url = $SUPABASE_URL . '/rest/v1/polar_sessions?fingerprint=eq.' . urlencode($fingerprint) . '&order=created_at.desc';
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'apikey: ' . $SUPABASE_KEY,
+        'Authorization: Bearer ' . $SUPABASE_KEY
+    ]);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    return json_decode($response, true) ?: [];
+}
+
+$fingerprint = $_SESSION['fingerprint'] ?? '';
+if (!$fingerprint) {
+    $fingerprint = hash('sha256', $_SERVER['HTTP_USER_AGENT'] . $_SERVER['REMOTE_ADDR'] . session_id());
+    $_SESSION['fingerprint'] = $fingerprint;
+}
+$sessions = getSessions($fingerprint);
+$totalSessions = count($sessions);
+$maxSessions = 10;
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -154,8 +367,8 @@
         .login-card p {
             color: var(--text-muted);
             font-size: 14px;
-            margin-bottom: 28px;
             font-weight: 500;
+            margin-bottom: 28px;
         }
         .google-btn-login {
             background: #ffffff;
