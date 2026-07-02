@@ -125,8 +125,8 @@ $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
 // ========== CEK SERVER ==========
 function checkPhoenixServer() {
     $ptero_panel = 'https://private.pterokudesu.web.id';
-    $api_key = 'ptlc_qEYuw1Iv0NQXPUMKzCUJhENIJ7P7SL6KFHTQ0kv9ckh';
-    $uuid = 'e076c725-f16d-4a7d-93d9-82c294e07f38';
+    $api_key = 'ptlc_UUp3T2RayUkXnIVt0dHIie1EXWwcC5Tu9U9yysRqKwj';
+    $uuid = 'b70c577e-f1ad-42bf-92da-1f6ecbb5190d';
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $ptero_panel . '/api/client/servers/' . $uuid . '/resources');
