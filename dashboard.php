@@ -1,5 +1,27 @@
 <?php
+// ===== PERBAIKAN SESSION =====
+// 1. Set session cookie parameters SEBELUM session_start()
+session_set_cookie_params([
+    'lifetime' => 86400 * 7, // 7 hari
+    'path' => '/',
+    'domain' => '', // biarkan kosong untuk auto-detect
+    'secure' => false, // set true kalau pakai HTTPS
+    'httponly' => true,
+    'samesite' => 'Lax'
+]);
+
 session_start();
+
+// 2. Refresh session untuk mencegah expired
+if (isset($_SESSION['user_google_id'])) {
+    $_SESSION['LAST_ACTIVITY'] = time();
+    if (isset($_SESSION['EXPIRES']) && (time() - $_SESSION['EXPIRES'] > 3600)) {
+        session_destroy();
+        session_start();
+    }
+    $_SESSION['EXPIRES'] = time() + 3600; // 1 jam
+}
+
 require_once 'config.php';
 
 // ========== KONFIGURASI GOOGLE ==========
@@ -90,11 +112,18 @@ if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
         curl_exec($ch);
         curl_close($ch);
 
+        // Set session dengan waktu expire
         $_SESSION['user_google_id'] = $google_id;
         $_SESSION['user_name']      = $name;
         $_SESSION['user_email']     = $email;
         $_SESSION['user_avatar']    = $avatar;
         $_SESSION['user_coins']     = $saved_coins;
+        $_SESSION['CREATED']        = time();
+        $_SESSION['EXPIRES']        = time() + 3600; // 1 jam
+        $_SESSION['LAST_ACTIVITY']  = time();
+        
+        // Regenerate session ID untuk keamanan
+        session_regenerate_id(true);
         
         header('Location: dashboard.php');
         exit;
@@ -221,736 +250,8 @@ $maxSessions = 10;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* ============================================================
-   NEOBRUTALISM ENHANCEMENTS — ALL IN ONE
-   Include this file after your main CSS
-   ============================================================ */
-
-/* ===== 1. FONT & TYPOGRAPHY ===== */
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap');
-
-* {
-    font-family: 'Space Grotesk', sans-serif;
-}
-
-/* ===== 2. ANIMATIONS ===== */
-@keyframes brutalShake {
-    0%, 100% { transform: translate(0, 0); }
-    25% { transform: translate(-3px, 3px); }
-    75% { transform: translate(3px, -3px); }
-}
-
-@keyframes glitch {
-    0% { transform: translate(0); }
-    20% { transform: translate(-3px, 3px); }
-    40% { transform: translate(3px, -3px); }
-    60% { transform: translate(-2px, 2px); }
-    80% { transform: translate(2px, -2px); }
-    100% { transform: translate(0); }
-}
-
-@keyframes typing {
-    from { width: 0; }
-    to { width: 100%; }
-}
-
-@keyframes marquee {
-    0% { transform: translateX(100%); }
-    100% { transform: translateX(-100%); }
-}
-
-@keyframes pulseBorder {
-    0%, 100% { box-shadow: 8px 8px 0px 0px #111; }
-    50% { box-shadow: 4px 4px 0px 0px #111; }
-}
-
-@keyframes rainbowShadow {
-    0% { box-shadow: 8px 8px 0px 0px #ff006e; }
-    25% { box-shadow: 8px 8px 0px 0px #ff5e00; }
-    50% { box-shadow: 8px 8px 0px 0px #ffe600; }
-    75% { box-shadow: 8px 8px 0px 0px #00d4ff; }
-    100% { box-shadow: 8px 8px 0px 0px #ff006e; }
-}
-
-/* ===== 3. SHADOWS ===== */
-:root {
-    --shadow-heavy: 8px 8px 0px 0px #111111;
-    --shadow-light: 6px 6px 0px 0px #333333;
-    --shadow-orange: 8px 8px 0px 0px #ff5e00;
-    --shadow-gold: 8px 8px 0px 0px #fbbf24;
-    --shadow-pink: 8px 8px 0px 0px #ff006e;
-    --shadow-blue: 8px 8px 0px 0px #00d4ff;
-    --shadow-green: 8px 8px 0px 0px #00ff87;
-}
-
-/* Shadow classes */
-.shadow-orange { box-shadow: var(--shadow-orange) !important; }
-.shadow-gold { box-shadow: var(--shadow-gold) !important; }
-.shadow-pink { box-shadow: var(--shadow-pink) !important; }
-.shadow-blue { box-shadow: var(--shadow-blue) !important; }
-.shadow-green { box-shadow: var(--shadow-green) !important; }
-.shadow-rainbow { animation: rainbowShadow 3s ease-in-out infinite; }
-
-/* ===== 4. BACKGROUND PATTERN ===== */
-body {
-    background-color: #f7f7f7;
-    background-image: 
-        repeating-linear-gradient(45deg, rgba(255,94,0,0.04) 0px, rgba(255,94,0,0.04) 15px, transparent 15px, transparent 30px),
-        repeating-linear-gradient(-45deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 15px, transparent 15px, transparent 30px),
-        repeating-linear-gradient(90deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 2px, transparent 2px, transparent 4px);
-}
-
-/* ===== 5. BUTTONS ===== */
-.btn {
-    transition: all 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    position: relative;
-}
-
-/* Hover efek untuk semua button */
-.btn:hover {
-    animation: brutalShake 0.2s ease;
-    transform: translate(-2px, -2px);
-}
-
-/* Active/pressed effect */
-.btn:active {
-    transform: translate(4px, 4px) !important;
-    box-shadow: 2px 2px 0px 0px #111 !important;
-    transition: all 0.05s ease;
-}
-
-/* Button variants yang lebih ekstrim */
-.btn-pink {
-    background: #ff006e;
-    color: #fff;
-    box-shadow: var(--shadow-pink);
-}
-.btn-pink:hover {
-    background: #e60062;
-    box-shadow: 6px 6px 0px 0px #111;
-}
-
-.btn-blue {
-    background: #00d4ff;
-    color: #111;
-    box-shadow: var(--shadow-blue);
-}
-.btn-blue:hover {
-    background: #00b8e6;
-    box-shadow: 6px 6px 0px 0px #111;
-}
-
-.btn-green {
-    background: #00ff87;
-    color: #111;
-    box-shadow: var(--shadow-green);
-}
-.btn-green:hover {
-    background: #00e67a;
-    box-shadow: 6px 6px 0px 0px #111;
-}
-
-.btn-rainbow {
-    background: linear-gradient(45deg, #ff006e, #ff5e00, #ffe600, #00d4ff);
-    color: #fff;
-    box-shadow: var(--shadow-heavy);
-    background-size: 300% 300%;
-    animation: rainbowBg 3s ease infinite;
-}
-@keyframes rainbowBg {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-/* ===== 6. CARDS ===== */
-.card {
-    transition: all 0.15s ease;
-    position: relative;
-}
-
-.card:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 12px 12px 0px 0px #111 !important;
-}
-
-/* Corner accents on cards */
-.card::before {
-    content: '◆';
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    font-size: 24px;
-    color: #ff5e00;
-    background: #fff;
-    padding: 0 4px;
-    border: 3px solid #111;
-    line-height: 1;
-}
-
-.card::after {
-    content: '◆';
-    position: absolute;
-    bottom: -10px;
-    right: -10px;
-    font-size: 24px;
-    color: #ff5e00;
-    background: #fff;
-    padding: 0 4px;
-    border: 3px solid #111;
-    line-height: 1;
-}
-
-/* ===== 7. HERO SECTION ===== */
-.hero h1 {
-    overflow: hidden;
-    white-space: nowrap;
-    animation: typing 2s steps(30) 1s forwards;
-    width: 0;
-}
-
-.hero h1 span {
-    transform: skew(-6deg) rotate(-2deg);
-    display: inline-block;
-    padding: 0 16px;
-}
-
-.slot-badge {
-    background: #ff5e00 !important;
-    color: #fff !important;
-    transform: rotate(-1deg);
-}
-
-/* ===== 8. STICKERS ===== */
-.sticker {
-    transform: rotate(-2deg);
-    border: 4px solid #111;
-    box-shadow: 8px 8px 0px 0px #111;
-    background: #ff5e00;
-    color: white;
-    padding: 8px 24px;
-    display: inline-block;
-    font-weight: 900;
-    text-transform: uppercase;
-    font-size: 14px;
-}
-
-.sticker-gold {
-    background: #fbbf24;
-    transform: rotate(3deg);
-}
-
-.sticker-pink {
-    background: #ff006e;
-    transform: rotate(-4deg);
-}
-
-.sticker-blue {
-    background: #00d4ff;
-    transform: rotate(2deg);
-    color: #111;
-}
-
-/* ===== 9. BORDERS ===== */
-.border-double {
-    border: 6px double #111 !important;
-}
-
-.border-dashed-heavy {
-    border: 4px dashed #111 !important;
-}
-
-.border-dotted-heavy {
-    border: 4px dotted #111 !important;
-}
-
-/* ===== 10. LOADING MODAL ===== */
-.loading-box.active {
-    animation: glitch 0.3s ease;
-}
-
-.loading-spinner {
-    border-width: 6px;
-    border-style: solid;
-    border-color: #111;
-    border-top-color: #ff5e00;
-    border-radius: 0px;
-}
-
-/* ===== 11. PROGRESS BAR ===== */
-.progress-bar {
-    width: 100%;
-    height: 24px;
-    background: #fff;
-    border: 3px solid #111;
-    box-shadow: inset 3px 3px 0px 0px #111;
-    border-radius: 0px;
-    overflow: hidden;
-}
-
-.progress-fill {
-    height: 100%;
-    background: #ff5e00;
-    border-right: 3px solid #111;
-    width: 0%;
-    transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.progress-fill.striped {
-    background-image: repeating-linear-gradient(45deg, #ff5e00, #ff5e00 10px, #ff7a2e 10px, #ff7a2e 20px);
-}
-
-/* ===== 12. MARQUEE ===== */
-.marquee {
-    background: #111;
-    color: #fff;
-    padding: 10px 0;
-    overflow: hidden;
-    white-space: nowrap;
-    border-top: 3px solid #ff5e00;
-    border-bottom: 3px solid #ff5e00;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.marquee span {
-    display: inline-block;
-    padding-left: 100%;
-    animation: marquee 20s linear infinite;
-}
-
-/* ===== 13. ALERTS ===== */
-.alert-brutal {
-    background: #fff;
-    border: 4px solid #111;
-    box-shadow: 8px 8px 0px 0px #111;
-    padding: 16px 24px;
-    margin: 12px 0;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-radius: 0px;
-}
-
-.alert-brutal.warning {
-    border-left: 12px solid #fbbf24;
-}
-
-.alert-brutal.error {
-    border-left: 12px solid #e0002b;
-}
-
-.alert-brutal.success {
-    border-left: 12px solid #00b341;
-}
-
-.alert-brutal.info {
-    border-left: 12px solid #00d4ff;
-}
-
-/* ===== 14. RIBBON ===== */
-.ribbon {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    background: #ff5e00;
-    color: #fff;
-    padding: 4px 20px;
-    font-weight: 900;
-    font-size: 11px;
-    transform: rotate(6deg);
-    border: 3px solid #111;
-    box-shadow: 6px 6px 0px 0px #111;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.ribbon::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    left: -8px;
-    border: 8px solid transparent;
-    border-right-color: #111;
-    border-bottom-color: #111;
-}
-
-.ribbon-gold {
-    background: #fbbf24;
-    color: #111;
-    transform: rotate(-4deg);
-}
-
-.ribbon-pink {
-    background: #ff006e;
-    transform: rotate(8deg);
-}
-
-/* ===== 15. TOGGLE SWITCH ===== */
-.toggle {
-    width: 64px;
-    height: 32px;
-    background: #fff;
-    border: 3px solid #111;
-    border-radius: 0px;
-    cursor: pointer;
-    position: relative;
-    box-shadow: inset 3px 3px 0px 0px #111;
-    transition: all 0.2s ease;
-}
-
-.toggle::after {
-    content: '';
-    position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 22px;
-    height: 20px;
-    background: #ff5e00;
-    border: 2px solid #111;
-    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.toggle.active::after {
-    left: 35px;
-    background: #00b341;
-}
-
-.toggle:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px 0px #111;
-}
-
-/* ===== 16. TOOLTIP ===== */
-.tooltip {
-    position: relative;
-    cursor: help;
-    border-bottom: 2px dashed #111;
-}
-
-.tooltip::after {
-    content: attr(data-tip);
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #111;
-    color: #fff;
-    padding: 6px 16px;
-    border: 2px solid #fff;
-    white-space: nowrap;
-    font-size: 11px;
-    font-weight: 700;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    z-index: 999;
-}
-
-.tooltip:hover::after {
-    opacity: 1;
-    transform: translateX(-50%) translateY(-6px);
-}
-
-/* ===== 17. SCROLLBAR ===== */
-::-webkit-scrollbar {
-    width: 16px;
-    height: 16px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f0f0f0;
-    border-left: 3px solid #111;
-    border-top: 3px solid #111;
-}
-
-::-webkit-scrollbar-thumb {
-    background: #ff5e00;
-    border: 3px solid #111;
-    border-radius: 0px;
-    box-shadow: inset 2px 2px 0px 0px rgba(255,255,255,0.3);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #cc4b00;
-}
-
-::-webkit-scrollbar-corner {
-    background: #f0f0f0;
-    border: 3px solid #111;
-}
-
-/* ===== 18. STEP INDICATOR ===== */
-.step-indicator {
-    display: flex;
-    gap: 6px;
-    margin: 16px 0;
-}
-
-.step {
-    flex: 1;
-    height: 10px;
-    background: #fff;
-    border: 2px solid #111;
-    border-radius: 0px;
-    transition: all 0.3s ease;
-}
-
-.step.active {
-    background: #ff5e00;
-    height: 14px;
-    margin-top: -2px;
-    box-shadow: 3px 3px 0px 0px #111;
-}
-
-.step.done {
-    background: #00b341;
-}
-
-/* ===== 19. SELECT BOX ENHANCEMENT ===== */
-.select-box {
-    transition: all 0.15s ease;
-}
-
-.select-box:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 8px 8px 0px 0px #111 !important;
-}
-
-.select-box:active {
-    transform: translate(3px, 3px);
-    box-shadow: 2px 2px 0px 0px #111 !important;
-}
-
-.select-box.active {
-    background: #ff5e00 !important;
-    color: #fff !important;
-    transform: translate(-2px, -2px);
-    box-shadow: 10px 10px 0px 0px #111 !important;
-}
-
-/* ===== 20. STAT BOX ===== */
-.stat-box {
-    transition: all 0.15s ease;
-}
-
-.stat-box:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 8px 8px 0px 0px #111 !important;
-}
-
-.stat-box:active {
-    transform: translate(3px, 3px);
-    box-shadow: 2px 2px 0px 0px #111 !important;
-}
-
-/* ===== 21. SESSION ITEMS ===== */
-.session-item {
-    transition: all 0.15s ease;
-    padding: 12px 0;
-}
-
-.session-item:hover {
-    padding-left: 8px;
-    border-left: 6px solid #ff5e00;
-}
-
-/* ===== 22. BADGE ===== */
-.badge-status {
-    transition: all 0.15s ease;
-    border-radius: 0px;
-}
-
-.badge-status:hover {
-    transform: scale(1.05) rotate(-2deg);
-}
-
-/* ===== 23. INPUT FIELDS ===== */
-input[type="text"],
-input[type="number"],
-input[type="email"],
-input[type="password"],
-textarea,
-select {
-    transition: all 0.15s ease;
-}
-
-input:focus,
-textarea:focus,
-select:focus {
-    transform: translate(-2px, -2px);
-    box-shadow: 6px 6px 0px 0px #111 !important;
-    outline: none;
-}
-
-/* ===== 24. SIDEBAR ENHANCEMENT ===== */
-.sidebar .nav-link {
-    transition: all 0.15s ease;
-}
-
-.sidebar .nav-link:hover {
-    transform: translate(-4px, -4px);
-    box-shadow: 8px 8px 0px 0px #111 !important;
-}
-
-.sidebar .nav-link:active {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px 0px #111 !important;
-}
-
-/* ===== 25. MODAL OVERLAY ===== */
-.login-overlay,
-.pairing-overlay,
-.loading-overlay {
-    backdrop-filter: blur(4px);
-}
-
-/* ===== 26. TOAST ===== */
-.toast {
-    border-radius: 0px;
-    border-width: 4px;
-}
-
-.toast.success { border-left: 12px solid #00b341; }
-.toast.error { border-left: 12px solid #e0002b; }
-.toast.gold { border-left: 12px solid #fbbf24; }
-.toast.info { border-left: 12px solid #00d4ff; }
-
-/* ===== 27. SPECIAL EFFECTS ===== */
-.brutal-glow {
-    animation: pulseBorder 2s ease-in-out infinite;
-}
-
-.text-stroke {
-    -webkit-text-stroke: 2px #111;
-    color: #fff;
-    text-shadow: 4px 4px 0px #111;
-}
-
-/* ===== 28. RESPONSIVE FIX ===== */
-@media (max-width: 480px) {
-    .card::before,
-    .card::after {
-        font-size: 18px;
-        top: -6px;
-        left: -6px;
-        bottom: -6px;
-        right: -6px;
-    }
-    
-    .hero h1 {
-        white-space: normal;
-        animation: none;
-        width: auto;
-    }
-    
-    .sticker {
-        font-size: 11px;
-        padding: 4px 14px;
-    }
-}
-
-/* ===== 29. PRINT STYLES ===== */
-@media print {
-    .btn,
-    .earn-btn,
-    .menu-btn {
-        display: none !important;
-    }
-    .card {
-        box-shadow: none !important;
-        border: 2px solid #111 !important;
-    }
-}
-
-/* ===== 30. EXTRA: LOADING SKELETON ===== */
-.skeleton {
-    background: #e0e0e0;
-    border: 3px solid #111;
-    animation: skeletonPulse 1.5s ease-in-out infinite;
-}
-
-@keyframes skeletonPulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.5; }
-}
-
-/* ===== 31. GLITCH TEXT EFFECT ===== */
-.glitch-text {
-    animation: glitchText 2s infinite;
-    position: relative;
-}
-
-@keyframes glitchText {
-    0%, 100% { transform: translate(0); }
-    20% { transform: translate(-2px, 2px); }
-    40% { transform: translate(2px, -2px); }
-    60% { transform: translate(-1px, 1px); }
-    80% { transform: translate(1px, -1px); }
-}
-
-/* ===== 32. FLOATING ACTION BUTTON ===== */
-.fab {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    width: 56px;
-    height: 56px;
-    background: #ff5e00;
-    border: 3px solid #111;
-    box-shadow: 6px 6px 0px 0px #111;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: #fff;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    z-index: 999;
-}
-
-.fab:hover {
-    transform: translate(-3px, -3px);
-    box-shadow: 10px 10px 0px 0px #111;
-}
-
-.fab:active {
-    transform: translate(3px, 3px);
-    box-shadow: 2px 2px 0px 0px #111;
-}
-
-/* ===== 33. DIVIDER ===== */
-.divider-brutal {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    margin: 20px 0;
-}
-
-.divider-brutal::before,
-.divider-brutal::after {
-    content: '';
-    flex: 1;
-    border-bottom: 4px dashed #111;
-}
-
-.divider-brutal span {
-    padding: 0 16px;
-    font-weight: 900;
-    font-size: 14px;
-    text-transform: uppercase;
-    background: #f7f7f7;
-}
-
-/* ============================================================
-   END OF NEOBRUTALISM ENHANCEMENTS
-   ============================================================ */
-        /* ============================================================
-                   NEOBRUTALISM STYLE — tanpa mengubah sistem seidkitpun
-                   ============================================================ */
+           NEOBRUTALISM STYLE — FULL INTEGRATION
+           ============================================================ */
         :root {
             --bg-main: #f7f7f7;
             --bg-card: #ffffff;
@@ -966,9 +267,18 @@ select:focus {
             --border: #111111;
             --green: #00b341;
             --red: #e0002b;
-            --transition: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            --shadow-heavy: 6px 6px 0px 0px #111111;
-            --shadow-light: 4px 4px 0px 0px #333333;
+            --neon-pink: #ff006e;
+            --neon-blue: #00d4ff;
+            --neon-green: #00ff87;
+            --brutal-yellow: #ffe600;
+            --transition: all 0.12s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --shadow-heavy: 8px 8px 0px 0px #111111;
+            --shadow-light: 6px 6px 0px 0px #333333;
+            --shadow-orange: 8px 8px 0px 0px #ff5e00;
+            --shadow-gold: 8px 8px 0px 0px #fbbf24;
+            --shadow-pink: 8px 8px 0px 0px #ff006e;
+            --shadow-blue: 8px 8px 0px 0px #00d4ff;
+            --shadow-green: 8px 8px 0px 0px #00ff87;
             --border-thick: 3px solid #111111;
         }
 
@@ -984,7 +294,10 @@ select:focus {
             color: var(--text-main);
             min-height: 100vh;
             overflow-x: hidden;
-            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 10px, transparent 10px, transparent 20px);
+            background-image: 
+                repeating-linear-gradient(45deg, rgba(255,94,0,0.04) 0px, rgba(255,94,0,0.04) 15px, transparent 15px, transparent 30px),
+                repeating-linear-gradient(-45deg, rgba(0,0,0,0.03) 0px, rgba(0,0,0,0.03) 15px, transparent 15px, transparent 30px),
+                repeating-linear-gradient(90deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 2px, transparent 2px, transparent 4px);
         }
 
         /* ===== ANIMATIONS ===== */
@@ -1005,19 +318,64 @@ select:focus {
             0% { transform: rotateY(0); }
             100% { transform: rotateY(360deg); }
         }
-        @keyframes borderPulse {
-            0%,100% { box-shadow: var(--shadow-heavy); }
-            50% { box-shadow: 3px 3px 0px 0px #111111; }
+        @keyframes brutalShake {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-3px, 3px); }
+            75% { transform: translate(3px, -3px); }
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-3px, 3px); }
+            40% { transform: translate(3px, -3px); }
+            60% { transform: translate(-2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        @keyframes pulseBorder {
+            0%, 100% { box-shadow: var(--shadow-heavy); }
+            50% { box-shadow: 4px 4px 0px 0px #111111; }
+        }
+        @keyframes rainbowShadow {
+            0% { box-shadow: 8px 8px 0px 0px #ff006e; }
+            25% { box-shadow: 8px 8px 0px 0px #ff5e00; }
+            50% { box-shadow: 8px 8px 0px 0px #ffe600; }
+            75% { box-shadow: 8px 8px 0px 0px #00d4ff; }
+            100% { box-shadow: 8px 8px 0px 0px #ff006e; }
+        }
+        @keyframes rainbowBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        @keyframes skeletonPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        @keyframes glitchText {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(2px, -2px); }
+            60% { transform: translate(-1px, 1px); }
+            80% { transform: translate(1px, -1px); }
         }
         .animate-in { animation: fadeInUp 0.4s ease forwards; }
         .animate-float { animation: float 2.4s ease-in-out infinite; }
         .animate-coin { animation: coinSpin 1s ease forwards; }
 
-        /* ===== LOGIN POPUP (NEOBRUTAL) ===== */
+        /* ===== LOGIN POPUP ===== */
         .login-overlay {
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
             z-index: 1000;
             display: flex;
             align-items: center;
@@ -1117,6 +475,11 @@ select:focus {
             transform: translate(2px, 2px);
             box-shadow: 2px 2px 0px 0px #111111;
             background: #f0f0f0;
+            animation: brutalShake 0.2s ease;
+        }
+        .google-btn-login:active {
+            transform: translate(4px, 4px);
+            box-shadow: 2px 2px 0px 0px #111;
         }
         .g-icon {
             background: white;
@@ -1162,6 +525,7 @@ select:focus {
             text-align: center;
             animation: slideUp 0.3s ease;
         }
+        .loading-box.active { animation: glitch 0.3s ease; }
         .loading-spinner {
             width: 44px;
             height: 44px;
@@ -1179,6 +543,7 @@ select:focus {
             position: fixed;
             inset: 0;
             background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
             z-index: 1101;
             display: none;
             align-items: center;
@@ -1238,6 +603,16 @@ select:focus {
             letter-spacing: 0.3px;
             background: #ffffff;
             color: #111;
+            position: relative;
+        }
+        .btn:hover {
+            animation: brutalShake 0.2s ease;
+            transform: translate(-2px, -2px);
+        }
+        .btn:active {
+            transform: translate(4px, 4px) !important;
+            box-shadow: 2px 2px 0px 0px #111 !important;
+            transition: all 0.05s ease;
         }
         .btn-orange {
             background: var(--orange);
@@ -1245,8 +620,8 @@ select:focus {
             box-shadow: var(--shadow-heavy);
         }
         .btn-orange:hover {
-            transform: translate(2px, 2px);
-            box-shadow: 3px 3px 0px 0px #111111;
+            transform: translate(-2px, -2px);
+            box-shadow: 10px 10px 0px 0px #111111;
         }
         .btn-white {
             background: #ffffff;
@@ -1254,8 +629,8 @@ select:focus {
             box-shadow: var(--shadow-light);
         }
         .btn-white:hover {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px 0px #111;
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px 0px #111;
         }
         .btn-gold {
             background: var(--gold);
@@ -1263,21 +638,58 @@ select:focus {
             box-shadow: var(--shadow-heavy);
         }
         .btn-gold:hover {
-            transform: translate(2px, 2px);
-            box-shadow: 3px 3px 0px 0px #111;
+            transform: translate(-2px, -2px);
+            box-shadow: 10px 10px 0px 0px #111;
+        }
+        .btn-pink {
+            background: var(--neon-pink);
+            color: #fff;
+            box-shadow: var(--shadow-pink);
+        }
+        .btn-pink:hover {
+            background: #e60062;
+            box-shadow: 10px 10px 0px 0px #111;
+        }
+        .btn-blue {
+            background: var(--neon-blue);
+            color: #111;
+            box-shadow: var(--shadow-blue);
+        }
+        .btn-blue:hover {
+            background: #00b8e6;
+            box-shadow: 10px 10px 0px 0px #111;
+        }
+        .btn-green {
+            background: var(--neon-green);
+            color: #111;
+            box-shadow: var(--shadow-green);
+        }
+        .btn-green:hover {
+            background: #00e67a;
+            box-shadow: 10px 10px 0px 0px #111;
+        }
+        .btn-rainbow {
+            background: linear-gradient(45deg, #ff006e, #ff5e00, #ffe600, #00d4ff);
+            color: #fff;
+            box-shadow: var(--shadow-heavy);
+            background-size: 300% 300%;
+            animation: rainbowBg 3s ease infinite;
+        }
+        .btn-rainbow:hover {
+            animation: rainbowBg 3s ease infinite, brutalShake 0.2s ease;
         }
         .btn-sm { padding: 4px 10px; font-size: 10px; }
         .btn-danger { background: var(--red); color: #fff; box-shadow: var(--shadow-heavy); }
-        .btn-danger:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0px 0px #111; }
+        .btn-danger:hover { transform: translate(-2px, -2px); box-shadow: 10px 10px 0px 0px #111; }
         .btn-success { background: var(--green); color: #fff; box-shadow: var(--shadow-heavy); }
-        .btn-success:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0px 0px #111; }
+        .btn-success:hover { transform: translate(-2px, -2px); box-shadow: 10px 10px 0px 0px #111; }
         .btn-close-modal {
             background: #e0e0e0;
             color: #111;
             border: var(--border-thick);
             box-shadow: var(--shadow-light);
         }
-        .btn-close-modal:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0px 0px #111; }
+        .btn-close-modal:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0px 0px #111; }
         .btn-full { width: 100%; justify-content: center; }
 
         /* ===== NAVBAR ===== */
@@ -1301,6 +713,10 @@ select:focus {
             font-size: 18px;
             text-transform: uppercase;
             letter-spacing: 0px;
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 2s steps(10) 1s forwards;
+            width: 0;
         }
         .brand-icon {
             background: var(--orange);
@@ -1339,7 +755,12 @@ select:focus {
             transition: var(--transition);
         }
         .profile-btn:hover {
-            transform: translate(2px, 2px);
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px 0px #111;
+            animation: brutalShake 0.2s ease;
+        }
+        .profile-btn:active {
+            transform: translate(3px, 3px);
             box-shadow: 2px 2px 0px 0px #111;
         }
         .profile-btn img {
@@ -1362,7 +783,12 @@ select:focus {
             transition: var(--transition);
         }
         .menu-btn:hover {
-            transform: translate(2px, 2px);
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px 0px #111;
+            animation: brutalShake 0.2s ease;
+        }
+        .menu-btn:active {
+            transform: translate(3px, 3px);
             box-shadow: 2px 2px 0px 0px #111;
         }
 
@@ -1436,10 +862,15 @@ select:focus {
             text-transform: uppercase;
         }
         .nav-link:hover {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px 0px #111;
+            transform: translate(-4px, -4px);
+            box-shadow: 10px 10px 0px 0px #111 !important;
             background: var(--orange);
             color: #fff;
+            animation: brutalShake 0.2s ease;
+        }
+        .nav-link:active {
+            transform: translate(3px, 3px);
+            box-shadow: 2px 2px 0px 0px #111 !important;
         }
         .nav-link.active {
             background: var(--orange);
@@ -1455,8 +886,8 @@ select:focus {
         .hero { text-align: center; }
         .slot-badge {
             display: inline-block;
-            background: #111;
-            color: #fff;
+            background: var(--orange) !important;
+            color: #fff !important;
             padding: 3px 18px;
             border-radius: 0px;
             font-weight: 900;
@@ -1464,6 +895,7 @@ select:focus {
             margin-bottom: 12px;
             border: var(--border-thick);
             box-shadow: var(--shadow-light);
+            transform: rotate(-1deg);
         }
         .hero h1 {
             font-size: clamp(30px, 8vw, 44px);
@@ -1472,13 +904,17 @@ select:focus {
             margin-bottom: 12px;
             text-transform: uppercase;
             letter-spacing: -0.5px;
+            overflow: hidden;
+            white-space: nowrap;
+            animation: typing 2s steps(30) 1s forwards;
+            width: 0;
         }
         .hero h1 span {
             background: var(--orange);
             color: #fff;
             padding: 0 12px;
             display: inline-block;
-            transform: skew(-6deg);
+            transform: skew(-6deg) rotate(-2deg);
             border: var(--border-thick);
             box-shadow: var(--shadow-light);
         }
@@ -1498,6 +934,7 @@ select:focus {
         }
         .btn-group .btn { width: 100%; }
 
+        /* ===== CARDS ===== */
         .card {
             background: var(--bg-card);
             border: var(--border-thick);
@@ -1506,10 +943,40 @@ select:focus {
             padding: 16px;
             margin-bottom: 16px;
             transition: var(--transition);
+            position: relative;
         }
         .card:hover {
-            transform: translate(1px, 1px);
-            box-shadow: 5px 5px 0px 0px #111;
+            transform: translate(-3px, -3px);
+            box-shadow: 12px 12px 0px 0px #111 !important;
+        }
+        .card:active {
+            transform: translate(3px, 3px);
+            box-shadow: 2px 2px 0px 0px #111 !important;
+        }
+        /* Corner accents */
+        .card::before {
+            content: '◆';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            font-size: 24px;
+            color: var(--orange);
+            background: #fff;
+            padding: 0 4px;
+            border: var(--border-thick);
+            line-height: 1;
+        }
+        .card::after {
+            content: '◆';
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            font-size: 24px;
+            color: var(--orange);
+            background: #fff;
+            padding: 0 4px;
+            border: var(--border-thick);
+            line-height: 1;
         }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
         .section-title {
@@ -1527,6 +994,7 @@ select:focus {
             text-transform: uppercase;
         }
 
+        /* ===== SELECT BOX ===== */
         .select-box {
             background: #fff;
             border: var(--border-thick);
@@ -1538,19 +1006,25 @@ select:focus {
             transition: var(--transition);
         }
         .select-box:hover {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px 0px #111;
+            transform: translate(-3px, -3px);
+            box-shadow: 8px 8px 0px 0px #111 !important;
+        }
+        .select-box:active {
+            transform: translate(3px, 3px);
+            box-shadow: 2px 2px 0px 0px #111 !important;
         }
         .select-box.active {
-            background: var(--orange);
-            color: #fff;
-            box-shadow: var(--shadow-heavy);
+            background: var(--orange) !important;
+            color: #fff !important;
+            transform: translate(-2px, -2px);
+            box-shadow: 10px 10px 0px 0px #111 !important;
         }
         .select-box.active i { color: #fff; }
         .select-box i { font-size: 22px; color: #111; margin-bottom: 6px; }
         .select-box h4 { font-size: 14px; font-weight: 900; }
         .select-box p { font-size: 10px; font-weight: 600; margin-top: 2px; opacity: 0.7; }
 
+        /* ===== STATUS GRID ===== */
         .status-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -1564,11 +1038,22 @@ select:focus {
             border: var(--border-thick);
             box-shadow: var(--shadow-light);
             border-radius: 0px;
+            transition: var(--transition);
+        }
+        .stat-box:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 8px 8px 0px 0px #111 !important;
+        }
+        .stat-box:active {
+            transform: translate(3px, 3px);
+            box-shadow: 2px 2px 0px 0px #111 !important;
         }
         .stat-box h3 { font-size: 22px; font-weight: 900; }
         .stat-box p { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .text-orange { color: var(--orange); }
         .text-gold { color: var(--gold); }
+
+        /* ===== BADGES ===== */
         .badge-status {
             padding: 3px 10px;
             border-radius: 0px;
@@ -1577,11 +1062,16 @@ select:focus {
             text-transform: uppercase;
             border: var(--border-thick);
             box-shadow: var(--shadow-light);
+            transition: var(--transition);
+        }
+        .badge-status:hover {
+            transform: scale(1.05) rotate(-2deg);
         }
         .bg-online { background: var(--green); color: #fff; }
         .bg-offline { background: var(--red); color: #fff; }
         .bg-pending { background: var(--gold); color: #111; }
 
+        /* ===== SPEC ROW ===== */
         .spec-row {
             display: flex;
             justify-content: space-between;
@@ -1592,6 +1082,7 @@ select:focus {
         }
         .spec-row:last-child { border: none; }
 
+        /* ===== SESSION ITEMS ===== */
         .session-item {
             display: flex;
             align-items: center;
@@ -1600,11 +1091,17 @@ select:focus {
             border-bottom: 2px dashed #111;
             flex-wrap: wrap;
             gap: 6px;
+            transition: var(--transition);
+        }
+        .session-item:hover {
+            padding-left: 8px;
+            border-left: 6px solid var(--orange);
         }
         .session-item:last-child { border-bottom: none; }
         .session-phone { font-weight: 800; font-family: monospace; font-size: 13px; }
         .session-actions { display: flex; gap: 5px; flex-wrap: wrap; }
 
+        /* ===== EARN BUTTON ===== */
         .earn-btn {
             display: inline-flex;
             align-items: center;
@@ -1622,8 +1119,9 @@ select:focus {
             text-transform: uppercase;
         }
         .earn-btn:hover {
-            transform: translate(2px, 2px);
-            box-shadow: 2px 2px 0px 0px #111;
+            transform: translate(-2px, -2px);
+            box-shadow: 8px 8px 0px 0px #111;
+            animation: brutalShake 0.2s ease;
         }
         .earn-btn:active { transform: scale(0.96); }
 
@@ -1645,9 +1143,10 @@ select:focus {
             max-width: 340px;
             animation: slideUp 0.3s ease;
         }
-        .toast.success { border-left: 8px solid var(--green); }
-        .toast.error { border-left: 8px solid var(--red); }
-        .toast.gold { border-left: 8px solid var(--gold); }
+        .toast.success { border-left: 12px solid var(--green); }
+        .toast.error { border-left: 12px solid var(--red); }
+        .toast.gold { border-left: 12px solid var(--gold); }
+        .toast.info { border-left: 12px solid var(--neon-blue); }
 
         /* ===== TUTORIAL SPOTLIGHT ===== */
         .tutorial-overlay {
@@ -1673,7 +1172,7 @@ select:focus {
                         width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
                         height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             pointer-events: none;
-            animation: borderPulse 1.6s ease-in-out infinite;
+            animation: pulseBorder 1.6s ease-in-out infinite;
         }
         .tutorial-arrow {
             position: absolute;
@@ -1727,7 +1226,7 @@ select:focus {
             box-shadow: var(--shadow-light);
             transition: var(--transition);
         }
-        .tutorial-skip:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0px 0px #111; }
+        .tutorial-skip:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0px 0px #111; }
         .tutorial-next { padding: 6px 16px; font-size: 11px; }
         .tutorial-dots { display: flex; gap: 4px; }
         .tutorial-dot {
@@ -1740,9 +1239,54 @@ select:focus {
         }
         .tutorial-dot.active { background: var(--orange); width: 20px; }
 
+        /* ===== INPUT FIELDS ===== */
+        input[type="text"],
+        input[type="number"],
+        input[type="email"],
+        input[type="password"],
+        textarea,
+        select {
+            transition: var(--transition);
+        }
+        input:focus,
+        textarea:focus,
+        select:focus {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px 0px #111 !important;
+            outline: none;
+        }
+
+        /* ===== SCROLLBAR ===== */
+        ::-webkit-scrollbar {
+            width: 16px;
+            height: 16px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f0f0f0;
+            border-left: var(--border-thick);
+            border-top: var(--border-thick);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--orange);
+            border: var(--border-thick);
+            border-radius: 0px;
+            box-shadow: inset 2px 2px 0px 0px rgba(255,255,255,0.3);
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--orange-hover);
+        }
+        ::-webkit-scrollbar-corner {
+            background: #f0f0f0;
+            border: var(--border-thick);
+        }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
-            .hero h1 { font-size: 28px; }
+            .hero h1 {
+                white-space: normal;
+                animation: none;
+                width: auto;
+            }
             .grid-2 { grid-template-columns: 1fr; }
             .status-grid { grid-template-columns: 1fr 1fr; }
             .navbar { padding: 8px 12px; }
@@ -1750,6 +1294,183 @@ select:focus {
             .pairing-box { padding: 20px 14px; }
             .pairing-code { font-size: 24px; letter-spacing: 4px; }
             .hide-mobile { display: none; }
+            .card::before, .card::after {
+                font-size: 18px;
+                top: -6px;
+                left: -6px;
+                bottom: -6px;
+                right: -6px;
+            }
+        }
+
+        /* ===== PRINT STYLES ===== */
+        @media print {
+            .btn, .earn-btn, .menu-btn {
+                display: none !important;
+            }
+            .card {
+                box-shadow: none !important;
+                border: 2px solid #111 !important;
+            }
+        }
+
+        /* ===== EXTRA: STICKER ===== */
+        .sticker {
+            transform: rotate(-2deg);
+            border: 4px solid #111;
+            box-shadow: 8px 8px 0px 0px #111;
+            background: var(--orange);
+            color: white;
+            padding: 8px 24px;
+            display: inline-block;
+            font-weight: 900;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+        .sticker-gold {
+            background: var(--gold);
+            transform: rotate(3deg);
+        }
+
+        /* ===== EXTRA: PROGRESS BAR ===== */
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: #fff;
+            border: var(--border-thick);
+            box-shadow: inset 3px 3px 0px 0px #111;
+            border-radius: 0px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--orange);
+            border-right: var(--border-thick);
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        /* ===== EXTRA: MARQUEE ===== */
+        .marquee {
+            background: #111;
+            color: #fff;
+            padding: 10px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            border-top: var(--border-thick);
+            border-bottom: var(--border-thick);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .marquee span {
+            display: inline-block;
+            padding-left: 100%;
+            animation: marquee 20s linear infinite;
+        }
+
+        /* ===== EXTRA: RIBBON ===== */
+        .ribbon {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--orange);
+            color: #fff;
+            padding: 4px 20px;
+            font-weight: 900;
+            font-size: 11px;
+            transform: rotate(6deg);
+            border: var(--border-thick);
+            box-shadow: 6px 6px 0px 0px #111;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .ribbon::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: -8px;
+            border: 8px solid transparent;
+            border-right-color: #111;
+            border-bottom-color: #111;
+        }
+        .ribbon-gold {
+            background: var(--gold);
+            color: #111;
+            transform: rotate(-4deg);
+        }
+
+        /* ===== EXTRA: TOGGLE ===== */
+        .toggle {
+            width: 64px;
+            height: 32px;
+            background: #fff;
+            border: var(--border-thick);
+            border-radius: 0px;
+            cursor: pointer;
+            position: relative;
+            box-shadow: inset 3px 3px 0px 0px #111;
+            transition: var(--transition);
+        }
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 22px;
+            height: 20px;
+            background: var(--orange);
+            border: var(--border-thick);
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .toggle.active::after {
+            left: 35px;
+            background: var(--green);
+        }
+        .toggle:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px 0px #111;
+        }
+
+        /* ===== EXTRA: TOOLTIP ===== */
+        .tooltip {
+            position: relative;
+            cursor: help;
+            border-bottom: 2px dashed #111;
+        }
+        .tooltip::after {
+            content: attr(data-tip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111;
+            color: #fff;
+            padding: 6px 16px;
+            border: var(--border-thick);
+            white-space: nowrap;
+            font-size: 11px;
+            font-weight: 700;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 999;
+        }
+        .tooltip:hover::after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-6px);
+        }
+
+        /* ===== EXTRA: GLITCH TEXT ===== */
+        .glitch-text {
+            animation: glitchText 2s infinite;
+            position: relative;
+        }
+
+        /* ===== EXTRA: SIDEBAR NAV LINK ACTIVE ===== */
+        .sidebar .nav-link.active {
+            background: var(--orange);
+            color: #fff;
         }
     </style>
 </head>
@@ -1851,7 +1572,7 @@ select:focus {
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMenu()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="nav-brand" style="font-size:14px;"><span class="brand-icon">✦</span> MENU</div>
+            <div class="nav-brand" style="font-size:14px;animation:none;width:auto;"><span class="brand-icon">✦</span> MENU</div>
             <button class="sidebar-close" onclick="toggleMenu()"><i class="fas fa-times"></i></button>
         </div>
         <a href="#" class="nav-link" data-tut="nav-home" onclick="navTo('home'); toggleMenu();"><i class="fas fa-home"></i> HOME</a>
@@ -1872,7 +1593,7 @@ select:focus {
         <!-- HOME -->
         <div id="sec-home" class="section active">
             <div class="hero">
-                <div class="slot-badge"><i class="fas fa-circle" style="font-size:8px;color:var(--orange);"></i> <?= $maxSessions - $totalSessions ?> SLOT TERSEDIA</div>
+                <div class="slot-badge"><i class="fas fa-circle" style="font-size:8px;color:#fff;"></i> <?= $maxSessions - $totalSessions ?> SLOT TERSEDIA</div>
                 <h1>Jadibot <br><span>WhatsApp Gratis</span></h1>
                 <p>Dapatkan server bot gratis. Claim sekarang sebelum slot habis!</p>
                 <div class="btn-group">
@@ -1887,7 +1608,7 @@ select:focus {
         <div id="sec-claim" class="section">
             <div style="text-align:center;margin-bottom:16px;">
                 <div class="slot-badge"><?= $maxSessions - $totalSessions ?> SLOT TERSEDIA</div>
-                <h1 style="font-weight:900;font-size:clamp(26px,6vw,36px);text-transform:uppercase;">CLAIM <span style="background:#111;color:#fff;padding:0 12px;transform:skew(-6deg);display:inline-block;border:var(--border-thick);box-shadow:var(--shadow-light);">SERVER</span></h1>
+                <h1 style="font-weight:900;font-size:clamp(26px,6vw,36px);text-transform:uppercase;animation:none;width:auto;white-space:normal;">CLAIM <span style="background:#111;color:#fff;padding:0 12px;transform:skew(-6deg);display:inline-block;border:var(--border-thick);box-shadow:var(--shadow-light);">SERVER</span></h1>
                 <p style="color:var(--text-muted);font-size:13px;font-weight:500;">Pilih paket dan claim server bot gratis</p>
             </div>
 
@@ -1956,15 +1677,15 @@ select:focus {
         <!-- STATUS -->
         <div id="sec-status" class="section">
             <div style="text-align:center;margin-bottom:16px;">
-                <div class="slot-badge" style="background:#111;color:#fff;">REAL-TIME MONITORING</div>
-                <h1 style="font-weight:900;font-size:clamp(26px,6vw,36px);text-transform:uppercase;">SERVER <span style="background:var(--orange);color:#fff;padding:0 12px;transform:skew(-6deg);display:inline-block;border:var(--border-thick);box-shadow:var(--shadow-light);">STATUS</span></h1>
+                <div class="slot-badge" style="background:#111 !important;color:#fff !important;">REAL-TIME MONITORING</div>
+                <h1 style="font-weight:900;font-size:clamp(26px,6vw,36px);text-transform:uppercase;animation:none;width:auto;white-space:normal;">SERVER <span style="background:var(--orange);color:#fff;padding:0 12px;transform:skew(-6deg);display:inline-block;border:var(--border-thick);box-shadow:var(--shadow-light);">STATUS</span></h1>
             </div>
 
             <div class="card">
                 <div class="status-grid">
                     <div class="stat-box"><h3 class="text-orange"><?= $totalSessions ?></h3><p>TOTAL</p></div>
                     <div class="stat-box"><h3 class="text-gold"><?= $maxSessions - $totalSessions ?></h3><p>SLOT</p></div>
-                    <div class="stat-box"><h3 class="text-white" style="color:#111;"><?= ($phoenix_status['online'] ? 1 : 0) + ($ourin_status['online'] ? 1 : 0) ?></h3><p>ONLINE</p></div>
+                    <div class="stat-box"><h3 style="color:#111;"><?= ($phoenix_status['online'] ? 1 : 0) + ($ourin_status['online'] ? 1 : 0) ?></h3><p>ONLINE</p></div>
                     <div class="stat-box"><h3 class="text-orange"><?= (!$phoenix_status['online'] ? 1 : 0) + (!$ourin_status['online'] ? 1 : 0) ?></h3><p>OFFLINE</p></div>
                 </div>
             </div>
@@ -1998,7 +1719,7 @@ select:focus {
         <div id="sec-sessions" class="section">
             <div style="text-align:center;margin-bottom:16px;">
                 <div class="slot-badge"><?= $totalSessions ?> / <?= $maxSessions ?> SESSION</div>
-                <h1 style="font-weight:900;font-size:clamp(26px,6vw,36px);text-transform:uppercase;">MY <span style="background:var(--orange);color:#fff;padding:0 12px;transform:skew(-6deg);display:inline-block;border:var(--border-thick);box-shadow:var(--shadow-light);">BOTS</span></h1>
+                <h1 style="font-weight:900;font-size:clamp(26px,6vw,36px);text-transform:uppercase;animation:none;width:auto;white-space:normal;">MY <span style="background:var(--orange);color:#fff;padding:0 12px;transform:skew(-6deg);display:inline-block;border:var(--border-thick);box-shadow:var(--shadow-light);">BOTS</span></h1>
             </div>
 
             <?php if (empty($sessions)): ?>
@@ -2042,7 +1763,7 @@ select:focus {
                     <img src="<?= $user_avatar ?>" style="width:80px;height:80px;border-radius:0px;border:var(--border-thick);box-shadow:var(--shadow-light);">
                     <div style="position:absolute;top:-10px;right:-10px;background:var(--orange);color:#fff;padding:2px 14px;font-size:10px;font-weight:900;border:var(--border-thick);box-shadow:var(--shadow-light);transform:rotate(6deg);">✦ YOU!</div>
                 </div>
-                <h1 style="font-weight:900;font-size:26px;margin-top:12px;text-transform:uppercase;"><?= $user_name ?></h1>
+                <h1 style="font-weight:900;font-size:26px;margin-top:12px;text-transform:uppercase;animation:none;width:auto;white-space:normal;"><?= $user_name ?></h1>
                 <p style="color:var(--text-muted);font-size:13px;font-weight:500;"><?= $user_email ?></p>
                 <div style="background:#fff;border:var(--border-thick);box-shadow:var(--shadow-light);display:inline-flex;align-items:center;gap:12px;padding:6px 18px;margin-top:12px;">
                     <div style="font-weight:900;font-size:14px;"><i class="fas fa-coins"></i> <span id="profileCoinDisplay"><?= $user_coins ?></span></div>
@@ -2517,6 +2238,15 @@ select:focus {
         document.getElementById('pairingOverlay').addEventListener('click', function(e) {
             if (e.target === this) closePairingModal();
         });
+
+        // ========== SESSION KEEP ALIVE ==========
+        // Kirim ping setiap 5 menit untuk keep session alive
+        setInterval(() => {
+            fetch('keep-alive.php', { 
+                method: 'POST',
+                cache: 'no-cache'
+            }).catch(() => {});
+        }, 300000);
     </script>
 </body>
 </html>
