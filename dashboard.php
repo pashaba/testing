@@ -1285,7 +1285,7 @@ $maxSessions = 10;
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                     <div style="display:flex;align-items:center;gap:10px;">
                         <div style="background:#111;padding:8px;border:var(--border-thick);box-shadow:var(--shadow-light);"><i class="fas fa-microchip" style="color:#fff;font-size:14px;"></i></div>
-                        <div><h3 style="font-size:14px;font-weight:900;">OURIN CORE</h3><div style="font-size:10px;font-weight:600;color:var(--text-muted);">Native</div></div>
+                        <div><h3 style="font-size:14px;font-weight:900;">OURIN MD V3</h3><div style="font-size:10px;font-weight:600;color:var(--text-muted);">Pterodatcyl</div></div>
                     </div>
                     <div class="badge-status <?= $ourin_status['online'] ? 'bg-online' : 'bg-offline' ?>"><?= $ourin_status['online'] ? 'ONLINE' : 'OFFLINE' ?></div>
                 </div>
