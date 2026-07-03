@@ -8,16 +8,16 @@
 define('GITHUB_TOKEN', 'ghp_GANTI_DENGAN_TOKEN_ASLI_KAMU');
 
 // Username/organisasi pemilik repo
-define('GITHUB_OWNER', 'username-github-kamu');
+define('GITHUB_OWNER', 'pashaba');
 
 // Nama repository (tanpa owner, tanpa .git)
-define('GITHUB_REPO', 'nama-repo-kamu');
+define('GITHUB_REPO', 'testing');
 
 // Branch yang dipakai sebagai sumber file
 define('GITHUB_BRANCH', 'main');
 
 // Password sederhana buat proteksi file manager ini (WAJIB diganti, jangan biarkan default!)
-define('FM_PASSWORD', 'ganti-password-ini');
+define('FM_PASSWORD', 'pashapro');
 
 // =========================================================
 // JANGAN UBAH DI BAWAH INI
