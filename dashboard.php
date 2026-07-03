@@ -104,8 +104,15 @@ $client_secret = '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';
 $redirect_uri = 'https://polar.web.id/dashboard.php';
 
 // ===== PROSES CALLBACK GOOGLE =====
-if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
+if (isset($_GET['code'])) {
+    // Jika sudah login, redirect ke dashboard
+    if (isset($_SESSION['user_google_id'])) {
+        header('Location: dashboard.php');
+        exit;
+    }
+    
     $code = $_GET['code'];
+    error_log('📌 Google callback received with code: ' . substr($code, 0, 20) . '...');
     
     $token_url = 'https://oauth2.googleapis.com/token';
     $post_data = [
@@ -122,74 +129,99 @@ if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
     curl_close($ch);
+    
+    error_log('📡 Token response HTTP: ' . $httpCode);
+    error_log('📡 Token response: ' . $response);
+    
+    if ($error) {
+        error_log('❌ CURL Error: ' . $error);
+        die('CURL Error: ' . $error);
+    }
     
     $token_data = json_decode($response, true);
     
-    if (isset($token_data['access_token'])) {
-        $userinfo_url = 'https://www.googleapis.com/oauth2/v2/userinfo';
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $userinfo_url);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token_data['access_token']]);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        $user_response = curl_exec($ch);
-        curl_close($ch);
-        
-        $user_data = json_decode($user_response, true);
-
-        $google_id = $user_data['id'];
-        $name      = $user_data['name'] ?? 'User';
-        $email     = $user_data['email'] ?? '';
-        $avatar    = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=FF6B00&color=fff';
-
-        // ===== CEK USER DI DATABASE =====
-        $existing_user = getUserData($google_id);
-        $saved_coins = $existing_user ? (int)$existing_user['coins'] : 0;
-
-        // ===== UPSERT KE DATABASE =====
-        $upsert_data = json_encode([
-            'google_id'  => $google_id,
-            'name'       => $name,
-            'email'      => $email,
-            'avatar'     => $avatar,
-            'coins'      => $saved_coins,
-            'created_at' => time()
-        ]);
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $SUPABASE_URL . '/rest/v1/polar_users');
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $upsert_data);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'apikey: ' . $SUPABASE_KEY,
-            'Authorization: Bearer ' . $SUPABASE_KEY,
-            'Prefer: resolution=merge-duplicates,return=minimal'
-        ]);
-        curl_exec($ch);
-        curl_close($ch);
-
-        // ===== SET SESSION =====
-        $_SESSION['user_google_id'] = $google_id;
-        $_SESSION['user_name']      = $name;
-        $_SESSION['user_email']     = $email;
-        $_SESSION['user_avatar']    = $avatar;
-        $_SESSION['user_coins']     = $saved_coins;
-        $_SESSION['CREATED']        = time();
-        $_SESSION['EXPIRES']        = time() + 86400;
-        $_SESSION['LAST_ACTIVITY']  = time();
-        
-        session_regenerate_id(true);
-        
-        header('Location: dashboard.php');
-        exit;
+    if (!isset($token_data['access_token'])) {
+        error_log('❌ No access_token in response: ' . print_r($token_data, true));
+        die('Gagal mendapatkan access token. Error: ' . ($token_data['error'] ?? 'unknown'));
     }
-}
+    
+    // Ambil user info
+    $userinfo_url = 'https://www.googleapis.com/oauth2/v2/userinfo';
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $userinfo_url);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token_data['access_token']]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $user_response = curl_exec($ch);
+    curl_close($ch);
+    
+    $user_data = json_decode($user_response, true);
+    error_log('👤 User data: ' . print_r($user_data, true));
+    
+    if (!isset($user_data['id'])) {
+        error_log('❌ No user ID in response');
+        die('Gagal mendapatkan data user');
+    }
 
+    $google_id = $user_data['id'];
+    $name      = $user_data['name'] ?? 'User';
+    $email     = $user_data['email'] ?? '';
+    $avatar    = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=FF6B00&color=fff';
+
+    // ===== CEK USER DI DATABASE =====
+    $existing_user = getUserData($google_id);
+    $saved_coins = $existing_user ? (int)$existing_user['coins'] : 0;
+
+    // ===== UPSERT KE DATABASE =====
+    $upsert_data = json_encode([
+        'google_id'  => $google_id,
+        'name'       => $name,
+        'email'      => $email,
+        'avatar'     => $avatar,
+        'coins'      => $saved_coins,
+        'created_at' => time()
+    ]);
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $SUPABASE_URL . '/rest/v1/polar_users');
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $upsert_data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'apikey: ' . $SUPABASE_KEY,
+        'Authorization: Bearer ' . $SUPABASE_KEY,
+        'Prefer: resolution=merge-duplicates,return=minimal'
+    ]);
+    curl_exec($ch);
+    curl_close($ch);
+
+    // ===== SET SESSION =====
+    $_SESSION['user_google_id'] = $google_id;
+    $_SESSION['user_name']      = $name;
+    $_SESSION['user_email']     = $email;
+    $_SESSION['user_avatar']    = $avatar;
+    $_SESSION['user_coins']     = $saved_coins;
+    $_SESSION['CREATED']        = time();
+    $_SESSION['EXPIRES']        = time() + 86400;
+    $_SESSION['LAST_ACTIVITY']  = time();
+    
+    // Regenerate session ID untuk keamanan
+    session_regenerate_id(true);
+    
+    error_log('✅ Login success! User: ' . $name . ' (' . $google_id . ')');
+    error_log('📦 Session data: ' . print_r($_SESSION, true));
+    
+    // Redirect ke dashboard tanpa parameter
+    header('Location: dashboard.php');
+    exit;
+}
 // ===== URL LOGIN GOOGLE =====
 $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
     'client_id' => $client_id,
