@@ -1,19 +1,21 @@
 <?php
 // ============================================================
-// POLAR.ID — DASHBOARD (LENGKAP)
+// POLAR.ID — DASHBOARD (VERSI TERBARU DENGAN SESSION FIX)
 // ============================================================
 
 // ===== KONFIGURASI SESSION =====
 session_name('POLAR_SID');
+
 $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
 session_set_cookie_params([
-    'lifetime'  => 86400 * 7,
+    'lifetime'  => 86400 * 7,      // 7 hari
     'path'      => '/',
     'domain'    => $_SERVER['HTTP_HOST'],
     'secure'    => $secure,
     'httponly'  => true,
     'samesite'  => 'Lax'
 ]);
+
 session_start();
 
 // ===== FUNGSI HELPER =====
@@ -35,11 +37,34 @@ function getUserData($google_id) {
     return (!empty($data) && isset($data[0])) ? $data[0] : null;
 }
 
-function getSessions($google_id) {
+function getUserCoins($google_id) {
+    $user = getUserData($google_id);
+    return $user ? (int)$user['coins'] : 0;
+}
+
+function updateUserCoins($google_id, $new_coins) {
     global $SUPABASE_URL, $SUPABASE_KEY;
     
-    $url = $SUPABASE_URL . '/rest/v1/polar_sessions?user_google_id=eq.' . urlencode($google_id) . '&order=created_at.desc';
+    $data = json_encode(['coins' => $new_coins]);
     
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $SUPABASE_URL . '/rest/v1/polar_users?google_id=eq.' . urlencode($google_id));
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'apikey: ' . $SUPABASE_KEY,
+        'Authorization: Bearer ' . $SUPABASE_KEY
+    ]);
+    curl_exec($ch);
+    curl_close($ch);
+}
+
+function getSessions($fingerprint) {
+    global $SUPABASE_URL, $SUPABASE_KEY;
+    $url = $SUPABASE_URL . '/rest/v1/polar_sessions?fingerprint=eq.' . urlencode($fingerprint) . '&order=created_at.desc';
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -50,51 +75,62 @@ function getSessions($google_id) {
     ]);
     $response = curl_exec($ch);
     curl_close($ch);
-    
     return json_decode($response, true) ?: [];
 }
 
-// ===== CEK LOGIN =====
+// ===== CEK SESSION DAN AMBIL DATA DARI DATABASE =====
 $is_logged_in = isset($_SESSION['user_google_id']);
 $user_google_id = $_SESSION['user_google_id'] ?? null;
 
+// Jika login, ambil data terbaru dari database
 if ($is_logged_in) {
+    // Refresh session activity
     $_SESSION['LAST_ACTIVITY'] = time();
+    
+    // Ambil data user terbaru dari database
     $user_data = getUserData($user_google_id);
     
     if ($user_data) {
+        // Update session dengan data terbaru dari database
         $_SESSION['user_name'] = $user_data['name'];
         $_SESSION['user_email'] = $user_data['email'];
         $_SESSION['user_avatar'] = $user_data['avatar'];
         $_SESSION['user_coins'] = (int)$user_data['coins'];
     } else {
+        // User tidak ditemukan di database, logout
         session_destroy();
         header('Location: dashboard.php');
         exit;
     }
 }
 
+// ===== VARIABLE SESSION =====
 $user_name = $_SESSION['user_name'] ?? "Guest";
 $user_email = $_SESSION['user_email'] ?? "guest@gmail.com";
 $user_avatar = $_SESSION['user_avatar'] ?? "https://ui-avatars.com/api/?name=Guest&background=FF6B00&color=fff";
 $user_coins = $_SESSION['user_coins'] ?? 0;
+$earn_flag_active = !empty($_SESSION['earn_flag']);
 
-// ===== FINGERPRINT =====
+// ===== FINGERPRINT UNTUK SESSION =====
 $fingerprint = $_SESSION['fingerprint'] ?? '';
 if (!$fingerprint) {
+    // Fingerprint: kombinasi User Agent + IP + Device Info
     $device_data = $_SERVER['HTTP_USER_AGENT'] . $_SERVER['REMOTE_ADDR'];
+    
+    // Tambahkan data tambahan untuk fingerprint yang lebih unik
     if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
         $device_data .= $_SERVER['HTTP_ACCEPT_LANGUAGE'];
     }
     if (isset($_SERVER['HTTP_SEC_CH_UA'])) {
         $device_data .= $_SERVER['HTTP_SEC_CH_UA'];
     }
+    
     $fingerprint = hash('sha256', $device_data . session_id());
     $_SESSION['fingerprint'] = $fingerprint;
 }
 
 // ===== AMBIL SESSIONS =====
-$sessions = getSessions($user_google_id);
+$sessions = getSessions($fingerprint);
 $totalSessions = count($sessions);
 $maxSessions = 10;
 
@@ -104,15 +140,8 @@ $client_secret = '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';
 $redirect_uri = 'https://polar.web.id/dashboard.php';
 
 // ===== PROSES CALLBACK GOOGLE =====
-if (isset($_GET['code'])) {
-    // Jika sudah login, redirect ke dashboard
-    if (isset($_SESSION['user_google_id'])) {
-        header('Location: dashboard.php');
-        exit;
-    }
-    
+if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
     $code = $_GET['code'];
-    error_log('📌 Google callback received with code: ' . substr($code, 0, 20) . '...');
     
     $token_url = 'https://oauth2.googleapis.com/token';
     $post_data = [
@@ -129,99 +158,75 @@ if (isset($_GET['code'])) {
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($post_data));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
     $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $error = curl_error($ch);
     curl_close($ch);
-    
-    error_log('📡 Token response HTTP: ' . $httpCode);
-    error_log('📡 Token response: ' . $response);
-    
-    if ($error) {
-        error_log('❌ CURL Error: ' . $error);
-        die('CURL Error: ' . $error);
-    }
     
     $token_data = json_decode($response, true);
     
-    if (!isset($token_data['access_token'])) {
-        error_log('❌ No access_token in response: ' . print_r($token_data, true));
-        die('Gagal mendapatkan access token. Error: ' . ($token_data['error'] ?? 'unknown'));
+    if (isset($token_data['access_token'])) {
+        $userinfo_url = 'https://www.googleapis.com/oauth2/v2/userinfo';
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $userinfo_url);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token_data['access_token']]);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        $user_response = curl_exec($ch);
+        curl_close($ch);
+        
+        $user_data = json_decode($user_response, true);
+
+        $google_id = $user_data['id'];
+        $name      = $user_data['name'] ?? 'User';
+        $email     = $user_data['email'] ?? '';
+        $avatar    = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=FF6B00&color=fff';
+
+        // ===== CEK USER DI DATABASE =====
+        $existing_user = getUserData($google_id);
+        $saved_coins = $existing_user ? (int)$existing_user['coins'] : 0;
+
+        // ===== UPSERT KE DATABASE =====
+        $upsert_data = json_encode([
+            'google_id'  => $google_id,
+            'name'       => $name,
+            'email'      => $email,
+            'avatar'     => $avatar,
+            'coins'      => $saved_coins,
+            'created_at' => time()
+        ]);
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $SUPABASE_URL . '/rest/v1/polar_users');
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $upsert_data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'apikey: ' . $SUPABASE_KEY,
+            'Authorization: Bearer ' . $SUPABASE_KEY,
+            'Prefer: resolution=merge-duplicates,return=minimal'
+        ]);
+        curl_exec($ch);
+        curl_close($ch);
+
+        // ===== SET SESSION =====
+        $_SESSION['user_google_id'] = $google_id;
+        $_SESSION['user_name']      = $name;
+        $_SESSION['user_email']     = $email;
+        $_SESSION['user_avatar']    = $avatar;
+        $_SESSION['user_coins']     = $saved_coins;
+        $_SESSION['CREATED']        = time();
+        $_SESSION['EXPIRES']        = time() + 86400; // 24 jam
+        $_SESSION['LAST_ACTIVITY']  = time();
+        
+        // Regenerate session ID untuk keamanan
+        session_regenerate_id(true);
+        
+        header('Location: dashboard.php');
+        exit;
     }
-    
-    // Ambil user info
-    $userinfo_url = 'https://www.googleapis.com/oauth2/v2/userinfo';
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $userinfo_url);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token_data['access_token']]);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    $user_response = curl_exec($ch);
-    curl_close($ch);
-    
-    $user_data = json_decode($user_response, true);
-    error_log('👤 User data: ' . print_r($user_data, true));
-    
-    if (!isset($user_data['id'])) {
-        error_log('❌ No user ID in response');
-        die('Gagal mendapatkan data user');
-    }
-
-    $google_id = $user_data['id'];
-    $name      = $user_data['name'] ?? 'User';
-    $email     = $user_data['email'] ?? '';
-    $avatar    = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=FF6B00&color=fff';
-
-    // ===== CEK USER DI DATABASE =====
-    $existing_user = getUserData($google_id);
-    $saved_coins = $existing_user ? (int)$existing_user['coins'] : 0;
-
-    // ===== UPSERT KE DATABASE =====
-    $upsert_data = json_encode([
-        'google_id'  => $google_id,
-        'name'       => $name,
-        'email'      => $email,
-        'avatar'     => $avatar,
-        'coins'      => $saved_coins,
-        'created_at' => time()
-    ]);
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $SUPABASE_URL . '/rest/v1/polar_users');
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $upsert_data);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'apikey: ' . $SUPABASE_KEY,
-        'Authorization: Bearer ' . $SUPABASE_KEY,
-        'Prefer: resolution=merge-duplicates,return=minimal'
-    ]);
-    curl_exec($ch);
-    curl_close($ch);
-
-    // ===== SET SESSION =====
-    $_SESSION['user_google_id'] = $google_id;
-    $_SESSION['user_name']      = $name;
-    $_SESSION['user_email']     = $email;
-    $_SESSION['user_avatar']    = $avatar;
-    $_SESSION['user_coins']     = $saved_coins;
-    $_SESSION['CREATED']        = time();
-    $_SESSION['EXPIRES']        = time() + 86400;
-    $_SESSION['LAST_ACTIVITY']  = time();
-    
-    // Regenerate session ID untuk keamanan
-    session_regenerate_id(true);
-    
-    error_log('✅ Login success! User: ' . $name . ' (' . $google_id . ')');
-    error_log('📦 Session data: ' . print_r($_SESSION, true));
-    
-    // Redirect ke dashboard tanpa parameter
-    header('Location: dashboard.php');
-    exit;
 }
+
 // ===== URL LOGIN GOOGLE =====
 $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
     'client_id' => $client_id,
@@ -298,7 +303,10 @@ function checkOurinServer() {
 $phoenix_status = checkPhoenixServer();
 $ourin_status = checkOurinServer();
 
-// ===== LOAD CONFIG =====
+// ===== REQUIRED CONFIG (harus di-set di config.php) =====
+// Pastikan file config.php ada dengan:
+// $SUPABASE_URL = 'https://your-project.supabase.co';
+// $SUPABASE_KEY = 'your-supabase-key';
 require_once 'config.php';
 ?>
 <!DOCTYPE html>
@@ -310,36 +318,46 @@ require_once 'config.php';
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        /* ===== STYLE SAMA SEPERTI SEBELUMNYA ===== */
+        /* ============================================================
+                   NEOBRUTALISM STYLE 
+                   ============================================================ */
         :root {
             --bg-main: #f7f7f7;
             --bg-card: #ffffff;
             --bg-nav: #ffffff;
             --orange: #ff5e00;
             --orange-hover: #cc4b00;
+            --orange-glow: rgba(255,94,0,0.4);
             --white: #ffffff;
             --gold: #fbbf24;
+            --gold-glow: rgba(251,191,36,0.3);
             --text-main: #111111;
             --text-muted: #333333;
             --border: #111111;
             --green: #00b341;
             --red: #e0002b;
-            --blue: #0066ff;
             --transition: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             --shadow-heavy: 6px 6px 0px 0px #111111;
             --shadow-light: 4px 4px 0px 0px #333333;
             --border-thick: 3px solid #111111;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Space Grotesk', sans-serif; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Space Grotesk', sans-serif;
+        }
 
         body {
             background-color: var(--bg-main);
             color: var(--text-main);
             min-height: 100vh;
             overflow-x: hidden;
+            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 10px, transparent 10px, transparent 20px);
         }
 
+        /* ===== ANIMATIONS ===== */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -349,12 +367,21 @@ require_once 'config.php';
             to { opacity: 1; transform: translateY(0); }
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes float {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
         @keyframes coinSpin {
             0% { transform: rotateY(0); }
             100% { transform: rotateY(360deg); }
         }
-
+        @keyframes borderPulse {
+            0%,100% { box-shadow: var(--shadow-heavy); }
+            50% { box-shadow: 3px 3px 0px 0px #111111; }
+        }
         .animate-in { animation: fadeInUp 0.4s ease forwards; }
+        .animate-float { animation: float 2.4s ease-in-out infinite; }
+        .animate-coin { animation: coinSpin 1s ease forwards; }
 
         /* ===== LOGIN POPUP ===== */
         .login-overlay {
@@ -366,6 +393,7 @@ require_once 'config.php';
             align-items: center;
             justify-content: center;
             padding: 20px;
+            animation: fadeInUp 0.4s ease;
         }
         body.locked-bg .navbar,
         body.locked-bg .main-container,
@@ -395,6 +423,7 @@ require_once 'config.php';
             right: 12px;
             height: 6px;
             background: var(--orange);
+            border-radius: 0px;
         }
         .login-badge {
             position: absolute;
@@ -533,7 +562,7 @@ require_once 'config.php';
             box-shadow: var(--shadow-heavy);
             border-radius: 0px;
             padding: 30px 20px;
-            max-width: 450px;
+            max-width: 400px;
             width: 100%;
             animation: slideUp 0.4s ease;
         }
@@ -557,21 +586,6 @@ require_once 'config.php';
             color: var(--text-muted);
             padding-left: 20px;
             line-height: 2.2;
-        }
-        .pairing-note {
-            background: #f0f7ff;
-            border: var(--border-thick);
-            padding: 10px 14px;
-            margin: 10px 0;
-            font-size: 12px;
-            font-weight: 600;
-            border-left: 6px solid var(--blue);
-        }
-        .pairing-note a {
-            color: var(--blue);
-            font-weight: 800;
-            text-decoration: underline;
-            cursor: pointer;
         }
 
         /* ===== BUTTONS ===== */
@@ -627,8 +641,6 @@ require_once 'config.php';
         .btn-danger:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0px 0px #111; }
         .btn-success { background: var(--green); color: #fff; box-shadow: var(--shadow-heavy); }
         .btn-success:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0px 0px #111; }
-        .btn-blue { background: var(--blue); color: #fff; box-shadow: var(--shadow-heavy); }
-        .btn-blue:hover { transform: translate(2px, 2px); box-shadow: 3px 3px 0px 0px #111; }
         .btn-close-modal {
             background: #e0e0e0;
             color: #111;
@@ -658,6 +670,7 @@ require_once 'config.php';
             font-weight: 900;
             font-size: 18px;
             text-transform: uppercase;
+            letter-spacing: 0px;
         }
         .brand-icon {
             background: var(--orange);
@@ -803,15 +816,6 @@ require_once 'config.php';
             color: #fff;
             box-shadow: var(--shadow-heavy);
         }
-        .nav-link .badge-donasi {
-            background: var(--gold);
-            color: #111;
-            font-size: 8px;
-            padding: 2px 8px;
-            border: var(--border-thick);
-            box-shadow: var(--shadow-light);
-            margin-left: auto;
-        }
 
         /* ===== MAIN CONTENT ===== */
         .main-container { padding: 20px 16px; max-width: 700px; margin: 0 auto; }
@@ -878,7 +882,6 @@ require_once 'config.php';
             box-shadow: 5px 5px 0px 0px #111;
         }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
         .section-title {
             background: #111;
             color: #fff;
@@ -936,7 +939,6 @@ require_once 'config.php';
         .stat-box p { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .text-orange { color: var(--orange); }
         .text-gold { color: var(--gold); }
-        .text-blue { color: var(--blue); }
         .badge-status {
             padding: 3px 10px;
             border-radius: 0px;
@@ -973,71 +975,27 @@ require_once 'config.php';
         .session-phone { font-weight: 800; font-family: monospace; font-size: 13px; }
         .session-actions { display: flex; gap: 5px; flex-wrap: wrap; }
 
-        /* ===== DONASI ===== */
-        .donasi-card {
-            background: #fff;
-            border: var(--border-thick);
-            box-shadow: var(--shadow-heavy);
-            padding: 20px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        .donasi-card .donasi-logo {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-            margin-bottom: 8px;
-        }
-        .donasi-card .donasi-qr {
-            width: 150px;
-            height: 150px;
-            object-fit: contain;
+        .earn-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: var(--gold);
+            color: #111;
             border: var(--border-thick);
             box-shadow: var(--shadow-light);
-            margin: 8px auto;
-        }
-        .donasi-card .donasi-nomer {
-            font-size: 18px;
-            font-weight: 900;
-            font-family: monospace;
-            background: #f0f0f0;
-            padding: 4px 12px;
-            border: var(--border-thick);
-            display: inline-block;
-            margin: 4px 0;
-        }
-        .donasi-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        /* ===== REQUEST SCRIPT ===== */
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            background: #f0f0f0;
-            border: var(--border-thick);
-            box-shadow: inset 2px 2px 0px 0px #111;
             border-radius: 0px;
-            color: #111;
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-        textarea.form-input {
-            min-height: 100px;
-            resize: vertical;
-            font-weight: 500;
-        }
-        .form-label {
+            font-weight: 900;
             font-size: 11px;
-            font-weight: 800;
-            color: var(--text-muted);
-            display: block;
-            margin-bottom: 4px;
+            cursor: pointer;
+            transition: var(--transition);
             text-transform: uppercase;
         }
+        .earn-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px 0px #111;
+        }
+        .earn-btn:active { transform: scale(0.96); }
 
         /* ===== TOAST ===== */
         .toast {
@@ -1061,12 +1019,101 @@ require_once 'config.php';
         .toast.error { border-left: 8px solid var(--red); }
         .toast.gold { border-left: 8px solid var(--gold); }
 
+        /* ===== TUTORIAL SPOTLIGHT ===== */
+        .tutorial-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1300;
+            display: none;
+        }
+        .tutorial-overlay.active { display: block; }
+        .tutorial-dim {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.75);
+            transition: clip-path 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .tutorial-spotlight-ring {
+            position: absolute;
+            border: 4px solid var(--orange);
+            border-radius: 0px;
+            box-shadow: 0 0 0 8px rgba(255,94,0,0.2), 0 0 30px rgba(255,94,0,0.3);
+            transition: top 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                        height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            pointer-events: none;
+            animation: borderPulse 1.6s ease-in-out infinite;
+        }
+        .tutorial-arrow {
+            position: absolute;
+            font-size: 28px;
+            color: var(--orange);
+            filter: drop-shadow(2px 2px 0px #111);
+            animation: float 1.4s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 1302;
+        }
+        .tutorial-card {
+            position: absolute;
+            z-index: 1302;
+            background: #fff;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-heavy);
+            border-radius: 0px;
+            padding: 16px 18px;
+            max-width: 260px;
+            animation: fadeInUp 0.3s ease;
+        }
+        .tutorial-step-badge {
+            display: inline-block;
+            background: var(--gold);
+            color: #111;
+            font-size: 10px;
+            font-weight: 900;
+            padding: 2px 12px;
+            border-radius: 0px;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-light);
+        }
+        .tutorial-card h4 { font-size: 15px; font-weight: 900; margin-bottom: 4px; }
+        .tutorial-card p { font-size: 12px; font-weight: 500; color: var(--text-muted); margin-bottom: 12px; line-height: 1.5; }
+        .tutorial-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .tutorial-skip {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            background: none;
+            border: var(--border-thick);
+            padding: 4px 12px;
+            cursor: pointer;
+            box-shadow: var(--shadow-light);
+            transition: var(--transition);
+        }
+        .tutorial-skip:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0px 0px #111; }
+        .tutorial-next { padding: 6px 16px; font-size: 11px; }
+        .tutorial-dots { display: flex; gap: 4px; }
+        .tutorial-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 0px;
+            background: #ccc;
+            border: var(--border-thick);
+            transition: var(--transition);
+        }
+        .tutorial-dot.active { background: var(--orange); width: 20px; }
+
         /* ===== RESPONSIVE ===== */
         @media (max-width: 480px) {
             .hero h1 { font-size: 28px; }
             .grid-2 { grid-template-columns: 1fr; }
-            .grid-3 { grid-template-columns: 1fr; }
-            .donasi-grid { grid-template-columns: 1fr; }
             .status-grid { grid-template-columns: 1fr 1fr; }
             .navbar { padding: 8px 12px; }
             .login-card { padding: 28px 16px; }
@@ -1131,15 +1178,6 @@ require_once 'config.php';
                 <li>Perangkat Tertaut → Tautkan Perangkat</li>
                 <li>Masukkan kode di atas</li>
             </ol>
-            
-            <!-- ===== PAIRING NOTE ===== -->
-            <div class="pairing-note">
-                <i class="fas fa-info-circle" style="color:var(--blue);"></i>
-                <strong>Jika tidak menerima pairing dalam 1 menit:</strong><br>
-                Pastikan status script sedang aktif. 
-                <a onclick="navTo('status'); closePairingModal();">Lihat status disini →</a>
-            </div>
-
             <button class="btn btn-orange btn-full" style="margin-top:12px;" onclick="copyPairingCode()">
                 <i class="fas fa-copy"></i> Salin Kode
             </button>
@@ -1147,19 +1185,36 @@ require_once 'config.php';
         </div>
     </div>
 
+    <!-- TUTORIAL SPOTLIGHT OVERLAY -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-dim" id="tutorialDim"></div>
+        <div class="tutorial-spotlight-ring" id="tutorialRing"></div>
+        <i class="fas fa-arrow-up tutorial-arrow" id="tutorialArrow"></i>
+        <div class="tutorial-card" id="tutorialCard">
+            <span class="tutorial-step-badge" id="tutorialStepBadge">STEP 1/5</span>
+            <h4 id="tutorialTitle">Judul</h4>
+            <p id="tutorialDesc">Deskripsi</p>
+            <div class="tutorial-card-footer">
+                <button class="tutorial-skip" onclick="skipTutorial()">Lewati</button>
+                <div class="tutorial-dots" id="tutorialDots"></div>
+                <button class="btn btn-orange tutorial-next" id="tutorialNextBtn" onclick="nextTutorialStep()">Lanjut <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== NAVBAR ===== -->
     <nav class="navbar" id="navbar">
-        <div class="nav-brand"><span class="brand-icon">✦</span> POLAR.ID</div>
+        <div class="nav-brand" id="tut-brand"><span class="brand-icon">✦</span> POLAR.ID</div>
         <div class="nav-right">
-            <div class="coin-badge">
+            <div class="coin-badge" id="coinBadge" data-tut="coin">
                 <i class="fas fa-coins"></i>
                 <span id="coinCount"><?= $user_coins ?></span>
             </div>
-            <div class="profile-btn" onclick="navTo('profile')">
+            <div class="profile-btn" id="profileBtn" data-tut="profile" onclick="navTo('profile')">
                 <img src="<?= $user_avatar ?>" alt="Avatar">
                 <span class="hide-mobile"><?= explode(' ', $user_name)[0] ?></span>
             </div>
-            <button class="menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
+            <button class="menu-btn" id="menuBtn" data-tut="menu" onclick="toggleMenu()"><i class="fas fa-bars"></i></button>
         </div>
     </nav>
 
@@ -1170,15 +1225,14 @@ require_once 'config.php';
             <div class="nav-brand" style="font-size:14px;"><span class="brand-icon">✦</span> MENU</div>
             <button class="sidebar-close" onclick="toggleMenu()"><i class="fas fa-times"></i></button>
         </div>
-        <a href="#" class="nav-link active" onclick="navTo('home'); toggleMenu();"><i class="fas fa-home"></i> HOME</a>
-        <a href="#" class="nav-link" onclick="navTo('status'); toggleMenu();"><i class="fas fa-server"></i> STATUS</a>
-        <a href="#" class="nav-link" onclick="navTo('claim'); toggleMenu();"><i class="fas fa-download"></i> CLAIM</a>
-        <a href="#" class="nav-link" onclick="navTo('sessions'); toggleMenu();"><i class="fas fa-robot"></i> SESSIONS</a>
-        <a href="#" class="nav-link" onclick="navTo('profile'); toggleMenu();"><i class="fas fa-user"></i> PROFILE</a>
-        <a href="#" class="nav-link" onclick="navTo('request'); toggleMenu();"><i class="fas fa-code"></i> REQUEST SCRIPT</a>
-        <a href="#" class="nav-link" onclick="navTo('donasi'); toggleMenu();">
-            <i class="fas fa-heart" style="color:var(--red);"></i> DONASI 
-            <span class="badge-donasi">❤️</span>
+        <a href="#" class="nav-link" data-tut="nav-home" onclick="navTo('home'); toggleMenu();"><i class="fas fa-home"></i> HOME</a>
+        <a href="#" class="nav-link" data-tut="nav-status" onclick="navTo('status'); toggleMenu();"><i class="fas fa-server"></i> STATUS</a>
+        <a href="#" class="nav-link" data-tut="nav-claim" onclick="navTo('claim'); toggleMenu();"><i class="fas fa-download"></i> CLAIM</a>
+        <a href="#" class="nav-link" data-tut="nav-sessions" onclick="navTo('sessions'); toggleMenu();"><i class="fas fa-robot"></i> SESSIONS</a>
+        <a href="#" class="nav-link" data-tut="nav-profile" onclick="navTo('profile'); toggleMenu();"><i class="fas fa-user"></i> PROFILE</a>
+        <a href="#" class="nav-link" onclick="toggleMenu(); setTimeout(startTutorial, 350);"><i class="fas fa-circle-question"></i> MULAI TUTORIAL</a>
+        <a href="#" class="nav-link" data-tut="nav-earn" onclick="<?= $earn_flag_active ? 'return false;' : 'earnCoin()' ?>" style="background:var(--gold);border:var(--border-thick);box-shadow:var(--shadow-light);<?= $earn_flag_active ? 'opacity:0.5;cursor:not-allowed;' : '' ?>">
+            <i class="fas fa-coins" style="color:#111;"></i> <?= $earn_flag_active ? 'MENUNGGU...' : 'EARN POLAR COIN' ?>
         </a>
         <a href="logout.php" class="nav-link" style="background:var(--red);color:#fff;margin-top:auto;"><i class="fas fa-sign-out-alt"></i> LOGOUT</a>
     </div>
@@ -1195,7 +1249,7 @@ require_once 'config.php';
                 <div class="btn-group">
                     <button class="btn btn-orange" onclick="navTo('claim')"><i class="fas fa-download"></i> CLAIM SEKARANG</button>
                     <button class="btn btn-white" onclick="navTo('status')">LIHAT STATUS <i class="fas fa-arrow-right"></i></button>
-                    <button class="btn btn-gold" onclick="navTo('donasi')"><i class="fas fa-heart"></i> DUKUNG KAMI</button>
+                    <button class="btn btn-close-modal" onclick="startTutorial()" style="border:var(--border-thick);"><i class="fas fa-circle-question"></i> MULAI TUTORIAL</button>
                 </div>
             </div>
         </div>
@@ -1214,7 +1268,10 @@ require_once 'config.php';
                         <div style="background:var(--orange);width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#fff;font-size:16px;border:var(--border-thick);box-shadow:var(--shadow-light);"><?= substr($user_name, 0, 1) ?></div>
                         <div><div style="font-size:9px;font-weight:700;color:var(--text-muted);">LOGIN AS</div><div style="font-weight:900;font-size:14px;"><?= $user_name ?></div></div>
                     </div>
-                    <span style="font-weight:900;font-size:14px;"><i class="fas fa-coins"></i> <span id="claimCoinDisplay"><?= $user_coins ?></span></span>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="font-weight:900;font-size:14px;"><i class="fas fa-coins"></i> <span id="claimCoinDisplay"><?= $user_coins ?></span></span>
+                        <button class="earn-btn" id="earnBtnClaim" onclick="earnCoin()" <?= $earn_flag_active ? 'disabled style="font-size:9px;padding:3px 10px;opacity:0.5;cursor:not-allowed;"' : 'style="font-size:9px;padding:3px 10px;"' ?>><i class="fas <?= $earn_flag_active ? 'fa-clock' : 'fa-plus' ?>"></i></button>
+                    </div>
                 </div>
             </div>
 
@@ -1255,8 +1312,8 @@ require_once 'config.php';
 
             <div class="card">
                 <div style="margin-bottom:10px;">
-                    <label class="form-label">📱 Nomor WhatsApp</label>
-                    <input type="text" id="phoneInput" placeholder="628xxxxxxxxxx" class="form-input">
+                    <label style="font-size:11px;font-weight:800;color:var(--text-muted);display:block;margin-bottom:4px;text-transform:uppercase;">📱 Nomor WhatsApp</label>
+                    <input type="text" id="phoneInput" placeholder="628xxxxxxxxxx" style="width:100%;padding:12px;background:#f0f0f0;border:var(--border-thick);box-shadow:inset 2px 2px 0px 0px #111;border-radius:0px;color:#111;font-size:14px;font-weight:600;">
                 </div>
                 <input type="hidden" id="selectedDays" value="1">
                 <input type="hidden" id="selectedCoin" value="1">
@@ -1278,7 +1335,7 @@ require_once 'config.php';
                 <div class="status-grid">
                     <div class="stat-box"><h3 class="text-orange"><?= $totalSessions ?></h3><p>TOTAL</p></div>
                     <div class="stat-box"><h3 class="text-gold"><?= $maxSessions - $totalSessions ?></h3><p>SLOT</p></div>
-                    <div class="stat-box"><h3 class="text-blue"><?= ($phoenix_status['online'] ? 1 : 0) + ($ourin_status['online'] ? 1 : 0) ?></h3><p>ONLINE</p></div>
+                    <div class="stat-box"><h3 class="text-white" style="color:#111;"><?= ($phoenix_status['online'] ? 1 : 0) + ($ourin_status['online'] ? 1 : 0) ?></h3><p>ONLINE</p></div>
                     <div class="stat-box"><h3 class="text-orange"><?= (!$phoenix_status['online'] ? 1 : 0) + (!$ourin_status['online'] ? 1 : 0) ?></h3><p>OFFLINE</p></div>
                 </div>
             </div>
@@ -1299,7 +1356,7 @@ require_once 'config.php';
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                     <div style="display:flex;align-items:center;gap:10px;">
                         <div style="background:#111;padding:8px;border:var(--border-thick);box-shadow:var(--shadow-light);"><i class="fas fa-microchip" style="color:#fff;font-size:14px;"></i></div>
-                        <div><h3 style="font-size:14px;font-weight:900;">OURIN MD V3</h3><div style="font-size:10px;font-weight:600;color:var(--text-muted);">Pterodactyl</div></div>
+                        <div><h3 style="font-size:14px;font-weight:900;">OURIN MD V3</h3><div style="font-size:10px;font-weight:600;color:var(--text-muted);">Pterodatcyl</div></div>
                     </div>
                     <div class="badge-status <?= $ourin_status['online'] ? 'bg-online' : 'bg-offline' ?>"><?= $ourin_status['online'] ? 'ONLINE' : 'OFFLINE' ?></div>
                 </div>
@@ -1331,17 +1388,18 @@ require_once 'config.php';
                     <div class="session-item">
                         <div>
                             <div class="session-phone"><i class="fab fa-whatsapp"></i> +<?= htmlspecialchars($s['phone']) ?></div>
-                            <div style="font-size:9px;font-weight:700;color:var(--text-muted);margin-top:2px;"><?= htmlspecialchars($s['script']) ?> • <?= $s['expiry_days'] ?> hari</div>
+                            <div style="font-size:9px;font-weight:700;color:var(--text-muted);margin-top:2px;"><?= htmlspecialchars($s['script']) ?></div>
                         </div>
                         <div class="badge-status <?= $statusClass ?>"><?= $statusText ?></div>
                     </div>
                     <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;">
-                        <?php if ($s['status'] === 'pending'): ?>
+                        <?php if ($s['status'] === 'waiting_pair' || $s['status'] === 'pending'): ?>
                         <button class="btn btn-sm btn-orange" onclick="openPairModal('<?= $s['phone'] ?>')"><i class="fas fa-link"></i> Pairing</button>
                         <?php endif; ?>
                         <?php if ($s['status'] === 'online'): ?>
                         <button class="btn btn-sm btn-success" onclick="showToast('Bot sedang online! ✅', 'success')"><i class="fas fa-circle"></i> Online</button>
                         <?php endif; ?>
+                        <button class="btn btn-sm btn-danger" onclick="deleteSession(<?= $s['id'] ?>, '<?= $s['phone'] ?>')"><i class="fas fa-trash"></i> Hapus</button>
                     </div>
                 </div>
                 <?php endforeach; ?>
@@ -1360,6 +1418,7 @@ require_once 'config.php';
                 <div style="background:#fff;border:var(--border-thick);box-shadow:var(--shadow-light);display:inline-flex;align-items:center;gap:12px;padding:6px 18px;margin-top:12px;">
                     <div style="font-weight:900;font-size:14px;"><i class="fas fa-coins"></i> <span id="profileCoinDisplay"><?= $user_coins ?></span></div>
                     <div style="font-size:10px;font-weight:800;letter-spacing:1px;color:var(--text-muted);">POLAR COIN</div>
+                    <button class="earn-btn" id="earnBtnProfile" onclick="earnCoin()" <?= $earn_flag_active ? 'disabled style="font-size:9px;padding:3px 10px;opacity:0.5;cursor:not-allowed;"' : 'style="font-size:9px;padding:3px 10px;"' ?>><i class="fas <?= $earn_flag_active ? 'fa-clock' : 'fa-plus' ?>"></i> <?= $earn_flag_active ? 'MENUNGGU' : 'EARN' ?></button>
                 </div>
                 <div style="margin-top:12px;">
                     <a href="logout.php" style="color:#111;font-size:12px;font-weight:800;text-decoration:none;border:var(--border-thick);padding:4px 16px;box-shadow:var(--shadow-light);background:#fff;display:inline-block;">LOGOUT <i class="fas fa-arrow-right"></i></a>
@@ -1376,94 +1435,16 @@ require_once 'config.php';
                 <button class="btn btn-orange" style="margin-top:16px;" onclick="navTo('claim')">CLAIM SERVER <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
-
-        <!-- ===== REQUEST SCRIPT ===== -->
-        <div id="sec-request" class="section">
-            <div style="text-align:center;margin-bottom:16px;">
-                <div class="slot-badge" style="background:var(--blue);color:#fff;">📝 REQUEST SCRIPT</div>
-                <h1 style="font-weight:900;font-size:clamp(26px,6vw,36px);text-transform:uppercase;">REQUEST <span style="background:var(--blue);color:#fff;padding:0 12px;transform:skew(-6deg);display:inline-block;border:var(--border-thick);box-shadow:var(--shadow-light);">SCRIPT</span></h1>
-                <p style="color:var(--text-muted);font-size:13px;font-weight:500;">Butuh script tertentu? Isi form dibawah, kami akan bantu!</p>
-            </div>
-
-            <div class="card">
-                <form id="requestForm" onsubmit="submitRequest(event)">
-                    <div style="margin-bottom:12px;">
-                        <label class="form-label">📝 Nama Script</label>
-                        <input type="text" id="scriptName" class="form-input" placeholder="Contoh: Bot AI ChatGPT" required>
-                    </div>
-                    <div style="margin-bottom:12px;">
-                        <label class="form-label">📋 Deskripsi / Spesifikasi</label>
-                        <textarea id="scriptDesc" class="form-input" placeholder="Jelaskan script yang kamu butuhkan..." required></textarea>
-                    </div>
-                    <div style="margin-bottom:12px;">
-                        <label class="form-label">📱 Nomor WhatsApp (untuk konfirmasi)</label>
-                        <input type="text" id="requestPhone" class="form-input" placeholder="628xxxxxxxxxx" required>
-                    </div>
-                    <button type="submit" class="btn btn-blue" style="width:100%;padding:14px;font-size:14px;">
-                        <i class="fab fa-whatsapp"></i> KIRIM KE WHATSAPP
-                    </button>
-                </form>
-            </div>
-
-            <div class="card" style="text-align:center;background:#f0f7ff;">
-                <p style="font-size:12px;font-weight:600;color:var(--text-muted);">
-                    <i class="fas fa-clock" style="color:var(--blue);"></i> 
-                    Request akan diproses dalam 1x24 jam. Kamu akan dikonfirmasi via WhatsApp.
-                </p>
-            </div>
-        </div>
-
-        <!-- ===== DONASI ===== -->
-        <div id="sec-donasi" class="section">
-            <div style="text-align:center;margin-bottom:16px;">
-                <div class="slot-badge" style="background:var(--red);color:#fff;">❤️ DUKUNG KAMI</div>
-                <h1 style="font-weight:900;font-size:clamp(26px,6vw,36px);text-transform:uppercase;">DONASI <span style="background:var(--red);color:#fff;padding:0 12px;transform:skew(-6deg);display:inline-block;border:var(--border-thick);box-shadow:var(--shadow-light);">UNTUK POLAR</span></h1>
-                <p style="color:var(--text-muted);font-size:13px;font-weight:500;">Donasi membantu Polar.id tetap gratis & berkembang! 🚀</p>
-            </div>
-
-            <div class="donasi-grid">
-                <!-- DANA -->
-                <div class="donasi-card">
-                    <img src="img/dana.png" alt="DANA" class="donasi-logo" onerror="this.style.display='none'">
-                    <h3 style="font-weight:900;font-size:18px;text-transform:uppercase;">DANA</h3>
-                    <div class="donasi-nomer">085715194026</div>
-                    <img src="img/danaqr.png" alt="QR DANA" class="donasi-qr" onerror="this.style.display='none'">
-                    <p style="font-size:10px;font-weight:600;color:var(--text-muted);margin-top:4px;">Scan QR atau kirim ke nomor di atas</p>
-                    <a href="https://link.dana.id/qr/085715194026" target="_blank" class="btn btn-sm" style="margin-top:8px;background:#005b96;color:#fff;border-color:#005b96;">
-                        <i class="fas fa-external-link-alt"></i> Buka DANA
-                    </a>
-                </div>
-
-                <!-- GOPAY -->
-                <div class="donasi-card">
-                    <img src="img/gopay.png" alt="GOPAY" class="donasi-logo" onerror="this.style.display='none'">
-                    <h3 style="font-weight:900;font-size:18px;text-transform:uppercase;">GOPAY</h3>
-                    <div class="donasi-nomer">085715294026</div>
-                    <img src="img/gopayqr.png" alt="QR GOPAY" class="donasi-qr" onerror="this.style.display='none'">
-                    <p style="font-size:10px;font-weight:600;color:var(--text-muted);margin-top:4px;">Scan QR atau kirim ke nomor di atas</p>
-                    <a href="https://gopay.co.id/qr/085715294026" target="_blank" class="btn btn-sm" style="margin-top:8px;background:#00a651;color:#fff;border-color:#00a651;">
-                        <i class="fas fa-external-link-alt"></i> Buka GOPAY
-                    </a>
-                </div>
-            </div>
-
-            <div class="donasi-card" style="background:#f0f0f0;">
-                <p style="font-size:12px;font-weight:600;color:var(--text-muted);">
-                    <i class="fas fa-heart" style="color:var(--red);"></i> 
-                    Terima kasih atas dukungannya! Setiap donasi sangat berarti untuk Polar.id.
-                </p>
-            </div>
-        </div>
-
     </div>
 
     <script>
         // ========== KONFIGURASI ==========
-        const SB_URL = '<?= $SUPABASE_URL ?>';
-        const SB_KEY = '<?= $SUPABASE_KEY ?>';
+        const SB_URL = '<?= SUPABASE_URL ?>';
+        const SB_KEY = '<?= SUPABASE_KEY ?>';
         const MAX_SESSIONS = <?= $maxSessions ?>;
         let selectedDays = 1;
         let selectedCoin = 1;
+        let isProcessing = false;
         let currentPairPhone = null;
         let pairInterval = null;
 
@@ -1489,7 +1470,6 @@ require_once 'config.php';
             document.getElementById('sec-' + sectionId).classList.add('active');
             document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            if (window.innerWidth < 768) toggleMenu();
         }
 
         // ========== SELECT BOX ==========
@@ -1560,6 +1540,37 @@ require_once 'config.php';
             }
         }
 
+        // ========== EARN COIN ==========
+        const EARN_FLAG_ACTIVE = <?= $earn_flag_active ? 'true' : 'false' ?>;
+        function earnCoin() {
+            if (EARN_FLAG_ACTIVE) {
+                showToast('⏳ Selesaikan dulu earn coin yang sedang berjalan!', 'error');
+                return;
+            }
+            window.location.href = 'start-earn.php';
+        }
+
+        // ========== HANDLE REDIRECT ==========
+        function checkEarnCoinReturn() {
+            const params = new URLSearchParams(window.location.search);
+            const earn = params.get('earn');
+            if (!earn) return;
+
+            history.replaceState(null, '', window.location.pathname);
+
+            if (earn === 'success') {
+                const coins = params.get('coins') || '?';
+                showToast('🎉 +1 Polar Coin berhasil diklaim! Total: ' + coins + ' 🪙', 'gold');
+                document.querySelectorAll('#coinCount, #claimCoinDisplay, #profileCoinDisplay').forEach(el => {
+                    if (el) el.textContent = coins;
+                });
+                // Refresh coin dari database
+                updateCoinDisplay();
+            } else if (earn === 'expired') {
+                showToast('⏰ Link kadaluarsa. Silakan earn coin lagi.', 'error');
+            }
+        }
+
         // ========== SUPABASE REQUEST ==========
         async function supabaseRequest(method, endpoint, body = null) {
             const ctrl = new AbortController();
@@ -1621,26 +1632,24 @@ require_once 'config.php';
             showLoading('Membuat Session...', 'Mohon tunggu sebentar');
 
             try {
-                // Update coin
                 const coinRes = await fetch('update-coin.php?amount=' + (-coin));
                 const coinData = await coinRes.json();
                 if (!coinData.success) throw new Error('Gagal update coin');
 
-                // Buat session
-                const sessionData = {
-                    user_google_id: '<?= $user_google_id ?>',
-                    fingerprint: '<?= $fingerprint ?>',
+                const fingerprint = '<?= $fingerprint ?>';
+                const token = 'COIN_' + Date.now();
+                
+                await supabaseRequest('POST', 'polar_sessions', {
+                    fingerprint: fingerprint,
                     phone: cleanPhone,
                     script: script,
                     status: 'pending',
                     bot_mode: 'public',
-                    token_used: 'COIN_' + Date.now(),
+                    token_used: token,
                     pairing_code: null,
                     created_at: Date.now(),
                     expiry_days: days
-                };
-
-                await supabaseRequest('POST', 'polar_sessions', sessionData);
+                });
 
                 hideLoading();
                 showToast('✅ Server berhasil di-claim! ' + days + ' hari aktif. 🎉', 'success');
@@ -1656,38 +1665,21 @@ require_once 'config.php';
             }
         }
 
+        // ========== DELETE SESSION ==========
+        async function deleteSession(id, phone) {
+            if (!confirm(`Hapus session +${phone}?`)) return;
+            try {
+                await supabaseRequest('DELETE', `polar_sessions?id=eq.${id}`);
+                showToast('✅ Session dihapus', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } catch(e) {
+                showToast('❌ ' + e.message, 'error');
+            }
+        }
+
         // ========== OPEN PAIRING ==========
         function openPairModal(phone) {
             showPairingModal(phone);
-        }
-
-        // ========== REQUEST SCRIPT ==========
-        function submitRequest(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('scriptName').value.trim();
-            const desc = document.getElementById('scriptDesc').value.trim();
-            const phone = document.getElementById('requestPhone').value.trim();
-
-            if (!name || !desc || !phone) {
-                showToast('❌ Semua field harus diisi!', 'error');
-                return;
-            }
-
-            // Clean phone
-            let cleanPhone = phone.replace(/[^0-9]/g, '');
-            if (cleanPhone.startsWith('0')) cleanPhone = '62' + cleanPhone.substring(1);
-            if (!cleanPhone.startsWith('62')) cleanPhone = '62' + cleanPhone;
-
-            const message = `Halo Polar.id! Saya mau request script:%0A%0A📝 Nama Script: ${encodeURIComponent(name)}%0A📋 Deskripsi: ${encodeURIComponent(desc)}%0A📱 No. WhatsApp: ${cleanPhone}%0A%0ATerima kasih! 🙏`;
-            
-            const waUrl = `https://wa.me/6285715294026?text=${message}`;
-            window.open(waUrl, '_blank');
-            
-            showToast('✅ Redirect ke WhatsApp...', 'success');
-            
-            // Reset form
-            document.getElementById('requestForm').reset();
         }
 
         // ========== UPDATE COIN DISPLAY ==========
@@ -1705,9 +1697,194 @@ require_once 'config.php';
                 .catch(() => {});
         }
 
+        // ========== TUTORIAL SPOTLIGHT ==========
+        const TUTORIAL_STEPS = [
+            {
+                selector: '#tut-brand',
+                title: 'Selamat Datang di Polar.id! 👋',
+                desc: 'Ini logo Polar.id. Yuk kenalan dulu sama bagian-bagian penting di dashboard.',
+                arrow: 'down'
+            },
+            {
+                selector: '[data-tut="coin"]',
+                title: 'Polar Coin 🪙',
+                desc: 'Ini saldo Polar Coin kamu. Coin dipakai untuk claim server bot WhatsApp.',
+                arrow: 'down'
+            },
+            {
+                selector: '[data-tut="profile"]',
+                title: 'Profil Kamu',
+                desc: 'Tap di sini buat lihat profil, statistik, dan info akun Google kamu.',
+                arrow: 'down'
+            },
+            {
+                selector: '[data-tut="menu"]',
+                title: 'Menu Navigasi ☰',
+                desc: 'Tombol ini buka menu utama buat pindah-pindah halaman dashboard.',
+                arrow: 'down'
+            }
+        ];
+        let tutStep = 0;
+        let tutSidebarOpened = false;
+
+        function getTutorialSidebarSteps() {
+            return [
+                { selector: '[data-tut="nav-home"]', title: 'Home', desc: 'Halaman utama buat claim server dengan cepat.', arrow: 'left' },
+                { selector: '[data-tut="nav-status"]', title: 'Status Server', desc: 'Pantau status server Phoenix MD & Ourin secara real-time.', arrow: 'left' },
+                { selector: '[data-tut="nav-claim"]', title: 'Claim Server', desc: 'Pilih paket, masukkan nomor WhatsApp, dan claim bot gratis di sini.', arrow: 'left' },
+                { selector: '[data-tut="nav-sessions"]', title: 'My Bots', desc: 'Lihat semua bot WhatsApp yang sudah kamu claim dan kelola statusnya.', arrow: 'left' },
+                { selector: '[data-tut="nav-earn"]', title: 'Earn Polar Coin', desc: 'Dapatkan Polar Coin gratis di sini buat claim lebih banyak server.', arrow: 'left' }
+            ];
+        }
+
+        function allTutorialSteps() {
+            return TUTORIAL_STEPS.concat(getTutorialSidebarSteps());
+        }
+
+        function positionTutorialStep(step) {
+            const el = document.querySelector(step.selector);
+            if (!el) { nextTutorialStep(); return; }
+
+            const rect = el.getBoundingClientRect();
+            const pad = 8;
+            const ring = document.getElementById('tutorialRing');
+            const arrow = document.getElementById('tutorialArrow');
+            const card = document.getElementById('tutorialCard');
+
+            ring.style.top = (rect.top - pad) + 'px';
+            ring.style.left = (rect.left - pad) + 'px';
+            ring.style.width = (rect.width + pad * 2) + 'px';
+            ring.style.height = (rect.height + pad * 2) + 'px';
+
+            const dim = document.getElementById('tutorialDim');
+            const top = rect.top - pad, left = rect.left - pad, right = rect.right + pad, bottom = rect.bottom + pad;
+            dim.style.clipPath = `polygon(
+                0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+                ${left}px ${top}px, ${right}px ${top}px, ${right}px ${bottom}px, ${left}px ${bottom}px, ${left}px ${top}px
+            )`;
+
+            arrow.className = 'tutorial-arrow fas fa-arrow-' + (step.arrow === 'left' ? 'right' : 'up');
+            let cardTop, cardLeft, arrowTop, arrowLeft;
+
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const isMobile = vw < 540;
+            const cardW = Math.min(260, vw - 24);
+
+            if (step.arrow === 'left') {
+                arrowTop = rect.top + rect.height / 2 - 13;
+                arrowLeft = rect.left - 38;
+
+                if (!isMobile) {
+                    cardTop = rect.top + rect.height / 2 - 60;
+                    cardLeft = rect.left - cardW - 20;
+                    if (cardLeft < 10) {
+                        cardLeft = rect.right + 20;
+                        arrow.className = 'tutorial-arrow fas fa-arrow-left';
+                        arrowLeft = rect.right + 8;
+                    }
+                } else {
+                    cardLeft = (vw - cardW) / 2;
+                    cardTop = vh - 200;
+                    if (rect.top > vh * 0.6) cardTop = rect.top - 180;
+                    arrowTop = rect.bottom + 6;
+                    arrowLeft = rect.left + rect.width / 2 - 13;
+                    arrow.className = 'tutorial-arrow fas fa-arrow-up';
+                }
+            } else {
+                arrowTop = rect.bottom + 8;
+                arrowLeft = rect.left + rect.width / 2 - 13;
+                cardTop = rect.bottom + 40;
+                cardLeft = Math.max(10, Math.min(vw - cardW - 10, rect.left + rect.width / 2 - cardW / 2));
+                if (cardTop + 160 > vh) {
+                    cardTop = rect.top - 160;
+                    arrowTop = rect.top - 34;
+                    arrow.className = 'tutorial-arrow fas fa-arrow-down';
+                }
+            }
+
+            cardTop = Math.max(10, Math.min(cardTop, vh - 180));
+            cardLeft = Math.max(10, Math.min(cardLeft, vw - cardW - 10));
+
+            card.style.width = cardW + 'px';
+
+            arrow.style.top = arrowTop + 'px';
+            arrow.style.left = arrowLeft + 'px';
+            card.style.top = cardTop + 'px';
+            card.style.left = cardLeft + 'px';
+
+            document.getElementById('tutorialTitle').textContent = step.title;
+            document.getElementById('tutorialDesc').textContent = step.desc;
+        }
+
+        function renderTutorialDots(total) {
+            const dotsEl = document.getElementById('tutorialDots');
+            dotsEl.innerHTML = '';
+            for (let i = 0; i < total; i++) {
+                const dot = document.createElement('span');
+                dot.className = 'tutorial-dot' + (i === tutStep ? ' active' : '');
+                dotsEl.appendChild(dot);
+            }
+        }
+
+        function showTutorialStep() {
+            const steps = allTutorialSteps();
+            if (tutStep >= steps.length) { finishTutorial(); return; }
+
+            if (tutStep >= TUTORIAL_STEPS.length && !tutSidebarOpened) {
+                document.getElementById('sidebar').classList.add('active');
+                document.getElementById('sidebarOverlay').classList.add('active');
+                tutSidebarOpened = true;
+            }
+
+            const total = steps.length;
+            document.getElementById('tutorialStepBadge').textContent = `STEP ${tutStep + 1}/${total}`;
+            document.getElementById('tutorialNextBtn').innerHTML = (tutStep === total - 1)
+                ? 'Selesai <i class="fas fa-check"></i>'
+                : 'Lanjut <i class="fas fa-arrow-right"></i>';
+            renderTutorialDots(total);
+
+            requestAnimationFrame(() => {
+                setTimeout(() => positionTutorialStep(steps[tutStep]), tutSidebarOpened && tutStep === TUTORIAL_STEPS.length ? 320 : 0);
+            });
+        }
+
+        function nextTutorialStep() {
+            tutStep++;
+            showTutorialStep();
+        }
+
+        function startTutorial() {
+            tutStep = 0;
+            tutSidebarOpened = false;
+            document.getElementById('tutorialOverlay').classList.add('active');
+            showTutorialStep();
+        }
+
+        function skipTutorial() { finishTutorial(); }
+
+        function finishTutorial() {
+            document.getElementById('tutorialOverlay').classList.remove('active');
+            if (tutSidebarOpened) {
+                document.getElementById('sidebar').classList.remove('active');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            }
+            const uid = '<?= $_SESSION['user_google_id'] ?? '' ?>';
+            try { localStorage.setItem('polar_tutorial_done_' + uid, '1'); } catch(e) {}
+        }
+
+        window.addEventListener('resize', () => {
+            const overlay = document.getElementById('tutorialOverlay');
+            if (overlay.classList.contains('active')) {
+                const steps = allTutorialSteps();
+                positionTutorialStep(steps[tutStep]);
+            }
+        });
+
         // ========== INIT ==========
         document.addEventListener('DOMContentLoaded', function() {
             setInterval(updateCoinDisplay, 30000);
+            checkEarnCoinReturn();
         });
 
         document.getElementById('pairingOverlay').addEventListener('click', function(e) {
