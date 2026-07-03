@@ -18,7 +18,9 @@ define('GITHUB_BRANCH', 'main');
 
 // Password sederhana buat proteksi file manager ini (WAJIB diganti, jangan biarkan default!)
 define('FM_PASSWORD', 'pashapro');
-
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 // =========================================================
 // JANGAN UBAH DI BAWAH INI
 // =========================================================
