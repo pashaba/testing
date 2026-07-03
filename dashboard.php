@@ -1,145 +1,35 @@
 <?php
-// ============================================================
-// POLAR.ID — DASHBOARD (VERSI TERBARU DENGAN SESSION FIX)
-// ============================================================
-
-// ===== KONFIGURASI SESSION =====
-session_name('POLAR_SID');
-
-$secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+// ===== PERBAIKAN SESSION =====
+// 1. Set session cookie parameters SEBELUM session_start()
 session_set_cookie_params([
-    'lifetime'  => 86400 * 7,      // 7 hari
-    'path'      => '/',
-    'domain'    => $_SERVER['HTTP_HOST'],
-    'secure'    => $secure,
-    'httponly'  => true,
-    'samesite'  => 'Lax'
+    'lifetime' => 86400 * 7, // 7 hari
+    'path' => '/',
+    'domain' => '', // biarkan kosong untuk auto-detect
+    'secure' => false, // set true kalau pakai HTTPS
+    'httponly' => true,
+    'samesite' => 'Lax'
 ]);
 
 session_start();
 
-// ===== FUNGSI HELPER =====
-function getUserData($google_id) {
-    global $SUPABASE_URL, $SUPABASE_KEY;
-    
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $SUPABASE_URL . '/rest/v1/polar_users?google_id=eq.' . urlencode($google_id));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'apikey: ' . $SUPABASE_KEY,
-        'Authorization: Bearer ' . $SUPABASE_KEY
-    ]);
-    $response = curl_exec($ch);
-    curl_close($ch);
-    
-    $data = json_decode($response, true);
-    return (!empty($data) && isset($data[0])) ? $data[0] : null;
-}
-
-function getUserCoins($google_id) {
-    $user = getUserData($google_id);
-    return $user ? (int)$user['coins'] : 0;
-}
-
-function updateUserCoins($google_id, $new_coins) {
-    global $SUPABASE_URL, $SUPABASE_KEY;
-    
-    $data = json_encode(['coins' => $new_coins]);
-    
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $SUPABASE_URL . '/rest/v1/polar_users?google_id=eq.' . urlencode($google_id));
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Content-Type: application/json',
-        'apikey: ' . $SUPABASE_KEY,
-        'Authorization: Bearer ' . $SUPABASE_KEY
-    ]);
-    curl_exec($ch);
-    curl_close($ch);
-}
-
-function getSessions($fingerprint) {
-    global $SUPABASE_URL, $SUPABASE_KEY;
-    $url = $SUPABASE_URL . '/rest/v1/polar_sessions?fingerprint=eq.' . urlencode($fingerprint) . '&order=created_at.desc';
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'apikey: ' . $SUPABASE_KEY,
-        'Authorization: Bearer ' . $SUPABASE_KEY
-    ]);
-    $response = curl_exec($ch);
-    curl_close($ch);
-    return json_decode($response, true) ?: [];
-}
-
-// ===== CEK SESSION DAN AMBIL DATA DARI DATABASE =====
-$is_logged_in = isset($_SESSION['user_google_id']);
-$user_google_id = $_SESSION['user_google_id'] ?? null;
-
-// Jika login, ambil data terbaru dari database
-if ($is_logged_in) {
-    // Refresh session activity
+// 2. Refresh session untuk mencegah expired
+if (isset($_SESSION['user_google_id'])) {
     $_SESSION['LAST_ACTIVITY'] = time();
-    
-    // Ambil data user terbaru dari database
-    $user_data = getUserData($user_google_id);
-    
-    if ($user_data) {
-        // Update session dengan data terbaru dari database
-        $_SESSION['user_name'] = $user_data['name'];
-        $_SESSION['user_email'] = $user_data['email'];
-        $_SESSION['user_avatar'] = $user_data['avatar'];
-        $_SESSION['user_coins'] = (int)$user_data['coins'];
-    } else {
-        // User tidak ditemukan di database, logout
+    if (isset($_SESSION['EXPIRES']) && (time() - $_SESSION['EXPIRES'] > 3600)) {
         session_destroy();
-        header('Location: dashboard.php');
-        exit;
+        session_start();
     }
+    $_SESSION['EXPIRES'] = time() + 3600; // 1 jam
 }
 
-// ===== VARIABLE SESSION =====
-$user_name = $_SESSION['user_name'] ?? "Guest";
-$user_email = $_SESSION['user_email'] ?? "guest@gmail.com";
-$user_avatar = $_SESSION['user_avatar'] ?? "https://ui-avatars.com/api/?name=Guest&background=FF6B00&color=fff";
-$user_coins = $_SESSION['user_coins'] ?? 0;
-$earn_flag_active = !empty($_SESSION['earn_flag']);
+require_once 'config.php';
 
-// ===== FINGERPRINT UNTUK SESSION =====
-$fingerprint = $_SESSION['fingerprint'] ?? '';
-if (!$fingerprint) {
-    // Fingerprint: kombinasi User Agent + IP + Device Info
-    $device_data = $_SERVER['HTTP_USER_AGENT'] . $_SERVER['REMOTE_ADDR'];
-    
-    // Tambahkan data tambahan untuk fingerprint yang lebih unik
-    if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
-        $device_data .= $_SERVER['HTTP_ACCEPT_LANGUAGE'];
-    }
-    if (isset($_SERVER['HTTP_SEC_CH_UA'])) {
-        $device_data .= $_SERVER['HTTP_SEC_CH_UA'];
-    }
-    
-    $fingerprint = hash('sha256', $device_data . session_id());
-    $_SESSION['fingerprint'] = $fingerprint;
-}
-
-// ===== AMBIL SESSIONS =====
-$sessions = getSessions($fingerprint);
-$totalSessions = count($sessions);
-$maxSessions = 10;
-
-// ===== KONFIGURASI GOOGLE =====
+// ========== KONFIGURASI GOOGLE ==========
 $client_id = '1054465623984-re5q3ehnrk4qrne8da214jjvltnut630.apps.googleusercontent.com';
 $client_secret = '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';
 $redirect_uri = 'https://polar.web.id/dashboard.php';
 
-// ===== PROSES CALLBACK GOOGLE =====
+// ========== PROSES CALLBACK GOOGLE ==========
 if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
     $code = $_GET['code'];
     
@@ -180,11 +70,24 @@ if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
         $email     = $user_data['email'] ?? '';
         $avatar    = $user_data['picture'] ?? 'https://ui-avatars.com/api/?name=' . urlencode($name) . '&background=FF6B00&color=fff';
 
-        // ===== CEK USER DI DATABASE =====
-        $existing_user = getUserData($google_id);
-        $saved_coins = $existing_user ? (int)$existing_user['coins'] : 0;
+        // ===== UPSERT ke Supabase =====
+        $sb_url = rtrim($SUPABASE_URL, '/');
+        $sb_key = $SUPABASE_KEY;
 
-        // ===== UPSERT KE DATABASE =====
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $sb_url . '/rest/v1/polar_users?google_id=eq.' . urlencode($google_id) . '&select=coins');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'apikey: ' . $sb_key,
+            'Authorization: Bearer ' . $sb_key
+        ]);
+        $existing_raw = curl_exec($ch);
+        curl_close($ch);
+
+        $existing = json_decode($existing_raw, true);
+        $saved_coins = (!empty($existing) && isset($existing[0]['coins'])) ? (int)$existing[0]['coins'] : 0;
+
         $upsert_data = json_encode([
             'google_id'  => $google_id,
             'name'       => $name,
@@ -195,28 +98,28 @@ if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
         ]);
 
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $SUPABASE_URL . '/rest/v1/polar_users');
+        curl_setopt($ch, CURLOPT_URL, $sb_url . '/rest/v1/polar_users');
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $upsert_data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'apikey: ' . $SUPABASE_KEY,
-            'Authorization: Bearer ' . $SUPABASE_KEY,
+            'apikey: ' . $sb_key,
+            'Authorization: Bearer ' . $sb_key,
             'Prefer: resolution=merge-duplicates,return=minimal'
         ]);
         curl_exec($ch);
         curl_close($ch);
 
-        // ===== SET SESSION =====
+        // Set session dengan waktu expire
         $_SESSION['user_google_id'] = $google_id;
         $_SESSION['user_name']      = $name;
         $_SESSION['user_email']     = $email;
         $_SESSION['user_avatar']    = $avatar;
         $_SESSION['user_coins']     = $saved_coins;
         $_SESSION['CREATED']        = time();
-        $_SESSION['EXPIRES']        = time() + 86400; // 24 jam
+        $_SESSION['EXPIRES']        = time() + 3600; // 1 jam
         $_SESSION['LAST_ACTIVITY']  = time();
         
         // Regenerate session ID untuk keamanan
@@ -227,7 +130,15 @@ if (isset($_GET['code']) && !isset($_SESSION['user_google_id'])) {
     }
 }
 
-// ===== URL LOGIN GOOGLE =====
+// ========== CEK LOGIN ==========
+$is_logged_in = isset($_SESSION['user_google_id']);
+$earn_flag_active = !empty($_SESSION['earn_flag']);
+$user_name = $_SESSION['user_name'] ?? "Guest";
+$user_email = $_SESSION['user_email'] ?? "guest@gmail.com";
+$user_avatar = $_SESSION['user_avatar'] ?? "https://ui-avatars.com/api/?name=Guest&background=FF6B00&color=fff";
+$user_coins = $_SESSION['user_coins'] ?? 0;
+
+// ========== URL LOGIN GOOGLE ==========
 $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
     'client_id' => $client_id,
     'redirect_uri' => $redirect_uri,
@@ -236,8 +147,7 @@ $auth_url = 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
     'access_type' => 'online',
     'prompt' => 'select_account'
 ]);
-
-// ===== CEK STATUS SERVER =====
+// ========== CEK SERVER ==========
 function checkPhoenixServer() {
     $ptero_panel = 'https://private.pterokudesu.web.id';
     $api_key = 'ptlc_UUp3T2RayUkXnIVt0dHIie1EXWwcC5Tu9U9yysRqKwj';
@@ -303,11 +213,31 @@ function checkOurinServer() {
 $phoenix_status = checkPhoenixServer();
 $ourin_status = checkOurinServer();
 
-// ===== REQUIRED CONFIG (harus di-set di config.php) =====
-// Pastikan file config.php ada dengan:
-// $SUPABASE_URL = 'https://your-project.supabase.co';
-// $SUPABASE_KEY = 'your-supabase-key';
-require_once 'config.php';
+// ========== AMBIL SESSION DARI SUPABASE ==========
+function getSessions($fingerprint) {
+    global $SUPABASE_URL, $SUPABASE_KEY;
+    $url = $SUPABASE_URL . '/rest/v1/polar_sessions?fingerprint=eq.' . urlencode($fingerprint) . '&order=created_at.desc';
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'apikey: ' . $SUPABASE_KEY,
+        'Authorization: Bearer ' . $SUPABASE_KEY
+    ]);
+    $response = curl_exec($ch);
+    curl_close($ch);
+    return json_decode($response, true) ?: [];
+}
+
+$fingerprint = $_SESSION['fingerprint'] ?? '';
+if (!$fingerprint) {
+    $fingerprint = hash('sha256', $_SERVER['HTTP_USER_AGENT'] . $_SERVER['REMOTE_ADDR'] . session_id());
+    $_SESSION['fingerprint'] = $fingerprint;
+}
+$sessions = getSessions($fingerprint);
+$totalSessions = count($sessions);
+$maxSessions = 10;
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -319,7 +249,7 @@ require_once 'config.php';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* ============================================================
-                   NEOBRUTALISM STYLE 
+                   NEOBRUTALISM STYLE — tanpa mengubah sistem seidkitpun
                    ============================================================ */
         :root {
             --bg-main: #f7f7f7;
@@ -383,7 +313,7 @@ require_once 'config.php';
         .animate-float { animation: float 2.4s ease-in-out infinite; }
         .animate-coin { animation: coinSpin 1s ease forwards; }
 
-        /* ===== LOGIN POPUP ===== */
+        /* ===== LOGIN POPUP (NEOBRUTAL) ===== */
         .login-overlay {
             position: fixed;
             inset: 0;
@@ -762,6 +692,7 @@ require_once 'config.php';
             display: flex;
             flex-direction: column;
             gap: 6px;
+            overflow-y: auto;
         }
         .sidebar.active { right: 0; }
         .sidebar-header {
@@ -1124,7 +1055,6 @@ require_once 'config.php';
     </style>
 </head>
 <body class="<?= !$is_logged_in ? 'locked-bg' : '' ?>">
-
 <?php if (!$is_logged_in): ?>
     <!-- LOGIN POPUP -->
     <div class="login-overlay">
@@ -1178,6 +1108,11 @@ require_once 'config.php';
                 <li>Perangkat Tertaut → Tautkan Perangkat</li>
                 <li>Masukkan kode di atas</li>
             </ol>
+            <div style="background:#fff8e1;border:var(--border-thick);box-shadow:var(--shadow-light);padding:10px 12px;margin-top:10px;font-size:11px;font-weight:600;line-height:1.6;">
+                <i class="fas fa-circle-exclamation" style="color:var(--orange);"></i>
+                Belum dapat pairing code? Pastikan status script <strong>aktif</strong> —
+                <a href="#" onclick="closePairingModal(); navTo('status'); return false;" style="color:#0066cc;font-weight:800;text-decoration:underline;">cek status</a>
+            </div>
             <button class="btn btn-orange btn-full" style="margin-top:12px;" onclick="copyPairingCode()">
                 <i class="fas fa-copy"></i> Salin Kode
             </button>
@@ -1230,6 +1165,7 @@ require_once 'config.php';
         <a href="#" class="nav-link" data-tut="nav-claim" onclick="navTo('claim'); toggleMenu();"><i class="fas fa-download"></i> CLAIM</a>
         <a href="#" class="nav-link" data-tut="nav-sessions" onclick="navTo('sessions'); toggleMenu();"><i class="fas fa-robot"></i> SESSIONS</a>
         <a href="#" class="nav-link" data-tut="nav-profile" onclick="navTo('profile'); toggleMenu();"><i class="fas fa-user"></i> PROFILE</a>
+        <a href="#" class="nav-link" data-tut="nav-donasi" onclick="navTo('donasi'); toggleMenu();"><i class="fas fa-hand-holding-heart"></i> DONASI</a>
         <a href="#" class="nav-link" onclick="toggleMenu(); setTimeout(startTutorial, 350);"><i class="fas fa-circle-question"></i> MULAI TUTORIAL</a>
         <a href="#" class="nav-link" data-tut="nav-earn" onclick="<?= $earn_flag_active ? 'return false;' : 'earnCoin()' ?>" style="background:var(--gold);border:var(--border-thick);box-shadow:var(--shadow-light);<?= $earn_flag_active ? 'opacity:0.5;cursor:not-allowed;' : '' ?>">
             <i class="fas fa-coins" style="color:#111;"></i> <?= $earn_flag_active ? 'MENUNGGU...' : 'EARN POLAR COIN' ?>
@@ -1435,6 +1371,52 @@ require_once 'config.php';
                 <button class="btn btn-orange" style="margin-top:16px;" onclick="navTo('claim')">CLAIM SERVER <i class="fas fa-arrow-right"></i></button>
             </div>
         </div>
+
+        <!-- DONASI -->
+        <div id="sec-donasi" class="section">
+            <div style="text-align:center;margin-bottom:20px;">
+                <div class="slot-badge" style="background:var(--gold);color:#111;"><i class="fas fa-heart"></i> DUKUNG PROYEK INI</div>
+                <h1 style="font-weight:900;font-size:clamp(26px,6vw,36px);text-transform:uppercase;">DONASI <span style="background:var(--orange);color:#fff;padding:0 12px;transform:skew(-6deg);display:inline-block;border:var(--border-thick);box-shadow:var(--shadow-light);">SEIKHLASNYA</span></h1>
+                <p style="color:var(--text-muted);font-size:13px;font-weight:500;max-width:340px;margin:8px auto 0;">Polar.id gratis dan bakal terus gratis. Kalau kamu terbantu, donasi kamu bakal dipakai buat biaya server & pengembangan fitur baru 🙏</p>
+            </div>
+
+            <!-- DANA -->
+            <div class="card">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                    <div style="width:44px;height:44px;background:#118EEA;border:var(--border-thick);box-shadow:var(--shadow-light);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:13px;letter-spacing:-0.5px;flex-shrink:0;">DANA</div>
+                    <div>
+                        <div style="font-weight:900;font-size:15px;">DANA</div>
+                        <div style="font-size:10px;font-weight:600;color:var(--text-muted);">E-Wallet</div>
+                    </div>
+                </div>
+                <div style="background:#f0f0f0;border:var(--border-thick);box-shadow:inset 2px 2px 0px 0px #111;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                    <span style="font-weight:800;font-size:16px;font-family:monospace;letter-spacing:0.5px;" id="danaNumber">0857-1529-4020-6</span>
+                    <button class="btn btn-sm btn-orange" onclick="copyDonationNumber('danaNumber', 'DANA')"><i class="fas fa-copy"></i></button>
+                </div>
+                <p style="font-size:10px;font-weight:600;color:var(--text-muted);margin-top:6px;">a.n. Pasha • Pastikan nama penerima sesuai sebelum transfer</p>
+            </div>
+
+            <!-- GOPAY -->
+            <div class="card">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                    <div style="width:44px;height:44px;background:#00274D;border:var(--border-thick);box-shadow:var(--shadow-light);display:flex;align-items:center;justify-content:center;color:#00AEEF;font-weight:900;font-size:22px;font-style:italic;flex-shrink:0;">G</div>
+                    <div>
+                        <div style="font-weight:900;font-size:15px;">GoPay</div>
+                        <div style="font-size:10px;font-weight:600;color:var(--text-muted);">E-Wallet</div>
+                    </div>
+                </div>
+                <div style="background:#f0f0f0;border:var(--border-thick);box-shadow:inset 2px 2px 0px 0px #111;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;">
+                    <span style="font-weight:800;font-size:16px;font-family:monospace;letter-spacing:0.5px;" id="gopayNumber">0857-1529-4020-6</span>
+                    <button class="btn btn-sm btn-orange" onclick="copyDonationNumber('gopayNumber', 'GoPay')"><i class="fas fa-copy"></i></button>
+                </div>
+                <p style="font-size:10px;font-weight:600;color:var(--text-muted);margin-top:6px;">a.n. Pasha • Pastikan nama penerima sesuai sebelum transfer</p>
+            </div>
+
+            <div class="card" style="text-align:center;background:var(--gold);border:var(--border-thick);box-shadow:var(--shadow-heavy);">
+                <i class="fas fa-heart" style="font-size:20px;margin-bottom:6px;"></i>
+                <p style="font-size:12px;font-weight:800;">Terima kasih banyak buat setiap dukungan, sekecil apapun itu sangat berarti! ❤️</p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -1540,7 +1522,14 @@ require_once 'config.php';
             }
         }
 
-        // ========== EARN COIN ==========
+        // ========== DONASI ==========
+        function copyDonationNumber(elId, label) {
+            const number = document.getElementById(elId).textContent.replace(/-/g, '');
+            navigator.clipboard.writeText(number);
+            showToast('✅ Nomor ' + label + ' disalin!', 'success');
+        }
+
+        // ========== EARN COIN (Session Flag) ==========
         const EARN_FLAG_ACTIVE = <?= $earn_flag_active ? 'true' : 'false' ?>;
         function earnCoin() {
             if (EARN_FLAG_ACTIVE) {
@@ -1550,7 +1539,7 @@ require_once 'config.php';
             window.location.href = 'start-earn.php';
         }
 
-        // ========== HANDLE REDIRECT ==========
+        // ========== HANDLE REDIRECT BALIK DARI earn-coin.php ==========
         function checkEarnCoinReturn() {
             const params = new URLSearchParams(window.location.search);
             const earn = params.get('earn');
@@ -1564,8 +1553,6 @@ require_once 'config.php';
                 document.querySelectorAll('#coinCount, #claimCoinDisplay, #profileCoinDisplay').forEach(el => {
                     if (el) el.textContent = coins;
                 });
-                // Refresh coin dari database
-                updateCoinDisplay();
             } else if (earn === 'expired') {
                 showToast('⏰ Link kadaluarsa. Silakan earn coin lagi.', 'error');
             }
