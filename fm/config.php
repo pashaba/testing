@@ -5,7 +5,7 @@
 
 // Personal Access Token GitHub (Settings > Developer settings > Personal access tokens > Fine-grained / classic)
 // Minimal scope: "repo" (classic) atau "Contents: Read and write" (fine-grained)
-define('GITHUB_TOKEN', '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');
+define('GITHUB_TOKEN', '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');
 
 // Username/organisasi pemilik repo
 define('GITHUB_OWNER', 'pashaba');
