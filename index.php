@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>Polar.id - Platform Layanan Digital</title>
     <meta name="title" content="Polar.id - Platform Layanan Digital Terpercaya" />
-    <meta name="description" content="Platform layanan digital lengkap: Jadibot WhatsApp, Tools, dan berbagai solusi digital lainnya. Gratis & terpercaya." />
+    <meta name="description" content="Platform layanan digital lengkap: Jadibot WhatsApp, Tools (Ceknik, YouTube & TikTok Downloader), dan berbagai solusi digital lainnya. Gratis & terpercaya." />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -13,7 +13,7 @@
     <meta property="og:title" content="Polar.id - Platform Layanan Digital">
     <meta property="og:url" content="https://polar.web.id">
     <meta property="og:image" content="https://polar.web.id/og-image.jpg">
-    <meta property="og:description" content="Platform layanan digital lengkap: Jadibot WhatsApp, Tools, dan berbagai solusi digital lainnya.">
+    <meta property="og:description" content="Platform layanan digital lengkap: Jadibot WhatsApp, Tools (Ceknik, YouTube & TikTok Downloader), dan berbagai solusi digital lainnya.">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -38,10 +38,12 @@
             --orange: #ff6b35;
             --purple: #7c3aed;
             --pink: #ec4899;
+            --teal: #14b8a6;
             
             --border-thick: 4px solid var(--black);
             --shadow-heavy: 8px 8px 0px 0px var(--black);
             --shadow-light: 4px 4px 0px 0px var(--black);
+            --shadow-xl: 12px 12px 0px 0px var(--black);
             
             --radius: 0px;
             --font-display: 'Space Grotesk', sans-serif;
@@ -79,6 +81,20 @@
             text-transform: uppercase;
         }
 
+        /* ---- SCROLLBAR ---- */
+        ::-webkit-scrollbar {
+            width: 12px;
+            background: var(--black);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border: 2px solid var(--black);
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--off-white);
+            border-left: 2px solid var(--black);
+        }
+
         /* ---- UTILITY ---- */
         .container {
             max-width: 1200px;
@@ -104,6 +120,20 @@
             transition: all 0.15s ease;
             text-decoration: none;
             letter-spacing: 0.3px;
+            position: relative;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: transparent;
+            transition: all 0.15s ease;
+        }
+
+        .btn:hover {
+            transform: translate(4px, 4px);
+            box-shadow: none;
         }
 
         .btn-primary {
@@ -113,8 +143,6 @@
         }
 
         .btn-primary:hover {
-            transform: translate(4px, 4px);
-            box-shadow: none;
             background: var(--primary-dark);
         }
 
@@ -125,9 +153,17 @@
         }
 
         .btn-secondary:hover {
-            transform: translate(4px, 4px);
-            box-shadow: none;
             background: #1a1a1a;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(135deg, var(--primary), var(--purple));
+            color: var(--white);
+            border-color: var(--black);
+        }
+
+        .btn-gradient:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--purple));
         }
 
         /* ---- SPLASH SCREEN ---- */
@@ -154,7 +190,7 @@
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--purple));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -200,13 +236,33 @@
             text-transform: uppercase;
         }
 
+        .splash-progress {
+            width: 200px;
+            height: 4px;
+            background: #222;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .splash-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            animation: loadProgress 1.5s ease forwards;
+        }
+
+        @keyframes loadProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
         /* ---- PROGRESS BAR ---- */
         .progress-container {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            height: 5px;
+            height: 6px;
             z-index: 1000;
             background: transparent;
         }
@@ -214,7 +270,7 @@
         .progress-bar {
             height: 100%;
             width: 0%;
-            background: var(--primary);
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
             border-bottom: var(--border-thick);
             transition: width 0.15s ease;
         }
@@ -224,12 +280,28 @@
             padding: 30px 0 50px;
             border-bottom: var(--border-thick);
             margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 0, 85, 0.05), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
         }
 
         .hero-content {
             max-width: 820px;
             margin: 0 auto;
             text-align: center;
+            position: relative;
+            z-index: 1;
         }
 
         .hero-badge {
@@ -246,6 +318,12 @@
             border: var(--border-thick);
             margin-bottom: 24px;
             letter-spacing: 0.5px;
+            animation: badgePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { box-shadow: var(--shadow-light); }
+            50% { box-shadow: 0 0 0 4px var(--primary), 4px 4px 0 4px var(--black); }
         }
 
         .hero-badge-dot {
@@ -254,6 +332,12 @@
             background: var(--green);
             border: 2px solid var(--white);
             border-radius: 50%;
+            animation: dotPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes dotPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
         .hero h1 {
@@ -270,6 +354,16 @@
             transform: rotate(-0.5deg);
             border: var(--border-thick);
             box-shadow: var(--shadow-heavy);
+            position: relative;
+        }
+
+        .hero h1 .highlight::after {
+            content: '✨';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            font-size: 1.2rem;
+            transform: rotate(15deg);
         }
 
         .hero-subtitle {
@@ -293,8 +387,14 @@
             gap: 8px;
             background: var(--white);
             border: var(--border-thick);
-            box-shadow: var(--shadow-light);
+            box-shadow: var(--shadow-heavy);
             padding: 4px;
+            transition: all 0.15s ease;
+        }
+
+        .search-box:focus-within {
+            box-shadow: var(--shadow-xl);
+            transform: translate(-2px, -2px);
         }
 
         .search-box input {
@@ -321,11 +421,12 @@
             border: none;
             font-size: 1.2rem;
             cursor: pointer;
-            transition: background 0.15s ease;
+            transition: all 0.15s ease;
         }
 
         .search-box button:hover {
             background: var(--primary);
+            transform: scale(1.05);
         }
 
         /* ---- TRUST BADGES ---- */
@@ -349,6 +450,12 @@
             background: var(--white);
             border: var(--border-thick);
             box-shadow: var(--shadow-light);
+            transition: all 0.15s ease;
+        }
+
+        .trust-item:hover {
+            transform: translate(3px, 3px);
+            box-shadow: none;
         }
 
         .trust-item i { font-size: 1.1rem; }
@@ -371,12 +478,26 @@
 
         .section-title {
             font-family: var(--font-display);
-            font-size: 2.5rem;
+            font-size: clamp(2rem, 4vw, 2.5rem);
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: -0.02em;
             color: var(--black);
             margin-bottom: 8px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 4px;
+            background: var(--primary);
+            border: 2px solid var(--black);
         }
 
         .section-subtitle {
@@ -384,13 +505,14 @@
             font-weight: 500;
             color: #444;
             max-width: 500px;
-            margin: 0 auto;
+            margin: 16px auto 0;
         }
 
         .section-subtitle span {
             background: var(--yellow);
             padding: 0 6px;
             font-weight: 800;
+            border: 2px solid var(--black);
         }
 
         /* ---- SERVICE CARDS GRID ---- */
@@ -419,11 +541,29 @@
             border: var(--border-thick);
             box-shadow: var(--shadow-heavy);
             padding: 28px 24px 24px;
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
             display: flex;
             flex-direction: column;
             position: relative;
             overflow: hidden;
+            cursor: default;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--primary);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
         }
 
         .service-card:hover {
@@ -431,7 +571,18 @@
             box-shadow: none;
         }
 
-        /* Badge "POPULER" atau "GRATIS" */
+        /* Decorative corner */
+        .service-card::after {
+            content: '✦';
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 0.6rem;
+            color: var(--gray);
+            opacity: 0.3;
+        }
+
+        /* Badge */
         .service-badge {
             position: absolute;
             top: 12px;
@@ -445,6 +596,7 @@
             background: var(--yellow);
             color: var(--black);
             letter-spacing: 0.5px;
+            z-index: 2;
         }
 
         .service-badge.gratis {
@@ -462,6 +614,11 @@
             color: var(--black);
         }
 
+        .service-badge.promo {
+            background: var(--orange);
+            color: var(--white);
+        }
+
         /* Icon */
         .service-icon {
             font-size: 2.8rem;
@@ -474,20 +631,18 @@
             color: var(--white);
             border: var(--border-thick);
             margin-bottom: 16px;
-            transition: all 0.15s ease;
+            transition: all 0.2s ease;
         }
 
         .service-card:hover .service-icon {
-            background: var(--primary);
-            transform: scale(1.05);
+            transform: scale(1.05) rotate(-3deg);
         }
 
-        /* Icon warna berbeda per kategori */
-        .service-card.type-jadibot .service-icon { background: var(--primary); }
-        .service-card.type-tools .service-icon { background: var(--secondary); color: var(--black); }
-        .service-card.type-hosting .service-icon { background: var(--green); color: var(--black); }
-        .service-card.type-domain .service-icon { background: var(--purple); }
-        .service-card.type-other .service-icon { background: var(--orange); }
+        .service-card.type-jadibot .service-icon { background: linear-gradient(135deg, #25D366, #128C7E); }
+        .service-card.type-tools .service-icon { background: linear-gradient(135deg, var(--secondary), var(--teal)); color: var(--black); }
+        .service-card.type-hosting .service-icon { background: linear-gradient(135deg, var(--green), #059669); color: var(--black); }
+        .service-card.type-domain .service-icon { background: linear-gradient(135deg, var(--purple), #6d28d9); }
+        .service-card.type-other .service-icon { background: linear-gradient(135deg, var(--orange), #ea580c); }
 
         .service-name {
             font-family: var(--font-display);
@@ -504,6 +659,37 @@
             color: #333;
             margin-bottom: 6px;
             flex: 1;
+            line-height: 1.5;
+        }
+
+        .service-desc .highlight-tag {
+            display: inline-block;
+            background: var(--yellow);
+            padding: 0 4px;
+            font-weight: 700;
+            border: 2px solid var(--black);
+            font-size: 0.7rem;
+        }
+
+        .service-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 6px 0 12px;
+        }
+
+        .service-tag {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 2px 10px;
+            background: var(--off-white);
+            border: 2px solid var(--black);
+            font-family: var(--font-display);
+        }
+
+        .service-tag i {
+            margin-right: 4px;
         }
 
         .service-meta {
@@ -530,6 +716,10 @@
             color: var(--orange);
         }
 
+        .service-meta .status-offline {
+            color: var(--gray);
+        }
+
         .service-btn {
             display: inline-flex;
             align-items: center;
@@ -548,26 +738,102 @@
             margin-top: 4px;
             width: 100%;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.1);
+            transform: rotate(45deg) translateX(100%);
+            transition: transform 0.4s ease;
+        }
+
+        .service-btn:hover::after {
+            transform: rotate(45deg) translateX(-100%);
         }
 
         .service-btn:hover {
             transform: translate(3px, 3px);
             box-shadow: none;
-            background: var(--primary);
+        }
+
+        .service-card.type-jadibot .service-btn { 
+            background: linear-gradient(135deg, #25D366, #128C7E); 
+            color: var(--white);
+        }
+        .service-card.type-jadibot .service-btn:hover { 
+            background: var(--black);
+        }
+
+        .service-card.type-tools .service-btn { 
+            background: linear-gradient(135deg, var(--secondary), var(--teal)); 
+            color: var(--black);
+        }
+        .service-card.type-tools .service-btn:hover { 
+            background: var(--black); 
             color: var(--white);
         }
 
-        .service-card.type-jadibot .service-btn { background: var(--primary); color: var(--white); }
-        .service-card.type-jadibot .service-btn:hover { background: var(--black); }
-
-        .service-card.type-tools .service-btn { background: var(--secondary); color: var(--black); }
-        .service-card.type-tools .service-btn:hover { background: var(--black); color: var(--white); }
-
         /* ============================================================
-           CUSTOM SECTION — TAMBAHAN (untuk layanan tambahan nanti)
+           STATS STRIP
            ============================================================ */
-        .custom-section {
-            padding: 20px 0 40px;
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            border: var(--border-thick);
+            background: var(--white);
+            margin: 12px 0 24px;
+            box-shadow: var(--shadow-light);
+        }
+
+        .strip-item {
+            padding: 18px 8px;
+            text-align: center;
+            border-right: var(--border-thick);
+            border-bottom: var(--border-thick);
+            transition: all 0.15s ease;
+        }
+
+        .strip-item:hover {
+            background: var(--off-white);
+        }
+
+        .strip-item:nth-child(2n) { border-right: none; }
+        .strip-item:nth-child(3),
+        .strip-item:nth-child(4) { border-bottom: none; }
+
+        .strip-number {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--black);
+            line-height: 1.1;
+        }
+
+        .strip-label {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #444;
+            letter-spacing: 0.3px;
+        }
+
+        @media (min-width: 768px) {
+            .stats-strip {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .strip-item {
+                border-right: var(--border-thick) !important;
+                border-bottom: none !important;
+            }
+            .strip-item:last-child { border-right: none !important; }
         }
 
         /* ============================================================
@@ -599,6 +865,12 @@
             border: var(--border-thick);
             padding: 18px 22px;
             box-shadow: var(--shadow-light);
+            transition: all 0.15s ease;
+        }
+
+        .testi-card:hover {
+            transform: translate(3px, 3px);
+            box-shadow: none;
         }
 
         .testi-avatar { font-size: 1.6rem; margin-bottom: 4px; }
@@ -626,6 +898,11 @@
             border: var(--border-thick);
             box-shadow: var(--shadow-light);
             overflow: hidden;
+            transition: all 0.15s ease;
+        }
+
+        .faq-item:hover {
+            box-shadow: var(--shadow-heavy);
         }
 
         .faq-question {
@@ -640,7 +917,7 @@
             cursor: pointer;
             background: var(--white);
             border-bottom: 2px solid transparent;
-            transition: all 0.1s ease;
+            transition: all 0.15s ease;
         }
 
         .faq-question:hover { background: var(--off-white); }
@@ -658,7 +935,7 @@
             padding: 0 18px;
             max-height: 0;
             overflow: hidden;
-            transition: all 0.25s ease;
+            transition: all 0.3s ease;
             font-weight: 500;
             color: #1a1a1a;
         }
@@ -680,10 +957,22 @@
             padding: 36px 20px;
             text-align: center;
             color: var(--white);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-box::before {
+            content: '✦';
+            position: absolute;
+            top: -20px;
+            right: -10px;
+            font-size: 8rem;
+            color: rgba(255,255,255,0.03);
+            transform: rotate(15deg);
         }
 
         .cta-box h2 {
-            font-size: 2rem;
+            font-size: clamp(1.8rem, 3vw, 2.2rem);
             color: var(--white);
             margin-bottom: 8px;
         }
@@ -745,6 +1034,7 @@
             visibility: hidden;
             transition: all 0.2s ease;
             z-index: 150;
+            border-radius: 50%;
         }
 
         .back-to-top.show {
@@ -797,6 +1087,33 @@
         .footer-col a:hover {
             text-decoration: underline;
             text-decoration-thickness: 3px;
+            color: var(--primary);
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .footer-social a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border: var(--border-thick);
+            background: var(--black);
+            color: var(--white);
+            font-size: 1.1rem;
+            transition: all 0.15s ease;
+        }
+
+        .footer-social a:hover {
+            background: var(--primary);
+            transform: translate(3px, 3px);
+            box-shadow: none;
+            text-decoration: none;
         }
 
         .footer-bottom {
@@ -823,6 +1140,13 @@
             .service-name { font-size: 1.1rem; }
             .service-icon { width: 56px; height: 56px; font-size: 2rem; }
             .section-title { font-size: 1.8rem; }
+            .back-to-top { 
+                width: 42px; 
+                height: 42px; 
+                font-size: 1rem;
+                bottom: 16px;
+                left: 16px;
+            }
         }
 
         /* EMPTY STATE */
@@ -851,7 +1175,6 @@
             font-weight: 500;
         }
 
-        /* NO RESULT */
         .no-result {
             text-align: center;
             padding: 30px;
@@ -873,6 +1196,25 @@
             font-size: 1rem;
             text-transform: uppercase;
         }
+
+        /* ANIMATED BG untuk card tertentu */
+        .service-card.type-jadibot .service-icon i {
+            animation: whatsappPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes whatsappPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .service-card.type-tools .service-icon i {
+            animation: toolsSpin 8s linear infinite;
+        }
+
+        @keyframes toolsSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -884,9 +1226,9 @@
 $services = [
     [
         'id' => 'jadibot',
-        'type' => 'jadibot', // untuk styling
+        'type' => 'jadibot',
         'name' => 'Jadibot WhatsApp',
-        'desc' => 'Bot WhatsApp multi-device gratis. Pairing cepat, tanpa registrasi, langsung online!',
+        'desc' => 'Bot WhatsApp multi-device gratis. Pairing cepat, tanpa registrasi, langsung online! Support Phoenix MD & Ourin MD.',
         'icon' => 'fa-brands fa-whatsapp',
         'badge' => 'Gratis',
         'badge_type' => 'gratis',
@@ -896,13 +1238,14 @@ $services = [
         'target' => '_self',
         'users' => '1.2k+',
         'featured' => true,
+        'tags' => ['Multi-Device', 'Pairing', 'No Login'],
         'created_at' => '2024-01-01'
     ],
     [
         'id' => 'tools',
         'type' => 'tools',
         'name' => 'Tools Collection',
-        'desc' => 'Kumpulan tools digital lengkap: TT downloader, ceknik, dan banyak lagi!',
+        'desc' => 'Kumpulan tools digital lengkap: <span class="highlight-tag">Ceknik</span> (Cek NIK KTP), <span class="highlight-tag">YouTube Downloader</span>, <span class="highlight-tag">TikTok Downloader</span>, QR Generator & banyak lagi!',
         'icon' => 'fa-solid fa-toolbox',
         'badge' => 'Populer',
         'badge_type' => 'populer',
@@ -911,11 +1254,12 @@ $services = [
         'url' => 'https://polar.web.id/tools/index.html',
         'target' => '_self',
         'users' => '500+',
-        'featured' => false,
+        'featured' => true,
+        'tags' => ['Ceknik', 'YT Downloader', 'TT Downloader', 'QR Generator'],
         'created_at' => '2024-03-15'
     ],
     // ============================================================
-    // 👇 TAMBAH LAYANAN BARU DI SINI — copy dan paste blok di bawah
+    // 👇 TAMBAH LAYANAN BARU DI SINI
     // ============================================================
     /*
     [
@@ -932,6 +1276,7 @@ $services = [
         'target' => '_self',
         'users' => '200+',
         'featured' => false,
+        'tags' => ['Uptime 99.9%', 'Unlimited'],
         'created_at' => '2024-06-01'
     ],
     [
@@ -941,13 +1286,14 @@ $services = [
         'desc' => 'Dapatkan domain .com, .id, .web.id dengan harga termurah se-Indonesia!',
         'icon' => 'fa-solid fa-globe',
         'badge' => 'Promo',
-        'badge_type' => 'populer',
+        'badge_type' => 'promo',
         'status' => 'Online',
         'status_type' => 'online',
         'url' => 'https://polar.web.id/domain',
         'target' => '_blank',
         'users' => '150+',
         'featured' => false,
+        'tags' => ['.com', '.id', '.web.id'],
         'created_at' => '2024-07-10'
     ],
     [
@@ -964,6 +1310,7 @@ $services = [
         'target' => '_self',
         'users' => '75+',
         'featured' => false,
+        'tags' => ['REST API', 'Free'],
         'created_at' => '2024-08-20'
     ]
     */
@@ -977,7 +1324,10 @@ $filtered_services = array_filter($services, function($service) use ($search) {
     if (empty($search)) return true;
     return strpos(strtolower($service['name']), $search) !== false ||
            strpos(strtolower($service['desc']), $search) !== false ||
-           strpos(strtolower($service['id']), $search) !== false;
+           strpos(strtolower($service['id']), $search) !== false ||
+           array_reduce($service['tags'] ?? [], function($carry, $tag) use ($search) {
+               return $carry || strpos(strtolower($tag), $search) !== false;
+           }, false);
 });
 
 // Pisahkan layanan featured dan regular
@@ -992,7 +1342,7 @@ $regular_services = array_filter($filtered_services, function($s) {
 $sorted_services = array_merge($featured_services, $regular_services);
 
 // ============================================================
-// STATISTIK (ambil dari DB atau hardcode)
+// STATISTIK
 // ============================================================
 $total_services = count($services);
 $active_services = count(array_filter($services, function($s) {
@@ -1008,6 +1358,7 @@ $active_services = count(array_filter($services, function($s) {
     <div class="splash-logo">❄️</div>
     <div class="splash-name">Polar.id</div>
     <div class="splash-spinner"></div>
+    <div class="splash-progress"><div class="splash-progress-bar"></div></div>
     <div class="splash-sub">Memuat layanan...</div>
 </div>
 
@@ -1037,6 +1388,30 @@ $active_services = count(array_filter($services, function($s) {
 </section>
 
 <!-- ============================================================
+     STATS
+     ============================================================ -->
+<div class="container">
+    <div class="stats-strip">
+        <div class="strip-item">
+            <div class="strip-number"><?= $total_services ?></div>
+            <div class="strip-label">Total Layanan</div>
+        </div>
+        <div class="strip-item">
+            <div class="strip-number"><?= $active_services ?></div>
+            <div class="strip-label">Layanan Aktif</div>
+        </div>
+        <div class="strip-item">
+            <div class="strip-number">10k+</div>
+            <div class="strip-label">Pengguna</div>
+        </div>
+        <div class="strip-item">
+            <div class="strip-number">24/7</div>
+            <div class="strip-label">Uptime</div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
      SEARCH + LAYANAN
      ============================================================ -->
 <section class="services-section container" id="services">
@@ -1050,10 +1425,10 @@ $active_services = count(array_filter($services, function($s) {
     <!-- Search Box -->
     <div class="search-section">
         <form class="search-box" method="GET" action="">
-            <input type="text" name="q" placeholder="Cari layanan..." value="<?= htmlspecialchars($search) ?>">
+            <input type="text" name="q" placeholder="Cari layanan... (contoh: downloader, ceknik, bot)" value="<?= htmlspecialchars($search) ?>">
             <button type="submit"><i class="fas fa-search"></i></button>
             <?php if (!empty($search)): ?>
-            <a href="?q=" style="display:flex;align-items:center;padding:0 12px;color:var(--black);text-decoration:none;font-weight:700;">✕</a>
+            <a href="?q=" style="display:flex;align-items:center;padding:0 12px;color:var(--black);text-decoration:none;font-weight:700;font-size:1.2rem;">✕</a>
             <?php endif; ?>
         </form>
     </div>
@@ -1080,7 +1455,16 @@ $active_services = count(array_filter($services, function($s) {
             <div class="service-name"><?= $service['name'] ?></div>
             <div class="service-desc"><?= $service['desc'] ?></div>
 
-            <!-- Meta: status + users -->
+            <!-- Tags -->
+            <?php if (!empty($service['tags'])): ?>
+            <div class="service-tags">
+                <?php foreach (array_slice($service['tags'], 0, 4) as $tag): ?>
+                <span class="service-tag"><i class="fas fa-tag"></i> <?= $tag ?></span>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
+            <!-- Meta -->
             <div class="service-meta">
                 <span class="status-<?= $service['status_type'] ?>">
                     <i class="fas fa-circle"></i> <?= $service['status'] ?>
@@ -1113,7 +1497,7 @@ $active_services = count(array_filter($services, function($s) {
     </div>
     <?php endif; ?>
 
-    <!-- Info tambahan: jumlah layanan -->
+    <!-- Info tambahan -->
     <div style="text-align:center;margin-top:24px;font-weight:600;color:#666;font-size:0.85rem;">
         Menampilkan <?= count($sorted_services) ?> dari <?= $total_services ?> layanan
         <?php if (!empty($search)): ?>
@@ -1123,7 +1507,7 @@ $active_services = count(array_filter($services, function($s) {
 </section>
 
 <!-- ============================================================
-     CUSTOM SECTION — Tempat untuk konten tambahan
+     CUSTOM SECTION
      ============================================================ -->
 <section class="custom-section container" data-aos="fade-up">
     <div style="background:var(--white);border:var(--border-thick);box-shadow:var(--shadow-light);padding:24px 20px;text-align:center;">
@@ -1159,7 +1543,7 @@ $active_services = count(array_filter($services, function($s) {
             <div class="testi-card">
                 <div class="testi-avatar">👤</div>
                 <div class="testi-rating">★★★★★</div>
-                <div class="testi-text">"Tools collection-nya lengkap banget. Ada QR generator, password maker, semua gratis!"</div>
+                <div class="testi-text">"Tools collection-nya lengkap banget. Ada Ceknik, YouTube & TikTok downloader, semua gratis!"</div>
                 <div class="testi-name">— Budi Santoso</div>
             </div>
             <div class="testi-card">
@@ -1184,7 +1568,7 @@ $active_services = count(array_filter($services, function($s) {
     <div class="faq-grid">
         <div class="faq-item">
             <div class="faq-question"><span>❓ Apa itu Polar.id?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer">Platform layanan digital terpercaya yang menyediakan berbagai solusi gratis seperti bot WhatsApp, tools, hosting, dan lainnya.</div>
+            <div class="faq-answer">Platform layanan digital terpercaya yang menyediakan berbagai solusi gratis seperti bot WhatsApp, tools (Ceknik, YouTube/TikTok Downloader), hosting, dan lainnya.</div>
         </div>
         <div class="faq-item">
             <div class="faq-question"><span>🔗 Apakah semua layanan gratis?</span><i class="fas fa-chevron-down"></i></div>
@@ -1197,6 +1581,10 @@ $active_services = count(array_filter($services, function($s) {
         <div class="faq-item">
             <div class="faq-question"><span>📱 Bagaimana cara mengakses layanan?</span><i class="fas fa-chevron-down"></i></div>
             <div class="faq-answer">Cukup pilih layanan yang Anda butuhkan dari daftar di atas, klik tombol "Akses Layanan", dan mulai gunakan!</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question"><span>🎥 Apa saja yang ada di Tools Collection?</span><i class="fas fa-chevron-down"></i></div>
+            <div class="faq-answer">Tools Collection menyediakan berbagai alat digital seperti Ceknik (Cek NIK KTP), YouTube Downloader, TikTok Downloader, QR Code Generator, Password Generator, dan masih banyak lagi!</div>
         </div>
     </div>
 </section>
@@ -1228,6 +1616,12 @@ $active_services = count(array_filter($services, function($s) {
             <div class="footer-col">
                 <h4>Polar.id</h4>
                 <p style="font-weight:500;">Platform layanan digital terpercaya untuk berbagai kebutuhan Anda.</p>
+                <div class="footer-social">
+                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                    <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
+                    <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                    <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                </div>
             </div>
             <div class="footer-col">
                 <h4>Layanan</h4>
@@ -1239,16 +1633,16 @@ $active_services = count(array_filter($services, function($s) {
                 <h4>Menu</h4>
                 <a href="index.php">Beranda</a>
                 <a href="#services">Layanan</a>
+                <a href="#faq">FAQ</a>
             </div>
             <div class="footer-col">
-                <h4>Socials</h4>
-                <a href="#">Instagram</a>
-                <a href="#">TikTok</a>
-                <a href="#">YouTube</a>
+                <h4>Kontak</h4>
+                <p><i class="fab fa-whatsapp" style="color:#25D366;"></i> +62 812-3456-7890</p>
+                <p><i class="fas fa-envelope"></i> support@polar.web.id</p>
             </div>
         </div>
         <div class="footer-bottom">
-            © <?= date('Y') ?> Polar.id. All rights reserved.
+            © <?= date('Y') ?> Polar.id. All rights reserved. Made with ❤️
         </div>
     </div>
 </footer>
@@ -1262,7 +1656,7 @@ $active_services = count(array_filter($services, function($s) {
     window.addEventListener('load', () => {
         setTimeout(() => {
             document.getElementById('splash')?.classList.add('hide');
-        }, 1500);
+        }, 1800);
     });
 
     // PROGRESS BAR + BACK TO TOP
@@ -1281,12 +1675,25 @@ $active_services = count(array_filter($services, function($s) {
     // FAQ ACCORDION
     document.querySelectorAll('.faq-question').forEach(q => {
         q.addEventListener('click', () => {
-            q.closest('.faq-item').classList.toggle('open');
+            const item = q.closest('.faq-item');
+            const isOpen = item.classList.contains('open');
+            // Tutup semua
+            document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+            if (!isOpen) {
+                item.classList.add('open');
+            }
         });
     });
 
+    // Buka FAQ pertama secara default
+    document.querySelector('.faq-item')?.classList.add('open');
+
     // AOS INIT
-    AOS.init({ duration: 500, once: true });
+    AOS.init({ 
+        duration: 500, 
+        once: true,
+        offset: 50
+    });
 
     // Smooth scroll untuk anchor link
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1296,11 +1703,22 @@ $active_services = count(array_filter($services, function($s) {
             e.preventDefault();
             const target = document.querySelector(href);
             if (target) {
-                target.scrollIntoView({ behavior: 'smooth' });
+                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
     });
-</script>
 
+    // Keyboard shortcut: tekan Ctrl+/ untuk focus ke search
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === '/') {
+            e.preventDefault();
+            const searchInput = document.querySelector('.search-box input');
+            if (searchInput) {
+                searchInput.focus();
+                searchInput.select();
+            }
+        }
+    });
+</script>
 </body>
 </html>
