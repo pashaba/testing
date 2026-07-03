@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Toolbox · NEXRAY</title>
+    <!-- Font & gaya dasar -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f5f0eb;
+            font-family: 'Inter', sans-serif;
+            padding: 2rem 1.5rem;
+            color: #1e1e2a;
+        }
+        /* NEO‑BRUTALISM CORE */
+        .neo-card {
+            background: #ffffff;
+            border: 3px solid #1e1e2a;
+            border-radius: 20px;
+            box-shadow: 8px 8px 0 #1e1e2a;
+            padding: 1.8rem 1.8rem 2rem;
+            transition: 0.1s ease;
+        }
+        .neo-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 12px 12px 0 #1e1e2a;
+        }
+        .neo-btn {
+            background: #fee440;
+            border: 3px solid #1e1e2a;
+            border-radius: 60px;
+            padding: 0.7rem 1.6rem;
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: #1e1e2a;
+            box-shadow: 5px 5px 0 #1e1e2a;
+            transition: 0.08s linear;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+        .neo-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0 #1e1e2a;
+        }
+        .neo-input {
+            background: white;
+            border: 3px solid #1e1e2a;
+            border-radius: 60px;
+            padding: 0.8rem 1.4rem;
+            font-size: 0.95rem;
+            width: 100%;
+            font-weight: 500;
+            box-shadow: 4px 4px 0 #1e1e2a;
+            transition: 0.1s;
+        }
+        .neo-input:focus {
+            outline: none;
+            box-shadow: 6px 6px 0 #1e1e2a;
+            transform: translate(-2px, -2px);
+        }
+        .neo-badge {
+            background: #d9e5f2;
+            border: 2px solid #1e1e2a;
+            border-radius: 40px;
+            padding: 0.2rem 1rem;
+            font-weight: 700;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        /* header */
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: #1e1e2a;
+            color: white;
+            padding: 0.2rem 1.2rem 0.2rem 1.5rem;
+            border-radius: 60px;
+            border: 3px solid #1e1e2a;
+            box-shadow: 6px 6px 0 #fee440;
+            display: inline-block;
+        }
+        .logo span {
+            color: #fee440;
+        }
+        .subhead {
+            font-weight: 600;
+            background: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 60px;
+            border: 3px solid #1e1e2a;
+            box-shadow: 6px 6px 0 #1e1e2a;
+        }
+        /* grid tools */
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .tool-card {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+        .tool-header {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+        .tool-header i {
+            font-size: 2rem;
+            background: #1e1e2a;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 16px;
+            border: 3px solid #1e1e2a;
+            box-shadow: 4px 4px 0 #fee440;
+        }
+        .tool-title {
+            font-weight: 800;
+            font-size: 1.4rem;
+        }
+        .tool-desc {
+            opacity: 0.75;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-top: -0.2rem;
+        }
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-top: 0.2rem;
+        }
+        .input-group .neo-input {
+            flex: 2 1 180px;
+        }
+        .input-group .neo-btn {
+            flex: 0 1 auto;
+        }
+        .response-area {
+            background: #faf7f2;
+            border: 3px solid #1e1e2a;
+            border-radius: 16px;
+            padding: 1rem 1.2rem;
+            max-height: 220px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: pre-wrap;
+            word-break: break-all;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+            margin-top: 0.3rem;
+            color: #1e1e2a;
+        }
+        .response-area:empty::before {
+            content: "⌘ hasil akan muncul di sini";
+            opacity: 0.4;
+            font-weight: 400;
+        }
+        .response-area.loading {
+            opacity: 0.5;
+        }
+        .footer-note {
+            margin-top: 3.5rem;
+            text-align: center;
+            font-weight: 600;
+            border-top: 3px solid #1e1e2a;
+            padding-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+        .footer-note span {
+            background: white;
+            padding: 0.3rem 1.8rem;
+            border-radius: 60px;
+            border: 3px solid #1e1e2a;
+            box-shadow: 4px 4px 0 #1e1e2a;
+        }
+        .badge-api {
+            background: #1e1e2a;
+            color: white;
+            padding: 0.2rem 1.2rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+        /* scroll */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e6e0d8;
+            border-radius: 20px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e1e2a;
+            border-radius: 20px;
+            border: 2px solid #f5f0eb;
+        }
+        @media (max-width: 500px) {
+            .header {
+                flex-direction: column;
+                align-items: start;
+                gap: 1rem;
+            }
+            .logo {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">NEX<span>RAY</span></div>
+    <div class="subhead"><i class="fas fa-bolt" style="margin-right: 8px;"></i> toolbox · neo brutalism</div>
+</div>
+
+<!-- intro -->
+<div class="neo-card" style="margin-bottom: 2rem; background: #fcf9f5;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;">
+        <div>
+            <span class="neo-badge"><i class="fas fa-code"></i> API NEXRAY</span>
+            <span style="font-weight: 700; margin-left: 0.8rem;">⚡ all tools in one</span>
+        </div>
+        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+            <span class="badge-api"><i class="fas fa-check-circle"></i> 16 digit NIK</span>
+            <span class="badge-api"><i class="fas fa-image"></i> removebg</span>
+            <span class="badge-api"><i class="fas fa-bullhorn"></i> NGL spam</span>
+            <span class="badge-api"><i class="fas fa-sitemap"></i> subdomain</span>
+            <span class="badge-api"><i class="fas fa-download"></i> aio downloader</span>
+        </div>
+    </div>
+</div>
+
+<!-- GRID TOOLS -->
+<div class="tool-grid">
+
+    <!-- 1. NIK PARSE -->
+    <div class="tool-card neo-card">
+        <div class="tool-header">
+            <i class="fas fa-id-card"></i>
+            <span class="tool-title">NIK Parse</span>
+            <span class="neo-badge">16 digit</span>
+        </div>
+        <div class="tool-desc">Parse data NIK (wajib 16 digit)</div>
+        <div class="input-group">
+            <input type="text" class="neo-input" id="nikInput" placeholder="3374120102990001" value="3374120102990001">
+            <button class="neo-btn" id="nikBtn"><i class="fas fa-arrow-right"></i> Parse</button>
+        </div>
+        <div class="response-area" id="nikResponse"></div>
+    </div>
+
+    <!-- 2. REMOVEBG -->
+    <div class="tool-card neo-card">
+        <div class="tool-header">
+            <i class="fas fa-crop-alt"></i>
+            <span class="tool-title">RemoveBG</span>
+            <span class="neo-badge">url</span>
+        </div>
+        <div class="tool-desc">Hapus background dari gambar (url)</div>
+        <div class="input-group">
+            <input type="text" class="neo-input" id="bgInput" placeholder="https://file.catbox.moe/abc.jpg" value="https://file.catbox.moe/abc.jpg">
+            <button class="neo-btn" id="bgBtn"><i class="fas fa-eraser"></i> Proses</button>
+        </div>
+        <div class="response-area" id="bgResponse"></div>
+    </div>
+
+    <!-- 3. NGL SPAM -->
+    <div class="tool-card neo-card">
+        <div class="tool-header">
+            <i class="fas fa-bullhorn"></i>
+            <span class="tool-title">NGL Spam</span>
+            <span class="neo-badge">spammer</span>
+        </div>
+        <div class="tool-desc">Kirim spam ke link NGL</div>
+        <div class="input-group" style="flex-wrap: wrap;">
+            <input type="text" class="neo-input" id="nglUrl" placeholder="ngl.link/pasha" value="ngl.link/pasha" style="flex: 2 1 140px;">
+            <input type="text" class="neo-input" id="nglMsg" placeholder="pesan" value="halo" style="flex: 1 1 100px;">
+            <input type="number" class="neo-input" id="nglJumlah" placeholder="jumlah" value="1" style="flex: 0 1 80px;">
+            <button class="neo-btn" id="nglBtn"><i class="fas fa-paper-plane"></i> Spam</button>
+        </div>
+        <div class="response-area" id="nglResponse"></div>
+    </div>
+
+    <!-- 4. SUBDOMAIN FINDER -->
+    <div class="tool-card neo-card">
+        <div class="tool-header">
+            <i class="fas fa-sitemap"></i>
+            <span class="tool-title">Subdomain Finder</span>
+            <span class="neo-badge">domain</span>
+        </div>
+        <div class="tool-desc">Cari subdomain dari domain utama</div>
+        <div class="input-group">
+            <input type="text" class="neo-input" id="domainInput" placeholder="google.com" value="google.com">
+            <button class="neo-btn" id="domainBtn"><i class="fas fa-search"></i> Cari</button>
+        </div>
+        <div class="response-area" id="domainResponse"></div>
+    </div>
+
+    <!-- 5. ALL IN ONE DOWNLOADER -->
+    <div class="tool-card neo-card" style="grid-column: span 1;">
+        <div class="tool-header">
+            <i class="fas fa-cloud-download-alt"></i>
+            <span class="tool-title">AIO Downloader</span>
+            <span class="neo-badge">yt · tiktok · dll</span>
+        </div>
+        <div class="tool-desc">Download video/audio dari berbagai platform</div>
+        <div class="input-group">
+            <input type="text" class="neo-input" id="aioInput" placeholder="https://www.youtube.com/watch?v=..." value="https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+            <button class="neo-btn" id="aioBtn"><i class="fas fa-download"></i> Download</button>
+        </div>
+        <div class="response-area" id="aioResponse"></div>
+    </div>
+
+</div>
+
+<!-- footer -->
+<div class="footer-note">
+    <span><i class="fas fa-microchip"></i> API: nexray.eu.cc</span>
+    <span><i class="fas fa-shield-alt"></i> neo‑brutalism</span>
+    <span><i class="fas fa-crown"></i> @nexray — ElrayyXml</span>
+</div>
+
+<script>
+    (function() {
+        // Base API (tanpa trailing slash)
+        const API_BASE = 'https://api.nexray.eu.cc';
+
+        // --- helper untuk fetch & tampilkan ---
+        async function fetchTool(endpoint, params = {}, targetId, isJson = true) {
+            const respEl = document.getElementById(targetId);
+            if (!respEl) return;
+            respEl.textContent = '⏳ memuat...';
+            respEl.classList.add('loading');
+
+            try {
+                // bangun URL
+                let url = `${API_BASE}${endpoint}`;
+                const query = new URLSearchParams(params).toString();
+                if (query) url += `?${query}`;
+
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                let data;
+                const contentType = res.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    data = await res.json();
+                    const pretty = JSON.stringify(data, null, 2);
+                    respEl.textContent = pretty;
+                } else {
+                    // kemungkinan gambar atau teks
+                    const text = await res.text();
+                    if (text.length > 0) {
+                        // coba parse JSON (jika response json meski header tidak tepat)
+                        try {
+                            const json = JSON.parse(text);
+                            respEl.textContent = JSON.stringify(json, null, 2);
+                        } catch {
+                            respEl.textContent = text.slice(0, 1500) + (text.length > 1500 ? '…' : '');
+                        }
+                    } else {
+                        respEl.textContent = '✅ berhasil (response kosong)';
+                    }
+                }
+            } catch (err) {
+                respEl.textContent = `❌ error: ${err.message}`;
+            } finally {
+                respEl.classList.remove('loading');
+            }
+        }
+
+        // --- 1. NIK Parse (wajib 16 digit) ---
+        document.getElementById('nikBtn').addEventListener('click', () => {
+            const nik = document.getElementById('nikInput').value.trim();
+            if (nik.length !== 16) {
+                document.getElementById('nikResponse').textContent = '⚠️ NIK harus 16 digit.';
+                return;
+            }
+            fetchTool('/tools/nikparse', { nik }, 'nikResponse');
+        });
+
+        // --- 2. RemoveBG ---
+        document.getElementById('bgBtn').addEventListener('click', () => {
+            let url = document.getElementById('bgInput').value.trim();
+            if (!url) {
+                document.getElementById('bgResponse').textContent = '⚠️ masukkan URL gambar.';
+                return;
+            }
+            // jika tidak ada protokol, tambahkan https
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+                url = 'https://' + url;
+            }
+            fetchTool('/tools/removebg', { url }, 'bgResponse');
+        });
+
+        // --- 3. NGL Spam ---
+        document.getElementById('nglBtn').addEventListener('click', () => {
+            let url = document.getElementById('nglUrl').value.trim();
+            const pesan = document.getElementById('nglMsg').value.trim() || 'halo';
+            let jumlah = parseInt(document.getElementById('nglJumlah').value) || 1;
+            if (jumlah < 1) jumlah = 1;
+            if (!url) {
+                document.getElementById('nglResponse').textContent = '⚠️ masukkan link NGL (contoh: ngl.link/pasha)';
+                return;
+            }
+            // pastikan format url (hapus https:// jika ada)
+            url = url.replace(/^https?:\/\//, '');
+            // jika tidak mengandung ngl.link, bisa tetap dipakai
+            fetchTool('/tools/spamngl', { url, pesan, jumlah }, 'nglResponse');
+        });
+
+        // --- 4. Subdomain Finder ---
+        document.getElementById('domainBtn').addEventListener('click', () => {
+            let domain = document.getElementById('domainInput').value.trim();
+            if (!domain) {
+                document.getElementById('domainResponse').textContent = '⚠️ masukkan domain (contoh: google.com)';
+                return;
+            }
+            fetchTool('/tools/subdomainfinder', { domain }, 'domainResponse');
+        });
+
+        // --- 5. AIO Downloader ---
+        document.getElementById('aioBtn').addEventListener('click', () => {
+            let url = document.getElementById('aioInput').value.trim();
+            if (!url) {
+                document.getElementById('aioResponse').textContent = '⚠️ masukkan URL video (youtube, tiktok, dll)';
+                return;
+            }
+            fetchTool('/downloader/aio', { url }, 'aioResponse');
+        });
+
+        // --- tambahan: contoh autoload first tool (NIK) ---
+        // biarkan kosong, user klik sendiri
+
+        // tombol enter pada input
+        document.querySelectorAll('.neo-input').forEach(inp => {
+            inp.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    const parent = inp.closest('.tool-card');
+                    if (parent) {
+                        const btn = parent.querySelector('.neo-btn');
+                        if (btn) btn.click();
+                    }
+                }
+            });
+        });
+
+        // pesan awal (response area)
+        document.querySelectorAll('.response-area').forEach(el => {
+            if (!el.textContent.trim()) {
+                // biarkan placeholder
+            }
+        });
+
+    })();
+</script>
+
+<!-- (opsional) sedikit sentuhan extra -->
+</body>
+</html>
