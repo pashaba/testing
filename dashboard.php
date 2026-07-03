@@ -181,8 +181,8 @@ function checkPhoenixServer() {
 
 function checkOurinServer() {
     $ptero_panel = 'https://private.pterokudesu.web.id';
-    $api_key = 'ptlc_qEYuw1Iv0NQXPUMKzCUJhENIJ7P7SL6KFHTQ0kv9ckh';
-    $uuid = 'e076c725-f16d-4a7d-93d9-82c294e07f38';
+    $api_key = 'ptlc_MPqC9pJMS444G2C62qWllcF3mUemjlIkqjxq0DuCpIc';
+    $uuid = '1ba932b5-bc54-4e6e-83dc-239c3f51d742';
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $ptero_panel . '/api/client/servers/' . $uuid . '/resources');
