@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Polar.id - Platform Layanan Digital</title>
-    <meta name="title" content="Polar.id - Platform Layanan Digital Terpercaya" />
-    <meta name="description" content="Platform layanan digital lengkap: Jadibot WhatsApp, Tools (Ceknik, YouTube & TikTok Downloader), dan berbagai solusi digital lainnya. Gratis & terpercaya." />
+    <title>Polar.id - Platform Layanan Digital Premium</title>
+    <meta name="title" content="Polar.id - Platform Layanan Digital Premium Terpercaya" />
+    <meta name="description" content="Platform layanan digital premium: Jadibot WhatsApp, Tools (Ceknik, YouTube & TikTok Downloader), Hosting, Domain, dan berbagai solusi digital lainnya." />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
-    <meta property="og:title" content="Polar.id - Platform Layanan Digital">
+    <meta property="og:title" content="Polar.id - Platform Layanan Digital Premium">
     <meta property="og:url" content="https://polar.web.id">
     <meta property="og:image" content="https://polar.web.id/og-image.jpg">
-    <meta property="og:description" content="Platform layanan digital lengkap: Jadibot WhatsApp, Tools (Ceknik, YouTube & TikTok Downloader), dan berbagai solusi digital lainnya.">
+    <meta property="og:description" content="Platform layanan digital premium: Jadibot WhatsApp, Tools, Hosting, Domain, dan berbagai solusi digital lainnya.">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,7 +21,7 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
         /* ============================================================
-           NEO-BRUTALISM REFINED — BOLD, CLEAN, MODULAR
+           ULTRA PREMIUM NEO-BRUTALISM
            ============================================================ */
         :root {
             --black: #0a0a0a;
@@ -39,11 +39,13 @@
             --purple: #7c3aed;
             --pink: #ec4899;
             --teal: #14b8a6;
+            --gold: #f59e0b;
             
             --border-thick: 4px solid var(--black);
             --shadow-heavy: 8px 8px 0px 0px var(--black);
             --shadow-light: 4px 4px 0px 0px var(--black);
             --shadow-xl: 12px 12px 0px 0px var(--black);
+            --shadow-2xl: 16px 16px 0px 0px var(--black);
             
             --radius: 0px;
             --font-display: 'Space Grotesk', sans-serif;
@@ -71,6 +73,7 @@
             line-height: 1.6;
             min-height: 100vh;
             padding: 16px;
+            overflow-x: hidden;
         }
 
         /* ---- TYPOGRAPHY ---- */
@@ -87,7 +90,7 @@
             background: var(--black);
         }
         ::-webkit-scrollbar-thumb {
-            background: var(--primary);
+            background: linear-gradient(180deg, var(--primary), var(--purple));
             border: 2px solid var(--black);
         }
         ::-webkit-scrollbar-track {
@@ -97,7 +100,7 @@
 
         /* ---- UTILITY ---- */
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
             padding: 0 12px;
         }
@@ -121,14 +124,22 @@
             text-decoration: none;
             letter-spacing: 0.3px;
             position: relative;
+            overflow: hidden;
         }
 
-        .btn::after {
+        .btn::before {
             content: '';
             position: absolute;
-            inset: 0;
-            background: transparent;
-            transition: all 0.15s ease;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
         }
 
         .btn:hover {
@@ -137,13 +148,13 @@
         }
 
         .btn-primary {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--purple));
             color: var(--white);
             border-color: var(--black);
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
+            background: linear-gradient(135deg, var(--primary-dark), var(--purple));
         }
 
         .btn-secondary {
@@ -156,14 +167,14 @@
             background: #1a1a1a;
         }
 
-        .btn-gradient {
-            background: linear-gradient(135deg, var(--primary), var(--purple));
-            color: var(--white);
+        .btn-gold {
+            background: linear-gradient(135deg, var(--gold), #d97706);
+            color: var(--black);
             border-color: var(--black);
         }
 
-        .btn-gradient:hover {
-            background: linear-gradient(135deg, var(--primary-dark), var(--purple));
+        .btn-gold:hover {
+            background: linear-gradient(135deg, #fbbf24, var(--gold));
         }
 
         /* ---- SPLASH SCREEN ---- */
@@ -190,7 +201,7 @@
             width: 100px;
             height: 100px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--purple));
+            background: linear-gradient(135deg, var(--primary), var(--purple), var(--secondary));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -202,8 +213,8 @@
         }
 
         @keyframes logoPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.04); }
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.04) rotate(-3deg); }
         }
 
         .splash-name {
@@ -247,7 +258,7 @@
         .splash-progress-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--purple));
             animation: loadProgress 1.5s ease forwards;
         }
 
@@ -270,7 +281,7 @@
         .progress-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--purple));
             border-bottom: var(--border-thick);
             transition: width 0.15s ease;
         }
@@ -282,6 +293,7 @@
             margin-bottom: 16px;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(180deg, var(--white) 0%, var(--off-white) 100%);
         }
 
         .hero::before {
@@ -289,9 +301,21 @@
             position: absolute;
             top: -50%;
             right: -20%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(255, 0, 85, 0.05), transparent 70%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(255, 0, 85, 0.06), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(124, 58, 237, 0.04), transparent 70%);
             border-radius: 50%;
             pointer-events: none;
         }
@@ -314,7 +338,7 @@
             font-weight: 800;
             font-size: 0.8rem;
             text-transform: uppercase;
-            padding: 6px 18px;
+            padding: 8px 20px;
             border: var(--border-thick);
             margin-bottom: 24px;
             letter-spacing: 0.5px;
@@ -336,19 +360,19 @@
         }
 
         @keyframes dotPulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.3; transform: scale(0.8); }
         }
 
         .hero h1 {
-            font-size: clamp(2.8rem, 7vw, 4.8rem);
+            font-size: clamp(2.8rem, 7vw, 5rem);
             line-height: 1.05;
             margin-bottom: 16px;
             color: var(--black);
         }
 
         .hero h1 .highlight {
-            background: var(--yellow);
+            background: linear-gradient(135deg, var(--yellow), var(--gold));
             padding: 0 10px;
             display: inline-block;
             transform: rotate(-0.5deg);
@@ -358,7 +382,7 @@
         }
 
         .hero h1 .highlight::after {
-            content: '✨';
+            content: '✦';
             position: absolute;
             top: -20px;
             right: -20px;
@@ -375,13 +399,321 @@
             line-height: 1.5;
         }
 
-        /* ---- SEARCH / FILTER ---- */
+        /* ---- TRUST BADGES ---- */
+        .trust-badges {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 16px 28px;
+            margin-top: 16px;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            padding: 8px 16px;
+            background: var(--white);
+            border: var(--border-thick);
+            box-shadow: var(--shadow-light);
+            transition: all 0.15s ease;
+        }
+
+        .trust-item:hover {
+            transform: translate(3px, 3px);
+            box-shadow: none;
+        }
+
+        .trust-item i { font-size: 1.1rem; }
+        .trust-item.gratis i { color: var(--green); }
+        .trust-item.instan i { color: var(--secondary); }
+        .trust-item.pro i { color: var(--gold); }
+        .trust-item.aman i { color: var(--purple); }
+
+        /* ============================================================
+           CAROUSEL LAYANAN PREMIUM
+           ============================================================ */
+        .carousel-section {
+            padding: 40px 0 30px;
+            background: var(--black);
+            border-top: var(--border-thick);
+            border-bottom: var(--border-thick);
+            margin: 12px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .carousel-section::before {
+            content: '✦';
+            position: absolute;
+            top: -30px;
+            right: -20px;
+            font-size: 10rem;
+            color: rgba(255,255,255,0.03);
+            transform: rotate(20deg);
+        }
+
+        .carousel-header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .carousel-header .section-title {
+            color: var(--white);
+        }
+
+        .carousel-header .section-title::after {
+            background: var(--gold);
+        }
+
+        .carousel-header .section-subtitle {
+            color: #aaa;
+        }
+
+        .carousel-header .section-subtitle span {
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        .carousel-wrapper {
+            position: relative;
+            overflow: hidden;
+            padding: 0 40px;
+        }
+
+        .carousel-track {
+            display: flex;
+            gap: 24px;
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        }
+
+        .carousel-card {
+            min-width: 280px;
+            max-width: 320px;
+            flex-shrink: 0;
+            background: var(--white);
+            border: var(--border-thick);
+            box-shadow: var(--shadow-heavy);
+            padding: 24px 20px;
+            transition: all 0.3s ease;
+            position: relative;
+            transform: scale(0.95);
+            opacity: 0.7;
+            cursor: pointer;
+        }
+
+        .carousel-card.active {
+            transform: scale(1);
+            opacity: 1;
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .carousel-card:hover {
+            transform: translate(4px, 4px) scale(1.02);
+            box-shadow: none;
+        }
+
+        .carousel-card.active:hover {
+            transform: translate(4px, 4px);
+            box-shadow: none;
+        }
+
+        /* Thumbnail/Webview Mini */
+        .carousel-thumbnail {
+            width: 100%;
+            height: 140px;
+            background: var(--off-white);
+            border: var(--border-thick);
+            margin-bottom: 14px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .carousel-thumbnail iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            transform: scale(0.3);
+            transform-origin: top left;
+            width: 333%;
+            height: 333%;
+            pointer-events: none;
+        }
+
+        .carousel-thumbnail .thumbnail-placeholder {
+            font-size: 3rem;
+            opacity: 0.3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            color: var(--gray);
+        }
+
+        .carousel-thumbnail .thumbnail-placeholder span {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-family: var(--font-display);
+        }
+
+        .carousel-thumbnail .premium-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(135deg, var(--gold), #d97706);
+            color: var(--black);
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            padding: 2px 10px;
+            border: 2px solid var(--black);
+        }
+
+        .carousel-card-icon {
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+            display: inline-block;
+        }
+
+        .carousel-card-title {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            color: var(--black);
+        }
+
+        .carousel-card-desc {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #444;
+            margin: 4px 0 10px;
+        }
+
+        .carousel-card-price {
+            font-family: var(--font-display);
+            font-weight: 900;
+            font-size: 1.3rem;
+            color: var(--black);
+        }
+
+        .carousel-card-price .price-original {
+            font-size: 0.8rem;
+            color: var(--gray);
+            text-decoration: line-through;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .carousel-card .btn-small {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            padding: 8px 18px;
+            border: var(--border-thick);
+            background: var(--black);
+            color: var(--white);
+            text-decoration: none;
+            transition: all 0.15s ease;
+            margin-top: 10px;
+        }
+
+        .carousel-card .btn-small:hover {
+            transform: translate(3px, 3px);
+            box-shadow: none;
+            background: var(--gold);
+            color: var(--black);
+        }
+
+        /* Carousel Controls */
+        .carousel-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 48px;
+            height: 48px;
+            background: var(--white);
+            border: var(--border-thick);
+            box-shadow: var(--shadow-heavy);
+            color: var(--black);
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.15s ease;
+        }
+
+        .carousel-btn:hover {
+            transform: translateY(-50%) translate(3px, 3px);
+            box-shadow: none;
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .carousel-btn.prev {
+            left: 0;
+        }
+
+        .carousel-btn.next {
+            right: 0;
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            border: var(--border-thick);
+            background: var(--white);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            opacity: 0.4;
+        }
+
+        .carousel-dot.active {
+            background: var(--gold);
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        .carousel-dot:hover {
+            opacity: 0.8;
+        }
+
+        /* ============================================================
+           SEARCH / FILTER
+           ============================================================ */
         .search-section {
             padding: 20px 0 10px;
         }
 
         .search-box {
-            max-width: 500px;
+            max-width: 520px;
             margin: 0 auto;
             display: flex;
             gap: 8px;
@@ -425,44 +757,9 @@
         }
 
         .search-box button:hover {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--purple));
             transform: scale(1.05);
         }
-
-        /* ---- TRUST BADGES ---- */
-        .trust-badges {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 16px 28px;
-            margin-top: 16px;
-        }
-
-        .trust-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-family: var(--font-display);
-            font-weight: 800;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            padding: 6px 14px;
-            background: var(--white);
-            border: var(--border-thick);
-            box-shadow: var(--shadow-light);
-            transition: all 0.15s ease;
-        }
-
-        .trust-item:hover {
-            transform: translate(3px, 3px);
-            box-shadow: none;
-        }
-
-        .trust-item i { font-size: 1.1rem; }
-        .trust-item.gratis i { color: var(--green); }
-        .trust-item.instan i { color: var(--secondary); }
-        .trust-item.pro i { color: var(--yellow); }
-        .trust-item.aman i { color: var(--purple); }
 
         /* ============================================================
            LAYANAN / SERVICES GRID
@@ -496,7 +793,7 @@
             transform: translateX(-50%);
             width: 60%;
             height: 4px;
-            background: var(--primary);
+            background: linear-gradient(90deg, var(--primary), var(--purple));
             border: 2px solid var(--black);
         }
 
@@ -556,10 +853,10 @@
             left: 0;
             width: 100%;
             height: 4px;
-            background: var(--primary);
+            background: linear-gradient(90deg, var(--primary), var(--purple));
             transform: scaleX(0);
             transform-origin: left;
-            transition: transform 0.3s ease;
+            transition: transform 0.4s ease;
         }
 
         .service-card:hover::before {
@@ -571,7 +868,6 @@
             box-shadow: none;
         }
 
-        /* Decorative corner */
         .service-card::after {
             content: '✦';
             position: absolute;
@@ -605,7 +901,7 @@
         }
 
         .service-badge.populer {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--purple));
             color: var(--white);
         }
 
@@ -617,6 +913,11 @@
         .service-badge.promo {
             background: var(--orange);
             color: var(--white);
+        }
+
+        .service-badge.premium {
+            background: linear-gradient(135deg, var(--gold), #d97706);
+            color: var(--black);
         }
 
         /* Icon */
@@ -642,6 +943,7 @@
         .service-card.type-tools .service-icon { background: linear-gradient(135deg, var(--secondary), var(--teal)); color: var(--black); }
         .service-card.type-hosting .service-icon { background: linear-gradient(135deg, var(--green), #059669); color: var(--black); }
         .service-card.type-domain .service-icon { background: linear-gradient(135deg, var(--purple), #6d28d9); }
+        .service-card.type-premium .service-icon { background: linear-gradient(135deg, var(--gold), #d97706); color: var(--black); }
         .service-card.type-other .service-icon { background: linear-gradient(135deg, var(--orange), #ea580c); }
 
         .service-name {
@@ -780,6 +1082,15 @@
             color: var(--white);
         }
 
+        .service-card.type-premium .service-btn {
+            background: linear-gradient(135deg, var(--gold), #d97706);
+            color: var(--black);
+        }
+        .service-card.type-premium .service-btn:hover {
+            background: var(--black);
+            color: var(--white);
+        }
+
         /* ============================================================
            STATS STRIP
            ============================================================ */
@@ -802,6 +1113,7 @@
 
         .strip-item:hover {
             background: var(--off-white);
+            transform: scale(1.02);
         }
 
         .strip-item:nth-child(2n) { border-right: none; }
@@ -874,7 +1186,7 @@
         }
 
         .testi-avatar { font-size: 1.6rem; margin-bottom: 4px; }
-        .testi-rating { color: var(--yellow); font-size: 1rem; letter-spacing: 1px; margin-bottom: 4px; }
+        .testi-rating { color: var(--gold); font-size: 1rem; letter-spacing: 1px; margin-bottom: 4px; }
         .testi-text { font-size: 0.95rem; font-weight: 500; font-style: italic; color: #1a1a1a; margin-bottom: 6px; }
         .testi-name { font-family: var(--font-display); font-weight: 800; text-transform: uppercase; font-size: 0.85rem; }
 
@@ -925,7 +1237,7 @@
 
         .faq-item.open .faq-question {
             border-bottom: var(--border-thick);
-            background: var(--black);
+            background: linear-gradient(135deg, var(--black), #1a1a1a);
             color: var(--white);
         }
 
@@ -951,10 +1263,10 @@
         .cta-wrapper { padding: 24px 0 32px; }
 
         .cta-box {
-            background: var(--black);
+            background: linear-gradient(135deg, var(--black), #1a1a1a);
             border: var(--border-thick);
             box-shadow: var(--shadow-heavy);
-            padding: 36px 20px;
+            padding: 40px 20px;
             text-align: center;
             color: var(--white);
             position: relative;
@@ -964,17 +1276,31 @@
         .cta-box::before {
             content: '✦';
             position: absolute;
-            top: -20px;
+            top: -30px;
             right: -10px;
-            font-size: 8rem;
+            font-size: 10rem;
             color: rgba(255,255,255,0.03);
             transform: rotate(15deg);
+        }
+
+        .cta-box::after {
+            content: '';
+            position: absolute;
+            bottom: -50%;
+            left: -20%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 0, 85, 0.05), transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
         }
 
         .cta-box h2 {
             font-size: clamp(1.8rem, 3vw, 2.2rem);
             color: var(--white);
             margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
         }
 
         .cta-box p {
@@ -985,10 +1311,12 @@
             max-width: 460px;
             margin-left: auto;
             margin-right: auto;
+            position: relative;
+            z-index: 1;
         }
 
         .cta-box .btn-cta {
-            background: var(--yellow);
+            background: linear-gradient(135deg, var(--gold), #d97706);
             color: var(--black);
             border-color: var(--white);
             display: inline-flex;
@@ -1004,6 +1332,8 @@
             cursor: pointer;
             transition: all 0.15s ease;
             text-decoration: none;
+            position: relative;
+            z-index: 1;
         }
 
         .cta-box .btn-cta:hover {
@@ -1021,7 +1351,7 @@
             left: 24px;
             width: 50px;
             height: 50px;
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--purple));
             color: var(--white);
             border: var(--border-thick);
             box-shadow: var(--shadow-heavy);
@@ -1072,6 +1402,19 @@
             text-transform: uppercase;
             margin-bottom: 8px;
             color: var(--black);
+            position: relative;
+            display: inline-block;
+        }
+
+        .footer-col h4::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 30px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--purple));
+            border: 1px solid var(--black);
         }
 
         .footer-col p,
@@ -1082,12 +1425,12 @@
             text-decoration: none;
             display: block;
             margin-bottom: 4px;
+            transition: all 0.15s ease;
         }
 
         .footer-col a:hover {
-            text-decoration: underline;
-            text-decoration-thickness: 3px;
             color: var(--primary);
+            transform: translateX(4px);
         }
 
         .footer-social {
@@ -1110,7 +1453,7 @@
         }
 
         .footer-social a:hover {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--purple));
             transform: translate(3px, 3px);
             box-shadow: none;
             text-decoration: none;
@@ -1147,9 +1490,17 @@
                 bottom: 16px;
                 left: 16px;
             }
+            .carousel-wrapper { padding: 0 20px; }
+            .carousel-card { min-width: 220px; max-width: 260px; }
+            .carousel-btn { width: 36px; height: 36px; font-size: 0.9rem; }
         }
 
-        /* EMPTY STATE */
+        @media (max-width: 768px) {
+            .carousel-card { min-width: 240px; max-width: 280px; }
+            .carousel-thumbnail { height: 100px; }
+        }
+
+        /* ---- EMPTY STATE ---- */
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -1197,7 +1548,7 @@
             text-transform: uppercase;
         }
 
-        /* ANIMATED BG untuk card tertentu */
+        /* ANIMATIONS */
         .service-card.type-jadibot .service-icon i {
             animation: whatsappPulse 2s ease-in-out infinite;
         }
@@ -1215,15 +1566,25 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .service-card.type-premium .service-icon i {
+            animation: premiumGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes premiumGlow {
+            0%, 100% { filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0)); }
+            50% { filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.5)); }
+        }
     </style>
 </head>
 <body>
 
 <?php
 // ============================================================
-// KONFIGURASI LAYANAN — Tambah layanan baru di sini!
+// KONFIGURASI LAYANAN
 // ============================================================
 $services = [
+    // FREE LAYANAN
     [
         'id' => 'jadibot',
         'type' => 'jadibot',
@@ -1238,6 +1599,7 @@ $services = [
         'target' => '_self',
         'users' => '1.2k+',
         'featured' => true,
+        'is_premium' => false,
         'tags' => ['Multi-Device', 'Pairing', 'No Login'],
         'created_at' => '2024-01-01'
     ],
@@ -1255,72 +1617,157 @@ $services = [
         'target' => '_self',
         'users' => '500+',
         'featured' => true,
+        'is_premium' => false,
         'tags' => ['Ceknik', 'YT Downloader', 'TT Downloader', 'QR Generator'],
         'created_at' => '2024-03-15'
     ],
+    
     // ============================================================
-    // 👇 TAMBAH LAYANAN BARU DI SINI
+    // PREMIUM LAYANAN — Untuk Carousel
     // ============================================================
-    /*
     [
-        'id' => 'hosting',
-        'type' => 'hosting',
-        'name' => 'Free Hosting',
-        'desc' => 'Hosting gratis untuk website statis dengan uptime 99.9% dan unlimited bandwidth.',
+        'id' => 'premium-hosting',
+        'type' => 'premium',
+        'name' => 'Premium Hosting',
+        'desc' => 'Hosting premium dengan performa tinggi, uptime 99.9%, dan support 24/7.',
         'icon' => 'fa-solid fa-server',
-        'badge' => 'Baru',
-        'badge_type' => 'baru',
+        'badge' => 'Premium',
+        'badge_type' => 'premium',
         'status' => 'Online',
         'status_type' => 'online',
-        'url' => 'https://polar.web.id/hosting',
-        'target' => '_self',
-        'users' => '200+',
+        'url' => 'https://polar.web.id/premium/hosting',
+        'target' => '_blank',
+        'users' => '250+',
         'featured' => false,
-        'tags' => ['Uptime 99.9%', 'Unlimited'],
+        'is_premium' => true,
+        'price' => 'Rp 50.000',
+        'price_original' => 'Rp 100.000',
+        'thumbnail' => 'hosting',
+        'tags' => ['SSD', 'SSL', '24/7 Support'],
         'created_at' => '2024-06-01'
     ],
     [
-        'id' => 'domain',
-        'type' => 'domain',
-        'name' => 'Domain Murah',
-        'desc' => 'Dapatkan domain .com, .id, .web.id dengan harga termurah se-Indonesia!',
+        'id' => 'premium-domain',
+        'type' => 'premium',
+        'name' => 'Domain .com',
+        'desc' => 'Dapatkan domain .com premium dengan harga spesial dan perlindungan privasi gratis.',
         'icon' => 'fa-solid fa-globe',
-        'badge' => 'Promo',
-        'badge_type' => 'promo',
+        'badge' => 'Premium',
+        'badge_type' => 'premium',
         'status' => 'Online',
         'status_type' => 'online',
-        'url' => 'https://polar.web.id/domain',
+        'url' => 'https://polar.web.id/premium/domain',
         'target' => '_blank',
-        'users' => '150+',
+        'users' => '180+',
         'featured' => false,
-        'tags' => ['.com', '.id', '.web.id'],
+        'is_premium' => true,
+        'price' => 'Rp 120.000',
+        'price_original' => 'Rp 200.000',
+        'thumbnail' => 'domain',
+        'tags' => ['.com', 'Privacy', 'Free SSL'],
         'created_at' => '2024-07-10'
     ],
     [
-        'id' => 'api',
-        'type' => 'other',
-        'name' => 'API Gateway',
-        'desc' => 'Akses API gratis untuk berbagai kebutuhan integrasi dan automation.',
+        'id' => 'premium-api',
+        'type' => 'premium',
+        'name' => 'API Premium',
+        'desc' => 'Akses API premium dengan rate limit tinggi dan support priority untuk bisnis Anda.',
         'icon' => 'fa-solid fa-code',
-        'badge' => 'Beta',
-        'badge_type' => 'baru',
-        'status' => 'Maintenance',
-        'status_type' => 'maintenance',
-        'url' => '#',
-        'target' => '_self',
-        'users' => '75+',
+        'badge' => 'Premium',
+        'badge_type' => 'premium',
+        'status' => 'Online',
+        'status_type' => 'online',
+        'url' => 'https://polar.web.id/premium/api',
+        'target' => '_blank',
+        'users' => '95+',
         'featured' => false,
-        'tags' => ['REST API', 'Free'],
+        'is_premium' => true,
+        'price' => 'Rp 200.000',
+        'price_original' => 'Rp 350.000',
+        'thumbnail' => 'api',
+        'tags' => ['REST API', 'High Rate', 'Priority Support'],
         'created_at' => '2024-08-20'
+    ],
+    [
+        'id' => 'premium-bot',
+        'type' => 'premium',
+        'name' => 'Bot WhatsApp Pro',
+        'desc' => 'Bot WhatsApp premium dengan fitur lengkap: auto reply, schedule, AI response, dan analytics.',
+        'icon' => 'fa-brands fa-whatsapp',
+        'badge' => 'Premium',
+        'badge_type' => 'premium',
+        'status' => 'Online',
+        'status_type' => 'online',
+        'url' => 'https://polar.web.id/premium/bot',
+        'target' => '_blank',
+        'users' => '300+',
+        'featured' => false,
+        'is_premium' => true,
+        'price' => 'Rp 75.000',
+        'price_original' => 'Rp 150.000',
+        'thumbnail' => 'bot',
+        'tags' => ['Auto Reply', 'AI', 'Analytics'],
+        'created_at' => '2024-09-01'
+    ],
+    [
+        'id' => 'premium-storage',
+        'type' => 'premium',
+        'name' => 'Cloud Storage',
+        'desc' => 'Penyimpanan cloud aman dengan enkripsi end-to-end dan akses dari mana saja.',
+        'icon' => 'fa-solid fa-cloud',
+        'badge' => 'Premium',
+        'badge_type' => 'premium',
+        'status' => 'Online',
+        'status_type' => 'online',
+        'url' => 'https://polar.web.id/premium/storage',
+        'target' => '_blank',
+        'users' => '120+',
+        'featured' => false,
+        'is_premium' => true,
+        'price' => 'Rp 45.000',
+        'price_original' => 'Rp 90.000',
+        'thumbnail' => 'storage',
+        'tags' => ['Encrypted', '50GB', 'Sync'],
+        'created_at' => '2024-10-15'
+    ],
+    [
+        'id' => 'premium-cdn',
+        'type' => 'premium',
+        'name' => 'CDN Premium',
+        'desc' => 'Jaringan distribusi konten global dengan kecepatan tinggi dan keamanan DDoS protection.',
+        'icon' => 'fa-solid fa-network-wired',
+        'badge' => 'Premium',
+        'badge_type' => 'premium',
+        'status' => 'Online',
+        'status_type' => 'online',
+        'url' => 'https://polar.web.id/premium/cdn',
+        'target' => '_blank',
+        'users' => '65+',
+        'featured' => false,
+        'is_premium' => true,
+        'price' => 'Rp 150.000',
+        'price_original' => 'Rp 280.000',
+        'thumbnail' => 'cdn',
+        'tags' => ['Global', 'DDoS Protection', 'Fast'],
+        'created_at' => '2024-11-01'
     ]
-    */
 ];
+
+// Filter FREE services untuk grid
+$free_services = array_filter($services, function($s) {
+    return !isset($s['is_premium']) || $s['is_premium'] === false;
+});
+
+// Filter PREMIUM services untuk carousel
+$premium_services = array_filter($services, function($s) {
+    return isset($s['is_premium']) && $s['is_premium'] === true;
+});
 
 // Ambil parameter filter dari URL
 $search = isset($_GET['q']) ? strtolower(trim($_GET['q'])) : '';
 
-// Filter layanan berdasarkan pencarian
-$filtered_services = array_filter($services, function($service) use ($search) {
+// Filter free services berdasarkan pencarian
+$filtered_services = array_filter($free_services, function($service) use ($search) {
     if (empty($search)) return true;
     return strpos(strtolower($service['name']), $search) !== false ||
            strpos(strtolower($service['desc']), $search) !== false ||
@@ -1330,7 +1777,7 @@ $filtered_services = array_filter($services, function($service) use ($search) {
            }, false);
 });
 
-// Pisahkan layanan featured dan regular
+// Pisahkan featured dan regular
 $featured_services = array_filter($filtered_services, function($s) {
     return isset($s['featured']) && $s['featured'] === true;
 });
@@ -1338,13 +1785,12 @@ $regular_services = array_filter($filtered_services, function($s) {
     return !isset($s['featured']) || $s['featured'] !== true;
 });
 
-// Gabungkan kembali dengan featured di depan
 $sorted_services = array_merge($featured_services, $regular_services);
 
-// ============================================================
-// STATISTIK
-// ============================================================
+// Statistik
 $total_services = count($services);
+$total_free = count($free_services);
+$total_premium = count($premium_services);
 $active_services = count(array_filter($services, function($s) {
     return $s['status_type'] === 'online';
 }));
@@ -1359,7 +1805,7 @@ $active_services = count(array_filter($services, function($s) {
     <div class="splash-name">Polar.id</div>
     <div class="splash-spinner"></div>
     <div class="splash-progress"><div class="splash-progress-bar"></div></div>
-    <div class="splash-sub">Memuat layanan...</div>
+    <div class="splash-sub">Memuat layanan premium...</div>
 </div>
 
 <!-- ============================================================
@@ -1369,10 +1815,10 @@ $active_services = count(array_filter($services, function($s) {
     <div class="container hero-content">
         <div class="hero-badge">
             <div class="hero-badge-dot"></div>
-            <?= $active_services ?> Layanan Aktif
+            <?= $active_services ?> Layanan Aktif • <?= $total_premium ?> Premium
         </div>
 
-        <h1>Platform Layanan <span class="highlight">Digital</span> Terpercaya</h1>
+        <h1>Platform Layanan <span class="highlight">Digital</span> Premium</h1>
 
         <p class="hero-subtitle">
             Temukan berbagai layanan digital gratis & premium untuk kebutuhan Anda. Dari bot WhatsApp hingga tools lengkap.
@@ -1381,11 +1827,105 @@ $active_services = count(array_filter($services, function($s) {
         <div class="trust-badges">
             <div class="trust-item gratis"><i class="fas fa-check-circle"></i> 100% Gratis</div>
             <div class="trust-item instan"><i class="fas fa-bolt"></i> Akses Instan</div>
-            <div class="trust-item pro"><i class="fas fa-star"></i> Premium Tersedia</div>
+            <div class="trust-item pro"><i class="fas fa-crown"></i> Premium Tersedia</div>
             <div class="trust-item aman"><i class="fas fa-shield-alt"></i> Aman & Terpercaya</div>
         </div>
     </div>
 </section>
+
+<!-- ============================================================
+     CAROUSEL PREMIUM
+     ============================================================ -->
+<?php if (count($premium_services) > 0): ?>
+<section class="carousel-section" id="premium">
+    <div class="container">
+        <div class="carousel-header">
+            <div class="section-title">✨ Layanan Premium</div>
+            <div class="section-subtitle">
+                <span><?= $total_premium ?></span> layanan premium dengan fitur eksklusif untuk kebutuhan profesional
+            </div>
+        </div>
+
+        <div class="carousel-wrapper">
+            <button class="carousel-btn prev" id="carouselPrev" aria-label="Previous">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            
+            <div class="carousel-track" id="carouselTrack">
+                <?php foreach ($premium_services as $index => $service): ?>
+                <div class="carousel-card <?= $index === 0 ? 'active' : '' ?>" data-index="<?= $index ?>">
+                    <!-- Thumbnail / Webview Mini -->
+                    <div class="carousel-thumbnail">
+                        <?php if ($service['thumbnail'] === 'hosting'): ?>
+                            <div class="thumbnail-placeholder">
+                                <i class="fas fa-server"></i>
+                                <span>Premium Hosting</span>
+                            </div>
+                        <?php elseif ($service['thumbnail'] === 'domain'): ?>
+                            <div class="thumbnail-placeholder">
+                                <i class="fas fa-globe"></i>
+                                <span>Domain .com</span>
+                            </div>
+                        <?php elseif ($service['thumbnail'] === 'api'): ?>
+                            <div class="thumbnail-placeholder">
+                                <i class="fas fa-code"></i>
+                                <span>API Premium</span>
+                            </div>
+                        <?php elseif ($service['thumbnail'] === 'bot'): ?>
+                            <div class="thumbnail-placeholder">
+                                <i class="fab fa-whatsapp"></i>
+                                <span>Bot Pro</span>
+                            </div>
+                        <?php elseif ($service['thumbnail'] === 'storage'): ?>
+                            <div class="thumbnail-placeholder">
+                                <i class="fas fa-cloud"></i>
+                                <span>Cloud Storage</span>
+                            </div>
+                        <?php elseif ($service['thumbnail'] === 'cdn'): ?>
+                            <div class="thumbnail-placeholder">
+                                <i class="fas fa-network-wired"></i>
+                                <span>CDN Premium</span>
+                            </div>
+                        <?php else: ?>
+                            <div class="thumbnail-placeholder">
+                                <i class="<?= $service['icon'] ?>"></i>
+                                <span><?= $service['name'] ?></span>
+                            </div>
+                        <?php endif; ?>
+                        <div class="premium-badge">★ Premium</div>
+                    </div>
+
+                    <div class="carousel-card-icon">
+                        <i class="<?= $service['icon'] ?>"></i>
+                    </div>
+                    <div class="carousel-card-title"><?= $service['name'] ?></div>
+                    <div class="carousel-card-desc"><?= strip_tags($service['desc']) ?></div>
+                    
+                    <div class="carousel-card-price">
+                        <span class="price-original"><?= $service['price_original'] ?? '' ?></span>
+                        <?= $service['price'] ?? 'Hubungi' ?>
+                    </div>
+                    
+                    <a href="<?= $service['url'] ?>" target="<?= $service['target'] ?>" class="btn-small">
+                        <i class="fas fa-crown"></i> Beli Sekarang
+                    </a>
+                </div>
+                <?php endforeach; ?>
+            </div>
+
+            <button class="carousel-btn next" id="carouselNext" aria-label="Next">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="carousel-dots" id="carouselDots">
+            <?php foreach ($premium_services as $index => $service): ?>
+            <button class="carousel-dot <?= $index === 0 ? 'active' : '' ?>" data-index="<?= $index ?>" aria-label="Slide <?= $index + 1 ?>"></button>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
 
 <!-- ============================================================
      STATS
@@ -1397,28 +1937,28 @@ $active_services = count(array_filter($services, function($s) {
             <div class="strip-label">Total Layanan</div>
         </div>
         <div class="strip-item">
-            <div class="strip-number"><?= $active_services ?></div>
-            <div class="strip-label">Layanan Aktif</div>
+            <div class="strip-number"><?= $total_free ?></div>
+            <div class="strip-label">Layanan Gratis</div>
+        </div>
+        <div class="strip-item">
+            <div class="strip-number"><?= $total_premium ?></div>
+            <div class="strip-label">Layanan Premium</div>
         </div>
         <div class="strip-item">
             <div class="strip-number">10k+</div>
             <div class="strip-label">Pengguna</div>
         </div>
-        <div class="strip-item">
-            <div class="strip-number">24/7</div>
-            <div class="strip-label">Uptime</div>
-        </div>
     </div>
 </div>
 
 <!-- ============================================================
-     SEARCH + LAYANAN
+     SEARCH + FREE LAYANAN GRID
      ============================================================ -->
 <section class="services-section container" id="services">
     <div class="section-header">
-        <div class="section-title">Layanan Kami</div>
+        <div class="section-title">🎯 Layanan Gratis</div>
         <div class="section-subtitle">
-            <span><?= $total_services ?></span> layanan siap pakai untuk kebutuhan digital Anda
+            <span><?= $total_free ?></span> layanan gratis siap pakai untuk kebutuhan digital Anda
         </div>
     </div>
 
@@ -1433,29 +1973,25 @@ $active_services = count(array_filter($services, function($s) {
         </form>
     </div>
 
-    <!-- Grid Layanan -->
+    <!-- Grid Layanan Free -->
     <?php if (count($sorted_services) > 0): ?>
     <div class="services-grid" id="servicesGrid">
         <?php foreach ($sorted_services as $service): ?>
         <div class="service-card type-<?= $service['type'] ?>" data-aos="fade-up" data-service="<?= $service['id'] ?>">
             
-            <!-- Badge -->
             <?php if (!empty($service['badge'])): ?>
             <div class="service-badge <?= $service['badge_type'] ?>">
                 <?= $service['badge'] ?>
             </div>
             <?php endif; ?>
 
-            <!-- Icon -->
             <div class="service-icon">
                 <i class="<?= $service['icon'] ?>"></i>
             </div>
 
-            <!-- Nama & Deskripsi -->
             <div class="service-name"><?= $service['name'] ?></div>
             <div class="service-desc"><?= $service['desc'] ?></div>
 
-            <!-- Tags -->
             <?php if (!empty($service['tags'])): ?>
             <div class="service-tags">
                 <?php foreach (array_slice($service['tags'], 0, 4) as $tag): ?>
@@ -1464,7 +2000,6 @@ $active_services = count(array_filter($services, function($s) {
             </div>
             <?php endif; ?>
 
-            <!-- Meta -->
             <div class="service-meta">
                 <span class="status-<?= $service['status_type'] ?>">
                     <i class="fas fa-circle"></i> <?= $service['status'] ?>
@@ -1474,7 +2009,6 @@ $active_services = count(array_filter($services, function($s) {
                 </span>
             </div>
 
-            <!-- Tombol -->
             <?php if (!empty($service['url']) && $service['url'] !== '#'): ?>
             <a href="<?= $service['url'] ?>" target="<?= $service['target'] ?>" class="service-btn">
                 <i class="fas fa-arrow-right"></i> Akses Layanan
@@ -1497,9 +2031,8 @@ $active_services = count(array_filter($services, function($s) {
     </div>
     <?php endif; ?>
 
-    <!-- Info tambahan -->
     <div style="text-align:center;margin-top:24px;font-weight:600;color:#666;font-size:0.85rem;">
-        Menampilkan <?= count($sorted_services) ?> dari <?= $total_services ?> layanan
+        Menampilkan <?= count($sorted_services) ?> dari <?= $total_free ?> layanan gratis
         <?php if (!empty($search)): ?>
         untuk pencarian "<strong><?= htmlspecialchars($search) ?></strong>"
         <?php endif; ?>
@@ -1510,7 +2043,7 @@ $active_services = count(array_filter($services, function($s) {
      CUSTOM SECTION
      ============================================================ -->
 <section class="custom-section container" data-aos="fade-up">
-    <div style="background:var(--white);border:var(--border-thick);box-shadow:var(--shadow-light);padding:24px 20px;text-align:center;">
+    <div style="background:var(--white);border:var(--border-thick);box-shadow:var(--shadow-heavy);padding:28px 20px;text-align:center;">
         <h3 style="font-family:var(--font-display);text-transform:uppercase;font-weight:900;font-size:1.2rem;">
             <i class="fas fa-rocket" style="color:var(--primary);"></i> Butuh layanan khusus?
         </h3>
@@ -1529,27 +2062,27 @@ $active_services = count(array_filter($services, function($s) {
 <section class="testimonials-section" data-aos="fade-up">
     <div class="container">
         <div class="section-header">
-            <div class="section-title">Apa Kata Mereka?</div>
-            <div class="section-subtitle">Ribuan pengguna telah mempercayakan kebutuhan digitalnya pada kami</div>
+            <div class="section-title">💬 Testimoni</div>
+            <div class="section-subtitle">Apa kata mereka tentang layanan kami</div>
         </div>
 
         <div class="testi-grid">
             <div class="testi-card">
                 <div class="testi-avatar">👤</div>
                 <div class="testi-rating">★★★★★</div>
-                <div class="testi-text">"Jadibot WhatsApp-nya sangat mudah digunakan. Tinggal klik, langsung online tanpa ribet!"</div>
+                <div class="testi-text">"Jadibot WhatsApp-nya sangat mudah digunakan. Premium hosting juga kencang banget!"</div>
                 <div class="testi-name">— Andi Setiawan</div>
             </div>
             <div class="testi-card">
                 <div class="testi-avatar">👤</div>
                 <div class="testi-rating">★★★★★</div>
-                <div class="testi-text">"Tools collection-nya lengkap banget. Ada Ceknik, YouTube & TikTok downloader, semua gratis!"</div>
+                <div class="testi-text">"Tools collection lengkap banget. Ada Ceknik, YouTube & TikTok downloader, semua gratis dan cepat!"</div>
                 <div class="testi-name">— Budi Santoso</div>
             </div>
             <div class="testi-card">
                 <div class="testi-avatar">👤</div>
                 <div class="testi-rating">★★★★★</div>
-                <div class="testi-text">"Platform yang sangat membantu. Layanan lengkap dan semuanya gratis. Recommended!"</div>
+                <div class="testi-text">"Layanan premium sangat worth it. Support cepat dan fitur lengkap. Highly recommended!"</div>
                 <div class="testi-name">— Citra Dewi</div>
             </div>
         </div>
@@ -1559,32 +2092,32 @@ $active_services = count(array_filter($services, function($s) {
 <!-- ============================================================
      FAQ
      ============================================================ -->
-<section class="faq-section container" data-aos="fade-up">
+<section class="faq-section container" data-aos="fade-up" id="faq">
     <div class="section-header">
-        <div class="section-title">Pertanyaan Umum</div>
-        <div class="section-subtitle">Jawaban cepat untuk pertanyaan yang sering diajukan</div>
+        <div class="section-title">❓ FAQ</div>
+        <div class="section-subtitle">Jawaban untuk pertanyaan yang sering diajukan</div>
     </div>
 
     <div class="faq-grid">
         <div class="faq-item">
             <div class="faq-question"><span>❓ Apa itu Polar.id?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer">Platform layanan digital terpercaya yang menyediakan berbagai solusi gratis seperti bot WhatsApp, tools (Ceknik, YouTube/TikTok Downloader), hosting, dan lainnya.</div>
+            <div class="faq-answer">Platform layanan digital terpercaya yang menyediakan berbagai solusi gratis & premium seperti bot WhatsApp, tools (Ceknik, YouTube/TikTok Downloader), hosting, domain, dan lainnya.</div>
         </div>
         <div class="faq-item">
-            <div class="faq-question"><span>🔗 Apakah semua layanan gratis?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer">Ya! Sebagian besar layanan kami gratis. Beberapa layanan premium juga tersedia dengan fitur tambahan.</div>
+            <div class="faq-question"><span>🔗 Apa perbedaan layanan gratis dan premium?</span><i class="fas fa-chevron-down"></i></div>
+            <div class="faq-answer">Layanan gratis dapat diakses tanpa biaya dengan fitur standar. Layanan premium menawarkan fitur eksklusif, performa lebih tinggi, dan support prioritas dengan harga terjangkau.</div>
         </div>
         <div class="faq-item">
             <div class="faq-question"><span>🛡️ Apakah aman menggunakan layanan ini?</span><i class="fas fa-chevron-down"></i></div>
             <div class="faq-answer">Sangat aman. Data Anda terenkripsi dan kami tidak menyimpan informasi sensitif pengguna.</div>
         </div>
         <div class="faq-item">
-            <div class="faq-question"><span>📱 Bagaimana cara mengakses layanan?</span><i class="fas fa-chevron-down"></i></div>
-            <div class="faq-answer">Cukup pilih layanan yang Anda butuhkan dari daftar di atas, klik tombol "Akses Layanan", dan mulai gunakan!</div>
-        </div>
-        <div class="faq-item">
             <div class="faq-question"><span>🎥 Apa saja yang ada di Tools Collection?</span><i class="fas fa-chevron-down"></i></div>
             <div class="faq-answer">Tools Collection menyediakan berbagai alat digital seperti Ceknik (Cek NIK KTP), YouTube Downloader, TikTok Downloader, QR Code Generator, Password Generator, dan masih banyak lagi!</div>
+        </div>
+        <div class="faq-item">
+            <div class="faq-question"><span>💳 Bagaimana cara membeli layanan premium?</span><i class="fas fa-chevron-down"></i></div>
+            <div class="faq-answer">Cukup pilih layanan premium dari carousel di atas, klik tombol "Beli Sekarang", dan ikuti petunjuk pembayaran yang tersedia.</div>
         </div>
     </div>
 </section>
@@ -1594,8 +2127,8 @@ $active_services = count(array_filter($services, function($s) {
      ============================================================ -->
 <div class="cta-wrapper container" data-aos="fade-up">
     <div class="cta-box">
-        <h2>Siap memulai?</h2>
-        <p>Jelajahi semua layanan digital kami. Gratis, cepat, dan tanpa registrasi.</p>
+        <h2>🚀 Siap memulai?</h2>
+        <p>Jelajahi semua layanan digital kami. Gratis, cepat, dan premium tersedia.</p>
         <a href="#services" class="btn-cta">
             <i class="fas fa-arrow-down"></i> Lihat Semua Layanan
         </a>
@@ -1615,7 +2148,7 @@ $active_services = count(array_filter($services, function($s) {
         <div class="footer-content">
             <div class="footer-col">
                 <h4>Polar.id</h4>
-                <p style="font-weight:500;">Platform layanan digital terpercaya untuk berbagai kebutuhan Anda.</p>
+                <p style="font-weight:500;">Platform layanan digital premium terpercaya untuk berbagai kebutuhan Anda.</p>
                 <div class="footer-social">
                     <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
                     <a href="#" aria-label="TikTok"><i class="fab fa-tiktok"></i></a>
@@ -1628,11 +2161,13 @@ $active_services = count(array_filter($services, function($s) {
                 <?php foreach (array_slice($services, 0, 4) as $s): ?>
                 <a href="<?= $s['url'] ?>" target="<?= $s['target'] ?>"><?= $s['name'] ?></a>
                 <?php endforeach; ?>
+                <a href="#premium">✨ Premium</a>
             </div>
             <div class="footer-col">
                 <h4>Menu</h4>
                 <a href="index.php">Beranda</a>
                 <a href="#services">Layanan</a>
+                <a href="#premium">Premium</a>
                 <a href="#faq">FAQ</a>
             </div>
             <div class="footer-col">
@@ -1652,14 +2187,18 @@ $active_services = count(array_filter($services, function($s) {
      ============================================================ -->
 <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-    // SPLASH
+    // ============================================================
+    // SPLASH SCREEN
+    // ============================================================
     window.addEventListener('load', () => {
         setTimeout(() => {
             document.getElementById('splash')?.classList.add('hide');
         }, 1800);
     });
 
+    // ============================================================
     // PROGRESS BAR + BACK TO TOP
+    // ============================================================
     (function initProgressBar() {
         const bar = document.getElementById('progressBar');
         const backBtn = document.getElementById('backToTop');
@@ -1672,30 +2211,97 @@ $active_services = count(array_filter($services, function($s) {
         });
     })();
 
+    // ============================================================
     // FAQ ACCORDION
+    // ============================================================
     document.querySelectorAll('.faq-question').forEach(q => {
         q.addEventListener('click', () => {
             const item = q.closest('.faq-item');
             const isOpen = item.classList.contains('open');
-            // Tutup semua
             document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
             if (!isOpen) {
                 item.classList.add('open');
             }
         });
     });
-
-    // Buka FAQ pertama secara default
     document.querySelector('.faq-item')?.classList.add('open');
 
+    // ============================================================
+    // CAROUSEL PREMIUM
+    // ============================================================
+    (function initCarousel() {
+        const track = document.getElementById('carouselTrack');
+        const prevBtn = document.getElementById('carouselPrev');
+        const nextBtn = document.getElementById('carouselNext');
+        const dots = document.querySelectorAll('.carousel-dot');
+        const cards = document.querySelectorAll('.carousel-card');
+        let currentIndex = 0;
+        const totalSlides = cards.length;
+
+        if (totalSlides === 0) return;
+
+        const updateCarousel = (index) => {
+            // Update cards
+            cards.forEach((card, i) => {
+                card.classList.toggle('active', i === index);
+            });
+
+            // Update dots
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i === index);
+            });
+
+            // Scroll track
+            const cardWidth = cards[0].offsetWidth + 24; // width + gap
+            const offset = index * cardWidth;
+            track.style.transform = `translateX(-${offset}px)`;
+        };
+
+        const goTo = (index) => {
+            if (index < 0) index = totalSlides - 1;
+            if (index >= totalSlides) index = 0;
+            currentIndex = index;
+            updateCarousel(currentIndex);
+        };
+
+        // Event listeners
+        prevBtn?.addEventListener('click', () => goTo(currentIndex - 1));
+        nextBtn?.addEventListener('click', () => goTo(currentIndex + 1));
+
+        dots.forEach((dot, i) => {
+            dot.addEventListener('click', () => goTo(i));
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') goTo(currentIndex - 1);
+            if (e.key === 'ArrowRight') goTo(currentIndex + 1);
+        });
+
+        // Auto play (pause on hover)
+        let autoPlayInterval = setInterval(() => goTo(currentIndex + 1), 4000);
+        const carouselWrapper = document.querySelector('.carousel-wrapper');
+        carouselWrapper?.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
+        carouselWrapper?.addEventListener('mouseleave', () => {
+            autoPlayInterval = setInterval(() => goTo(currentIndex + 1), 4000);
+        });
+
+        // Update on resize
+        window.addEventListener('resize', () => updateCarousel(currentIndex));
+    })();
+
+    // ============================================================
     // AOS INIT
+    // ============================================================
     AOS.init({ 
         duration: 500, 
         once: true,
         offset: 50
     });
 
-    // Smooth scroll untuk anchor link
+    // ============================================================
+    // SMOOTH SCROLL
+    // ============================================================
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
             const href = this.getAttribute('href');
@@ -1708,7 +2314,9 @@ $active_services = count(array_filter($services, function($s) {
         });
     });
 
-    // Keyboard shortcut: tekan Ctrl+/ untuk focus ke search
+    // ============================================================
+    // KEYBOARD SHORTCUT: Ctrl+/ untuk search
+    // ============================================================
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === '/') {
             e.preventDefault();
