@@ -3,7 +3,7 @@
 header('Content-Type: application/json');
 
 $panel = 'https://private.pterokudesu.web.id';
-$apiKey = 'ptlc_UUp3T2RayUkXnIVt0dHIie1EXWwcC5Tu9U9yysRqKwj';
+$apiKey = 'ptlc_MPqC9pJMS444G2C62qWllcF3mUemjlIkqjxq0DuCpIc';
 $identifier = 'b70c577e';
 
 /**
