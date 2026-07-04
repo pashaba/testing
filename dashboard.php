@@ -249,8 +249,8 @@ $maxSessions = 10;
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         /* ============================================================
-                   NEOBRUTALISM STYLE — tanpa mengubah sistem seidkitpun
-                   ============================================================ */
+           NEOBRUTALISM STYLE — dengan SPLASH SCREEN PREMIUM
+           ============================================================ */
         :root {
             --bg-main: #f7f7f7;
             --bg-card: #ffffff;
@@ -287,7 +287,232 @@ $maxSessions = 10;
             background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 10px, transparent 10px, transparent 20px);
         }
 
-        /* ===== ANIMATIONS ===== */
+        /* ============================================================
+           SPLASH SCREEN - PREMIUM VERSION
+           ============================================================ */
+        #splash {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: #0a0a0a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+            transition: opacity 0.8s ease, visibility 0.8s ease;
+            overflow: hidden;
+        }
+        #splash.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        /* Background grid pattern */
+        #splash::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .splash-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 28px;
+            position: relative;
+            z-index: 1;
+            animation: splashFloat 3s ease-in-out infinite;
+        }
+        @keyframes splashFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+
+        /* CUSTOM POLAR LOGO SVG */
+        .splash-logo {
+            width: 140px;
+            height: 140px;
+            position: relative;
+            animation: logoGlow 2s ease-in-out infinite alternate;
+        }
+        @keyframes logoGlow {
+            0% { filter: drop-shadow(0 0 20px rgba(255, 94, 0, 0.3)); }
+            100% { filter: drop-shadow(0 0 60px rgba(255, 94, 0, 0.5)); }
+        }
+
+        .splash-logo svg {
+            width: 100%;
+            height: 100%;
+            animation: logoSpin 20s linear infinite;
+        }
+        @keyframes logoSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .splash-logo .logo-ring {
+            animation: ringPulse 2s ease-in-out infinite alternate;
+        }
+        @keyframes ringPulse {
+            0% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 40; }
+        }
+
+        .splash-name {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #ffffff 0%, #00e5ff 50%, #ff0055 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: nameShine 3s ease-in-out infinite;
+            position: relative;
+        }
+        .splash-name::after {
+            content: '✦';
+            position: absolute;
+            top: -15px;
+            right: -25px;
+            font-size: 1.2rem;
+            -webkit-text-fill-color: var(--gold);
+            animation: starSpin 4s linear infinite;
+        }
+        @keyframes nameShine {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            background-size: 200% 200%;
+        }
+        @keyframes starSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.3); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .splash-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,255,255,0.05);
+            border-top: 3px solid #ff5e00;
+            border-right: 3px solid #00e5ff;
+            border-bottom: 3px solid #7c3aed;
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+            position: relative;
+        }
+        .splash-spinner::after {
+            content: '';
+            position: absolute;
+            inset: 8px;
+            border: 2px solid rgba(255,255,255,0.05);
+            border-top: 2px solid #00ff88;
+            border-radius: 50%;
+            animation: spin 0.6s cubic-bezier(0.65, 0, 0.35, 1) infinite reverse;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .splash-progress {
+            width: 280px;
+            height: 4px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .splash-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff5e00, #00e5ff, #7c3aed, #00ff88);
+            animation: loadProgress 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+            position: relative;
+            border-radius: 4px;
+        }
+        .splash-progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 30px;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3));
+            animation: progressShine 1.5s ease-in-out infinite;
+        }
+        @keyframes progressShine {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        @keyframes loadProgress {
+            0% { width: 0%; }
+            15% { width: 12%; }
+            40% { width: 35%; }
+            65% { width: 62%; }
+            85% { width: 85%; }
+            100% { width: 100%; }
+        }
+
+        .splash-sub {
+            color: #666;
+            font-weight: 500;
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            animation: textPulse 2s ease-in-out infinite;
+        }
+        @keyframes textPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Floating particles */
+        .splash-particles {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .splash-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: particleFloat linear infinite;
+            opacity: 0;
+        }
+        .splash-particle:nth-child(1) { left: 10%; animation-duration: 6s; animation-delay: 0s; background: #ff5e00; }
+        .splash-particle:nth-child(2) { left: 20%; animation-duration: 8s; animation-delay: 1s; background: #00e5ff; }
+        .splash-particle:nth-child(3) { left: 30%; animation-duration: 7s; animation-delay: 2s; background: #7c3aed; }
+        .splash-particle:nth-child(4) { left: 40%; animation-duration: 9s; animation-delay: 0.5s; background: #00ff88; }
+        .splash-particle:nth-child(5) { left: 50%; animation-duration: 6.5s; animation-delay: 1.5s; background: #fbbf24; }
+        .splash-particle:nth-child(6) { left: 60%; animation-duration: 7.5s; animation-delay: 2.5s; background: #06b6d4; }
+        .splash-particle:nth-child(7) { left: 70%; animation-duration: 8.5s; animation-delay: 0.8s; background: #ec4899; }
+        .splash-particle:nth-child(8) { left: 80%; animation-duration: 6s; animation-delay: 1.8s; background: #ff6b35; }
+        .splash-particle:nth-child(9) { left: 90%; animation-duration: 7s; animation-delay: 2.2s; background: #14b8a6; }
+        .splash-particle:nth-child(10) { left: 15%; animation-duration: 8s; animation-delay: 3s; background: #ff5e00; }
+        .splash-particle:nth-child(11) { left: 45%; animation-duration: 7s; animation-delay: 1.2s; background: #00e5ff; }
+        .splash-particle:nth-child(12) { left: 75%; animation-duration: 9s; animation-delay: 0.3s; background: #7c3aed; }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            10% { opacity: 0.6; }
+            90% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+        }
+
+        /* ============================================================
+           SISA STYLE (tidak diubah)
+           ============================================================ */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
@@ -295,11 +520,6 @@ $maxSessions = 10;
         @keyframes slideUp {
             from { opacity: 0; transform: translateY(40px); }
             to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes float {
-            0%,100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
         }
         @keyframes coinSpin {
             0% { transform: rotateY(0); }
@@ -1051,10 +1271,84 @@ $maxSessions = 10;
             .pairing-box { padding: 20px 14px; }
             .pairing-code { font-size: 24px; letter-spacing: 4px; }
             .hide-mobile { display: none; }
+            .splash-logo { width: 100px; height: 100px; }
+            .splash-name { font-size: 2rem; }
+            .splash-progress { width: 200px; }
         }
     </style>
 </head>
 <body class="<?= !$is_logged_in ? 'locked-bg' : '' ?>">
+
+<!-- ============================================================
+     SPLASH SCREEN - PREMIUM VERSION
+     ============================================================ -->
+<div id="splash">
+    <div class="splash-particles">
+        <div class="splash-particle"></div>
+        <div class="splash-particle"></div>
+        <div class="splash-particle"></div>
+        <div class="splash-particle"></div>
+        <div class="splash-particle"></div>
+        <div class="splash-particle"></div>
+        <div class="splash-particle"></div>
+        <div class="splash-particle"></div>
+        <div class="splash-particle"></div>
+        <div class="splash-particle"></div>
+        <div class="splash-particle"></div>
+        <div class="splash-particle"></div>
+    </div>
+
+    <div class="splash-container">
+        <!-- CUSTOM POLAR LOGO SVG -->
+        <div class="splash-logo">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Outer ring -->
+                <circle cx="100" cy="100" r="88" fill="none" stroke="url(#ringGrad)" stroke-width="4" class="logo-ring" stroke-dasharray="10 15"/>
+                <!-- Inner ring -->
+                <circle cx="100" cy="100" r="72" fill="none" stroke="url(#ringGrad2)" stroke-width="3" opacity="0.5"/>
+                <!-- Polar star -->
+                <polygon points="100,30 112,68 153,68 120,92 132,130 100,106 68,130 80,92 47,68 88,68" fill="url(#starGrad)" stroke="white" stroke-width="2"/>
+                <!-- Small accent stars -->
+                <circle cx="40" cy="40" r="4" fill="#00e5ff" opacity="0.6">
+                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="160" cy="40" r="4" fill="#ff5e00" opacity="0.6">
+                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="30" cy="130" r="3" fill="#7c3aed" opacity="0.6">
+                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="170" cy="130" r="3" fill="#00ff88" opacity="0.6">
+                    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2.8s" repeatCount="indefinite"/>
+                </circle>
+                <!-- Glow defs -->
+                <defs>
+                    <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#ff5e00"/>
+                        <stop offset="50%" stop-color="#00e5ff"/>
+                        <stop offset="100%" stop-color="#7c3aed"/>
+                    </linearGradient>
+                    <linearGradient id="ringGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#7c3aed"/>
+                        <stop offset="50%" stop-color="#00ff88"/>
+                        <stop offset="100%" stop-color="#ff5e00"/>
+                    </linearGradient>
+                    <linearGradient id="starGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#fbbf24"/>
+                        <stop offset="50%" stop-color="#f59e0b"/>
+                        <stop offset="100%" stop-color="#fbbf24"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </div>
+
+        <div class="splash-name">Polar.id</div>
+        <div class="splash-spinner"></div>
+        <div class="splash-progress"><div class="splash-progress-bar"></div></div>
+        <div class="splash-sub">Memuat dashboard...</div>
+    </div>
+</div>
+
 <?php if (!$is_logged_in): ?>
     <!-- LOGIN POPUP -->
     <div class="login-overlay">
@@ -1420,6 +1714,18 @@ $maxSessions = 10;
     </div>
 
     <script>
+        // ============================================================
+        // SPLASH SCREEN - HIDE AFTER LOAD
+        // ============================================================
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('splash').classList.add('hide');
+            }, 2500);
+        });
+
+        // ============================================================
+        // SISA SCRIPT (tidak diubah)
+        // ============================================================
         // ========== KONFIGURASI ==========
         const SB_URL = '<?= SUPABASE_URL ?>';
         const SB_KEY = '<?= SUPABASE_KEY ?>';
