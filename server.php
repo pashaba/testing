@@ -2,8 +2,8 @@
 // api/test-pterodactyl-v2.php
 header('Content-Type: application/json');
 
-$panel = 'https://private.pterokudesu.web.id';
-$apiKey = 'ptlc_MPqC9pJMS444G2C62qWllcF3mUemjlIkqjxq0DuCpIc';
+$panel = 'https://reynagemas.rxpedia.web.id';
+$apiKey = 'ptlc_Pb0j1zybApQ5dx874PHlTTdZAjLqpdVUoRSEZvhMEbo';
 $identifier = 'b70c577e';
 
 /**
