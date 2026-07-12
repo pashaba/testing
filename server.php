@@ -2,8 +2,8 @@
 // api/test-pterodactyl-v2.php
 header('Content-Type: application/json');
 
-$panel = 'https://reynagemas.rxpedia.web.id';
-$apiKey = 'ptlc_Pb0j1zybApQ5dx874PHlTTdZAjLqpdVUoRSEZvhMEbo';
+$panel = 'https://server.lynzzofficial.com';
+$apiKey = 'ptlc_3GEaHtBqXi66inlyfl5FxV4GHNEU6SAmeOwY0lHZQH6';
 $identifier = 'b70c577e';
 
 /**
